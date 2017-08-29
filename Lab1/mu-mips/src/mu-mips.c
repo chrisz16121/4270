@@ -6,6 +6,8 @@
 
 #include "mu-mips.h"
 
+uint32_t CURRENT_ADDRESS;
+
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
 /***************************************************************/
@@ -29,7 +31,7 @@ void help() {
 /***************************************************************/
 /* Read a 32-bit word from memory                                                                            */
 /***************************************************************/
-uint32_t mem_read_32(int32_t address)
+uint32_t mem_read_32(uint32_t address)
 {
 	int i;
 	for (i = 0; i < NUM_MEM_REGION; i++) {
