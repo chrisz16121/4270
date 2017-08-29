@@ -6,8 +6,6 @@
 
 #include "mu-mips.h"
 
-uint32_t CURRENT_ADDRESS;
-
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
 /***************************************************************/
@@ -305,12 +303,13 @@ void load_program() {
 /************************************************************/
 /* decode and execute instruction                                                                     */ 
 /************************************************************/
-void handle_instruction(int32_t address)
+void handle_instruction()
 {
-	while(){
-	}
+	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
 	/*IMPLEMENT THIS*/
 	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
+
+	//Bump NEXT_STATE
 }
 
 
@@ -328,6 +327,9 @@ void initialize() {
 /* Print the program loaded into memory (in MIPS assembly format)    */ 
 /************************************************************/
 void print_program(){
+	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
+
+	
 	/*IMPLEMENT THIS*/
 }
 
