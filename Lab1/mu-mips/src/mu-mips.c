@@ -316,6 +316,50 @@ void handle_instruction(int32_t address)
 
 /************************************************************/
 /* Initialize Memory                                                                                                    */ 
+void handle_instruction(int32_t address) {
+	int32_t mask = createMask(26, 31);
+	int32_t opcode = mask & address;
+
+	//ANDI
+	if (opcode == 001100) {
+		int32_t newMask1 = createMask(0, 15);
+		int32_t newMask2 = createMask(21, 25);
+		int32_t immediate = newMask1 & address;
+		int32_t rs = newMask2 & address;
+		int32_t rt = immediate & rs;
+		int32_t result; // need to store value of rt into address
+
+		//OR
+	} else if (opcode == 100101) {
+		int32_t newMask1 = createMask(21, 25);
+		int32_t newMask2 = createMask(16, 20);
+		int32_t rs = newMask1 & address;
+		int32_t rt = newMask2 & address;
+		int32_t rd = rs | rt;
+		int32_t result; // need to store value of rd into address
+		//ORI
+	} else if (opcode == 001101) {
+		int32_t newMask1 = createMask(0, 15);
+		int32_t newMask2 = createMask(21, 25);
+		int32_t immediate = newMask1 & address;
+		int32_t rs = newMask2 & address;
+		int32_t rt = immediate | rs;
+		int32_t result; //store value of rt into address
+		//XOR
+	} else if (100110) {
+		int32_t newMask1 = createMask(21, 25);
+		int32_t newMask2 = createMask(16, 20);
+		int32_t rs = newMask1 & address;
+		int32_t rt = newMask2 & address;
+		int32_t a = rs & rt;
+		int32_t b = ~rs & ~rt;
+		int32_t rd = ~a & ~b; //~ gets bitwise complement 
+		int32_t result; // need to store value of rd into address
+	}
+
+	/*IMPLEMENT THIS*/
+	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
+}
 /************************************************************/
 void initialize() { 
 	init_memory();
