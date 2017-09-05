@@ -6,8 +6,6 @@
 
 #include "mu-mips.h"
 
-uint32_t CURRENT_ADDRESS;
-
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
 /***************************************************************/
@@ -305,12 +303,13 @@ void load_program() {
 /************************************************************/
 /* decode and execute instruction                                                                     */ 
 /************************************************************/
-void handle_instruction(int32_t address)
+void handle_instruction()
 {
-	while(){
-	}
+	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
 	/*IMPLEMENT THIS*/
 	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
+
+	//Bump NEXT_STATE
 }
 
 
@@ -328,12 +327,81 @@ void initialize() {
 /* Print the program loaded into memory (in MIPS assembly format)    */ 
 /************************************************************/
 void print_program(){
+	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
+
+	mask = createMask(26,32);
+
+	opcode = instruct & mask;	
+
+	switch(opcode){
+		case '0010000000000000000000000000000': //ADDI
+			break;
+		case '0010010000000000000000000000000': //ADDIU
+			break;
+		case '0011000000000000000000000000000': //ANDI
+			break;
+		case '0001000000000000000000000000000': //BEQ
+			break;
+		case '0001010000000000000000000000000': //BNE
+			break;
+		case '0011010000000000000000000000000': //ORI
+			break;
+		case '0001110000000000000000000000000': //BGTZ
+			break;
+		case '0001100000000000000000000000000': //BLEZ
+			break;
+		case '0011100000000000000000000000000': //XORI
+			break;
+		case '0010100000000000000000000000000': //SLTI
+			break;
+		case '0000100000000000000000000000000': //J
+			break;
+		case '0000110000000000000000000000000': //JAL
+			break;
+		case '1000000000000000000000000000000': //LB
+			break;
+		case '1000010000000000000000000000000': //LH
+			break;
+		case '0000000000000000000000000000000': //LUI
+			break;
+		case '1000110000000000000000000000000': //LW
+			break;
+		case '1010000000000000000000000000000': //SB
+			break;
+		case '1010010000000000000000000000000': //SH
+			break;
+		case '1010110000000000000000000000000': //SW
+			break;
+		case '0000010000000000000000000000000': //BLTZ, BGEZ
+			mask = createMask(16,20);
+			check = instruct & mask;
+			if(check == "00000000000000000000000000000000"){
+				//BLTZ
+			}
+			else{
+				//BGEZ
+			}
+			break;
+		case '00000000000000000000000000000000': //Special
+			//ADD, ADDU, AND, SUB, SUBU, MULT, MULTU, DIV, DIVU, 
+			//OR, XOR, NOR, SLT, SLL, SRA, SRL, JALR, JR, MFHI, 
+			//MFLO, MTHI, MTLO
+			break;
+		default: 
+			break;
+	}	
 	/*IMPLEMENT THIS*/
 }
 
+int32_t createMask( int32_t a, int32_t b){ //a needs to be smaller than b
+	int32_t r = 0;
+	for (int32_t i=a; i <=b; i++){
+		r |= 1 << i;
+	}
+	return r;
+}
 /***************************************************************/
-/* main                                                                                                                                   */
-/***************************************************************/
+/* main**************************************************/
 int main(int argc, char *argv[]) {                              
 	printf("\n**************************\n");
 	printf("Welcome to MU-MIPS SIM...\n");
