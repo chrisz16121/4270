@@ -329,7 +329,7 @@ void initialize() {
 void print_program(){
 	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
 
-	mask = createMask(31,26);
+	mask = createMask(26,32);
 
 	opcode = instruct & mask;	
 
@@ -373,7 +373,7 @@ void print_program(){
 		case '1010110000000000000000000000000': //SW
 			break;
 		case '0000010000000000000000000000000': //BLTZ, BGEZ
-			mask = createMask(20,16);
+			mask = createMask(16,20);
 			check = instruct & mask;
 			if(check == "00000000000000000000000000000000"){
 				//BLTZ
@@ -393,7 +393,7 @@ void print_program(){
 	/*IMPLEMENT THIS*/
 }
 
-int32_t createMask( int32_t a, int32_t b){
+int32_t createMask( int32_t a, int32_t b){ //a needs to be smaller than b
 	int32_t r = 0;
 	for (int32_t i=a; i <=b; i++){
 		r |= 1 << i;
