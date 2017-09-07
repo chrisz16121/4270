@@ -306,31 +306,106 @@ void load_program() {
 void handle_instruction()
 {
 	int i;
+	int binary_num[32];
+	uint32_t temp_instruct;
 	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
+	uint32_t opcode,rs,rt,rd,result,remainder;
+	uint64_t double_result;
+	opcode = 0xFC000000 & instruct;
 	printf("Instruction fetched: %x\n",instruct);
-	int32_t mask = createMask(26,32);
-	int32_t opcode = instruct & mask;	
-	opcode = opcode >> 25;
-	for(i = 0;i < 6;i++){
-		int temp = 1 & opcode;
-		printf("%d",temp);
+	temp_instruct = instruct;
+	for(i = 0;i < 32;i++){
+		int temp = 1 & temp_instruct;
+		//printf("%d",temp);
+		temp_instruct >>= 1;
+		binary_num[31-i] = temp;
+	}
+	for(i = 0;i < 32; i ++){
+		printf("%d",binary_num[i]);
 	}
 	printf("\n");
-	switch(opcode){
-		case 0: 
-			printf("Special opcode detected\n");
-			break;
-		case 1: 
-			break;
-		default: 
-			printf("Cannot handle this instruction yet\n");	
-			break;
-	}
+	
+	printf("\n");
+	//begin else ifs 
+	//ADD
+	rs = (0x03E00000 & instruct) >>= 21;
+	rt = (0x001F0000 & instruct) >>= 16;
+	rd = (0x00007C00 & instruct) >>= 11;
+	result = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
+	NEXT_STATE.REGS[rd] = result;
+
+	//ADDI
+
+	//ADDU
+	rs = (0x03E00000 & instruct) >>= 21;
+	rt = (0x001F0000 & instruct) >>= 16;
+	rd = (0x00007C00 & instruct) >>= 11;
+	result = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
+	NEXT_STATE.REGS[rd] = result;
+
+	//ADDIU
+
+	//SUB
+	rs = (0x03E00000 & instruct) >>= 21;
+	rt = (0x001F0000 & instruct) >>= 16;
+	rd = (0x00007C00 & instruct) >>= 11;
+	result = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
+	NEXT_STATE.REGS[rd] = result;
+	//implement overflow
+
+	//SUBU
+	rs = (0x03E00000 & instruct) >>= 21;
+	rt = (0x001F0000 & instruct) >>= 16;
+	rd = (0x00007C00 & instruct) >>= 11;
+	result = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
+	NEXT_STATE.REGS[rd] = result;
+
+	//MULT
+	rs = (0x03E00000 & instruct) >>= 21;
+	rt = (0x001F0000 & instruct) >>= 16;
+	double_result = CURRENT_STATE.REGS[rs] * CURRENT_STATE[rt];
+	NEXT_STATE.HI = (uint32_t)((double_result & 0xFFFFFFFF00000000) >>= 32);
+	NEXT_STATE.LO = (uint32_t)(double_result & 0x00000000FFFFFFFF);
+	//implement 2's complement
+	
+	//MULTU
+	rs = (0x03E00000 & instruct) >>= 21;
+	rt = (0x001F0000 & instruct) >>= 16;
+	double_result = CURRENT_STATE.REGS[rs] * CURRENT_STATE[rt];
+	NEXT_STATE.HI = (uint32_t)((double_result & 0xFFFFFFFF00000000) >>= 32);
+	NEXT_STATE.LO = (uint32_t)(double_result & 0x00000000FFFFFFFF);
+
+	//DIV
+	rs = (0x03E00000 & instruct) >>= 21;
+	rt = (0x001F0000 & instruct) >>= 16;
+	result = CURRENT_STATE[rs] / CURRENT_STATE[rt];
+	remainder = CURRENT_STATE[rs] % CURRENT_STATE[rt];
+	NEXT_STATE.HI = remainder;
+	NEXT_STATE.LO = result;
+	//implement 2's complement
+
+	//DIVU
+	rs = (0x03E00000 & instruct) >>= 21;
+	rt = (0x001F0000 & instruct) >>= 16;
+	result = CURRENT_STATE[rs] / CURRENT_STATE[rt];
+	remainder = CURRENT_STATE[rs] % CURRENT_STATE[rt];
+	NEXT_STATE.HI = remainder;
+	NEXT_STATE.LO = result;
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
 	int dummy = 0;
 	scanf("%d",&dummy);
 	/*IMPLEMENT THIS*/
 	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
-	NEXT_STATE.PC++;
+	NEXT_STATE.PC += 4;
 	//Bump NEXT_STATE
 }
 
