@@ -351,8 +351,8 @@ void initialize() {
 void print_program(){
 	int i;
 	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
-	int32_t mask = createMask(26,32);
-	int32_t opcode = instruct & mask;	
+	uint32_t mask = createMask(26,32);
+	uint32_t opcode = instruct & mask;	
 	opcode = opcode >> 25;
 	for(i = 0;i < 6;i++){
 		int temp = 1 & opcode;
@@ -360,70 +360,117 @@ void print_program(){
 	}
 	printf("\n");
 	
-	/*
+	
 	switch(opcode){
-		//case '00100000000000000000000000000000': //ADDI
+		case 0x20000000: //ADDI
 			break;
-		//case '00100100000000000000000000000000': //ADDIU
+		case 0x24000000: //ADDIU
 			break;
-		//case '00110000000000000000000000000000': //ANDI
+		case 0x30000000: //ANDI
 			break;
-		//case '00010000000000000000000000000000': //BEQ
+		case 0x10000000: //BEQ
 			break;
-		//case '00010100000000000000000000000000': //BNE
+		case 0x14000000: //BNE
 			break;
-		//case '00110100000000000000000000000000': //ORI
+		case 0x34000000: //ORI
 			break;
-		//case '00011100000000000000000000000000': //BGTZ
+		case 0x1C000000: //BGTZ
 			break;
-		//case '00011000000000000000000000000000': //BLEZ
+		case 0x18000000: //BLEZ
 			break;
-		//case '00111000000000000000000000000000': //XORI
+		case 0x38000000: //XORI
 			break;
-		//case '00101000000000000000000000000000': //SLTI
+		case 0x28000000: //SLTI
 			break;
-		//case '00001000000000000000000000000000': //J
+		case 0x08000000: //J
 			break;
-		//case '00001100000000000000000000000000': //JAL
+		case 0x0C000000: //JAL
 			break;
-		//case '10000000000000000000000000000000': //LB
+		case 0x80000000: //LB
 			break;
-		//case '10000100000000000000000000000000': //LH
+		case 0x84000000: //LH
 			break;
-		//case '00000000000000000000000000000000': //LUI
+		case 0x3C000000: //LUI
 			break;
-		//case '10001100000000000000000000000000': //LW
+		case 0x8C000000: //LW
 			break;
-		//case '10100000000000000000000000000000': //SB
+		case 0xA0000000: //SB
 			break;
-		//case '10100100000000000000000000000000': //SH
+		case 0xA4000000: //SH
 			break;
-		//case '10101100000000000000000000000000': //SW
+		case 0xAC000000: //SW
 			break;
-		//case '00000100000000000000000000000000': //BLTZ, BGEZ
-		//	mask = createMask(16,20);
-		//	check = instruct & mask;
-		//	if(check == "000000000000000000000000000000000"){
-		//		//BLTZ
-		//	}
-		//	else{
-		//		//BGEZ
-		//	}
+		case 0x04000000: //BLTZ, BGEZ
+			mask = createMask(16,20);
+			uint32_t check = instruct & mask;
+			if(check == 0x00000000){
+				//BLTZ
+			}
+			else{
+				//BGEZ
+			}
 			break;
-		//case '000000000000000000000000000000000': //Special
-			//ADD, ADDU, AND, SUB, SUBU, MULT, MULTU, DIV, DIVU, 
-			//OR, XOR, NOR, SLT, SLL, SRA, SRL, JALR, JR, MFHI, 
-			//MFLO, MTHI, MTLO
+		case 0x00000000: //Special
+			mask = createMask(0,5);
+			uint32_t special = instruct & mask;
+			switch( special ){
+				case 0x00000020: //ADD
+					break;
+				case 0x00000021: //ADDU
+					break;
+				case 0x00000024: //AND
+					break;
+				case 0x00000022: //SUB
+					break;		
+				case 0x00000023: //SUBU
+					break;
+				case 0x00000018: //MULT
+					break;
+				case 0x00000019: //MULTU
+					break;
+				case 0x0000001A: //DIV
+					break;	
+				case 0x0000001B: //DIVU
+					break;
+				case 0x00000025: //OR
+					break;
+				case 0x00000026: //XOR
+					break;
+				case 0x00000027: //NOR
+					break;		
+				case 0x0000002A: //SLT
+					break;
+				case 0x00000000: //SLL !!!It is supposed to be all zeroes!!!
+					break;
+				case 0x00000003: //SRA
+					break;
+				case 0x00000002: //SRL
+					break;	
+				case 0x00000009: //JALR
+					break;		
+				case 0x00000008: //JR
+					break;
+				case 0x00000010: //MFHI
+					break;
+				case 0x00000012: //MFLO
+					break;
+				case 0x00000011: //MTHI
+					break;	
+				case 0x00000013: //MTLO
+					break;
+				default:
+					printf("\n\nInstruction Not Found\n\n");
+			}
 			break;
 		default: 
+			printf("\n\nInstruction Not Found\n\n");
 			break;
 	}
-	*/	
 	/*IMPLEMENT THIS*/
 }
 
-int32_t createMask( int32_t a, int32_t b){ //a needs to be smaller than b
-	int32_t r = 0;
+uint32_t createMask( uint32_t a, uint32_t b){ //a needs to be smaller than b
+	uint32_t r = 0;
 	for (int32_t i=a; i <=b; i++){
 		r |= 1 << i;
 	}
