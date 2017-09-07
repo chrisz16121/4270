@@ -305,10 +305,32 @@ void load_program() {
 /************************************************************/
 void handle_instruction()
 {
+	int i;
 	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
+	printf("Instruction fetched: %x\n",instruct);
+	int32_t mask = createMask(26,32);
+	int32_t opcode = instruct & mask;	
+	opcode = opcode >> 25;
+	for(i = 0;i < 6;i++){
+		int temp = 1 & opcode;
+		printf("%d",temp);
+	}
+	printf("\n");
+	switch(opcode){
+		case 0: 
+			printf("Special opcode detected\n");
+			break;
+		case 1: 
+			break;
+		default: 
+			printf("Cannot handle this instruction yet\n");	
+			break;
+	}
+	int dummy = 0;
+	scanf("%d",&dummy);
 	/*IMPLEMENT THIS*/
 	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
-
+	NEXT_STATE.PC++;
 	//Bump NEXT_STATE
 }
 
@@ -327,69 +349,76 @@ void initialize() {
 /* Print the program loaded into memory (in MIPS assembly format)    */ 
 /************************************************************/
 void print_program(){
+	int i;
 	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
-
-	mask = createMask(26,32);
-
-	opcode = instruct & mask;	
-
+	int32_t mask = createMask(26,32);
+	int32_t opcode = instruct & mask;	
+	opcode = opcode >> 25;
+	for(i = 0;i < 6;i++){
+		int temp = 1 & opcode;
+		printf("%d",temp);
+	}
+	printf("\n");
+	
+	/*
 	switch(opcode){
-		case '0010000000000000000000000000000': //ADDI
+		//case '00100000000000000000000000000000': //ADDI
 			break;
-		case '0010010000000000000000000000000': //ADDIU
+		//case '00100100000000000000000000000000': //ADDIU
 			break;
-		case '0011000000000000000000000000000': //ANDI
+		//case '00110000000000000000000000000000': //ANDI
 			break;
-		case '0001000000000000000000000000000': //BEQ
+		//case '00010000000000000000000000000000': //BEQ
 			break;
-		case '0001010000000000000000000000000': //BNE
+		//case '00010100000000000000000000000000': //BNE
 			break;
-		case '0011010000000000000000000000000': //ORI
+		//case '00110100000000000000000000000000': //ORI
 			break;
-		case '0001110000000000000000000000000': //BGTZ
+		//case '00011100000000000000000000000000': //BGTZ
 			break;
-		case '0001100000000000000000000000000': //BLEZ
+		//case '00011000000000000000000000000000': //BLEZ
 			break;
-		case '0011100000000000000000000000000': //XORI
+		//case '00111000000000000000000000000000': //XORI
 			break;
-		case '0010100000000000000000000000000': //SLTI
+		//case '00101000000000000000000000000000': //SLTI
 			break;
-		case '0000100000000000000000000000000': //J
+		//case '00001000000000000000000000000000': //J
 			break;
-		case '0000110000000000000000000000000': //JAL
+		//case '00001100000000000000000000000000': //JAL
 			break;
-		case '1000000000000000000000000000000': //LB
+		//case '10000000000000000000000000000000': //LB
 			break;
-		case '1000010000000000000000000000000': //LH
+		//case '10000100000000000000000000000000': //LH
 			break;
-		case '0000000000000000000000000000000': //LUI
+		//case '00000000000000000000000000000000': //LUI
 			break;
-		case '1000110000000000000000000000000': //LW
+		//case '10001100000000000000000000000000': //LW
 			break;
-		case '1010000000000000000000000000000': //SB
+		//case '10100000000000000000000000000000': //SB
 			break;
-		case '1010010000000000000000000000000': //SH
+		//case '10100100000000000000000000000000': //SH
 			break;
-		case '1010110000000000000000000000000': //SW
+		//case '10101100000000000000000000000000': //SW
 			break;
-		case '0000010000000000000000000000000': //BLTZ, BGEZ
-			mask = createMask(16,20);
-			check = instruct & mask;
-			if(check == "00000000000000000000000000000000"){
-				//BLTZ
-			}
-			else{
-				//BGEZ
-			}
+		//case '00000100000000000000000000000000': //BLTZ, BGEZ
+		//	mask = createMask(16,20);
+		//	check = instruct & mask;
+		//	if(check == "000000000000000000000000000000000"){
+		//		//BLTZ
+		//	}
+		//	else{
+		//		//BGEZ
+		//	}
 			break;
-		case '00000000000000000000000000000000': //Special
+		//case '000000000000000000000000000000000': //Special
 			//ADD, ADDU, AND, SUB, SUBU, MULT, MULTU, DIV, DIVU, 
 			//OR, XOR, NOR, SLT, SLL, SRA, SRL, JALR, JR, MFHI, 
 			//MFLO, MTHI, MTLO
 			break;
 		default: 
 			break;
-	}	
+	}
+	*/	
 	/*IMPLEMENT THIS*/
 }
 
