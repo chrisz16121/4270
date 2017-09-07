@@ -306,8 +306,21 @@ void load_program() {
 void handle_instruction()
 {
 	int i;
+	int binary_num[32];
+	uint32_t temp_instruct;
 	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
 	printf("Instruction fetched: %x\n",instruct);
+	temp_instruct = instruct;
+	for(i = 0;i < 32;i++){
+		int temp = 1 & temp_instruct;
+		//printf("%d",temp);
+		temp_instruct >>= 1;
+		binary_num[31-i] = temp;
+	}
+	for(i = 0;i < 32; i ++){
+		printf("%d",binary_num[i]);
+	}
+	printf("\n");
 	int32_t mask = createMask(26,32);
 	int32_t opcode = instruct & mask;	
 	opcode = opcode >> 25;
@@ -330,7 +343,7 @@ void handle_instruction()
 	scanf("%d",&dummy);
 	/*IMPLEMENT THIS*/
 	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
-	NEXT_STATE.PC++;
+	NEXT_STATE.PC += 4;
 	//Bump NEXT_STATE
 }
 
