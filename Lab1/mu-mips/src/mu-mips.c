@@ -311,6 +311,7 @@ void handle_instruction()
 	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
 	uint32_t opcode,rs,rt,rd,result,remainder;
 	uint64_t double_result;
+	uint32_t delay_slot_instruct,target_address,offset;
 	opcode = 0xFC000000 & instruct;
 	printf("Instruction fetched: %x\n",instruct);
 	temp_instruct = instruct;
@@ -324,82 +325,189 @@ void handle_instruction()
 		printf("%d",binary_num[i]);
 	}
 	printf("\n");
-	
 	printf("\n");
 	//begin else ifs 
-	//ADD
-	rs = (0x03E00000 & instruct) >>= 21;
-	rt = (0x001F0000 & instruct) >>= 16;
-	rd = (0x00007C00 & instruct) >>= 11;
-	result = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
-	NEXT_STATE.REGS[rd] = result;
-
-	//ADDI
-
-	//ADDU
-	rs = (0x03E00000 & instruct) >>= 21;
-	rt = (0x001F0000 & instruct) >>= 16;
-	rd = (0x00007C00 & instruct) >>= 11;
-	result = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
-	NEXT_STATE.REGS[rd] = result;
-
-	//ADDIU
-
-	//SUB
-	rs = (0x03E00000 & instruct) >>= 21;
-	rt = (0x001F0000 & instruct) >>= 16;
-	rd = (0x00007C00 & instruct) >>= 11;
-	result = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
-	NEXT_STATE.REGS[rd] = result;
-	//implement overflow
-
-	//SUBU
-	rs = (0x03E00000 & instruct) >>= 21;
-	rt = (0x001F0000 & instruct) >>= 16;
-	rd = (0x00007C00 & instruct) >>= 11;
-	result = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
-	NEXT_STATE.REGS[rd] = result;
-
-	//MULT
-	rs = (0x03E00000 & instruct) >>= 21;
-	rt = (0x001F0000 & instruct) >>= 16;
-	double_result = CURRENT_STATE.REGS[rs] * CURRENT_STATE[rt];
-	NEXT_STATE.HI = (uint32_t)((double_result & 0xFFFFFFFF00000000) >>= 32);
-	NEXT_STATE.LO = (uint32_t)(double_result & 0x00000000FFFFFFFF);
-	//implement 2's complement
 	
-	//MULTU
-	rs = (0x03E00000 & instruct) >>= 21;
-	rt = (0x001F0000 & instruct) >>= 16;
-	double_result = CURRENT_STATE.REGS[rs] * CURRENT_STATE[rt];
-	NEXT_STATE.HI = (uint32_t)((double_result & 0xFFFFFFFF00000000) >>= 32);
-	NEXT_STATE.LO = (uint32_t)(double_result & 0x00000000FFFFFFFF);
+	switch(opcode){
+		case 0x20000000: //ADDI
+			break;
+		case 0x24000000: //ADDIU
+			break;
+		case 0x30000000: //ANDI
+			break;
+		case 0x10000000: //BEQ
+			offset = 0x0000FFFF & instruct;
+			delay_slot_instruct = mem_read_32(CURRENT_STATE.PC + 4);
+			target_address = delay_slot_instruct + offset;
+			rs = (0x03E00000 & instruct) >>= 21;
+			rt = (0x001F0000 & instruct) >>= 16;
+			if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
+				CURRENT_STATE.PC = CURRENT_STATE.PC + offset;
+			}
+			break;
+		case 0x14000000: //BNE
+			offset = 0x0000FFFF & instruct;
+			delay_slot_instruct = mem_read_32(CURRENT_STATE.PC + 4);
+			target_address = delay_slot_instruct + offset;
+			rs = (0x03E00000 & instruct) >>= 21;
+			rt = (0x001F0000 & instruct) >>= 16;
+			if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
+				CURRENT_STATE.PC = CURRENT_STATE.PC + offset;
+			}
+			break;
+		case 0x34000000: //ORI
+			break;
+		case 0x1C000000: //BGTZ
+			offset = 0x0000FFFF & instruct;
+			delay_slot_instruct = mem_read_32(CURRENT_STATE.PC + 4);
+			target_address = delay_slot_instruct + offset;
+			rs = (0x03E00000 & instruct) >>= 21;
+			if(CURRENT_STATE.REGS[rs] > 0){
+				CURRENT_STATE.PC = CURRENT_STATE.PC + offset;
+			}
+			break;
+		case 0x18000000: //BLEZ
+			offset = 0x0000FFFF & instruct;
+			delay_slot_instruct = mem_read_32(CURRENT_STATE.PC + 4);
+			target_address = delay_slot_instruct + offset;
+			rs = (0x03E00000 & instruct) >>= 21;
+			if(CURRENT_STATE.REGS[rs] <= 0){
+				CURRENT_STATE.PC = CURRENT_STATE.PC + offset;
+			}
+			break;
+		case 0x38000000: //XORI
+			break;
+		case 0x28000000: //SLTI
+			break;
+		case 0x08000000: //J
+			break;
+		case 0x0C000000: //JAL
+			break;
+		case 0x80000000: //LB
+			break;
+		case 0x84000000: //LH
+			break;
+		case 0x3C000000: //LUI
+			break;
+		case 0x8C000000: //LW
+			break;
+		case 0xA0000000: //SB
+			break;
+		case 0xA4000000: //SH
+			break;
+		case 0xAC000000: //SW
+			break;
+		case 0x04000000: //BLTZ, BGEZ
+			mask = createMask(16,20);
+			uint32_t check = instruct & mask;
+			if(check == 0x00000000){
+				//BLTZ
+			}
+			else{
+				//BGEZ
+			}
+			break;
+		case 0x00000000: //Special
+		mask = createMask(0,5);
+			uint32_t special = instruct & mask;
+			switch( special ){
+				case 0x00000020: //ADD
+					rs = (0x03E00000 & instruct) >>= 21;
+					rt = (0x001F0000 & instruct) >>= 16;
+					rd = (0x00007C00 & instruct) >>= 11;
+					result = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
+					NEXT_STATE.REGS[rd] = result;
+					break;
+				case 0x00000021: //ADDU
+					rs = (0x03E00000 & instruct) >>= 21;
+					rt = (0x001F0000 & instruct) >>= 16;
+					rd = (0x00007C00 & instruct) >>= 11;
+					result = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
+					NEXT_STATE.REGS[rd] = result;
+					break;
+				case 0x00000024: //AND
+					break;
+				case 0x00000022: //SUB
+					rs = (0x03E00000 & instruct) >>= 21;
+					rt = (0x001F0000 & instruct) >>= 16;
+					rd = (0x00007C00 & instruct) >>= 11;
+					result = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
+					NEXT_STATE.REGS[rd] = result;
+					break;		
+				case 0x00000023: //SUBU
+					rs = (0x03E00000 & instruct) >>= 21;
+					rt = (0x001F0000 & instruct) >>= 16;
+					rd = (0x00007C00 & instruct) >>= 11;
+					result = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
+					NEXT_STATE.REGS[rd] = result;
+					break;
+				case 0x00000018: //MULT
+					rs = (0x03E00000 & instruct) >>= 21;
+					rt = (0x001F0000 & instruct) >>= 16;
+					double_result = CURRENT_STATE.REGS[rs] * CURRENT_STATE[rt];
+					NEXT_STATE.HI = (uint32_t)((double_result & 0xFFFFFFFF00000000) >>= 32);
+					NEXT_STATE.LO = (uint32_t)(double_result & 0x00000000FFFFFFFF);
+					//implement 2's complement
+					break;
+				case 0x00000019: //MULTU
+					rs = (0x03E00000 & instruct) >>= 21;
+					rt = (0x001F0000 & instruct) >>= 16;
+					double_result = CURRENT_STATE.REGS[rs] * CURRENT_STATE[rt];
+					NEXT_STATE.HI = (uint32_t)((double_result & 0xFFFFFFFF00000000) >>= 32);
+					NEXT_STATE.LO = (uint32_t)(double_result & 0x00000000FFFFFFFF);
+					break;
+				case 0x0000001A: //DIV
+					rs = (0x03E00000 & instruct) >>= 21;
+					rt = (0x001F0000 & instruct) >>= 16;
+					result = CURRENT_STATE[rs] / CURRENT_STATE[rt];
+					remainder = CURRENT_STATE[rs] % CURRENT_STATE[rt];
+					NEXT_STATE.HI = remainder;
+					NEXT_STATE.LO = result;
+					//implement 2's complement
+					break;	
+				case 0x0000001B: //DIVU
+					rs = (0x03E00000 & instruct) >>= 21;
+					rt = (0x001F0000 & instruct) >>= 16;
+					result = CURRENT_STATE[rs] / CURRENT_STATE[rt];
+					remainder = CURRENT_STATE[rs] % CURRENT_STATE[rt];
+					NEXT_STATE.HI = remainder;
+					NEXT_STATE.LO = result;
+					break;
+				case 0x00000025: //OR
+					break;
+				case 0x00000026: //XOR
+					break;
+				case 0x00000027: //NOR
+					break;		
+				case 0x0000002A: //SLT
+					break;
+				case 0x00000000: //SLL !!!It is supposed to be all zeroes!!!
+					break;
+				case 0x00000003: //SRA
+					break;
+				case 0x00000002: //SRL
+					break;	
+				case 0x00000009: //JALR
+					break;		
+				case 0x00000008: //JR
+					break;
+				case 0x00000010: //MFHI
+					break;
+				case 0x00000012: //MFLO
+					break;
+				case 0x00000011: //MTHI
+					break;	
+				case 0x00000013: //MTLO
+					break;
+				default:
+					printf("\n\nInstruction Not Found\n\n");
+			}
+			break;
+		default: 
+			printf("\n\nInstruction Not Found\n\n");
+			break;
+	}
 
-	//DIV
-	rs = (0x03E00000 & instruct) >>= 21;
-	rt = (0x001F0000 & instruct) >>= 16;
-	result = CURRENT_STATE[rs] / CURRENT_STATE[rt];
-	remainder = CURRENT_STATE[rs] % CURRENT_STATE[rt];
-	NEXT_STATE.HI = remainder;
-	NEXT_STATE.LO = result;
-	//implement 2's complement
-
-	//DIVU
-	rs = (0x03E00000 & instruct) >>= 21;
-	rt = (0x001F0000 & instruct) >>= 16;
-	result = CURRENT_STATE[rs] / CURRENT_STATE[rt];
-	remainder = CURRENT_STATE[rs] % CURRENT_STATE[rt];
-	NEXT_STATE.HI = remainder;
-	NEXT_STATE.LO = result;
-	
-	
-
-	
-	
-	
-	
-	
-	
 	
 	int dummy = 0;
 	scanf("%d",&dummy);
@@ -428,13 +536,13 @@ void print_program(){
 	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
 	uint32_t mask = createMask(26,32);
 	uint32_t opcode = instruct & mask;	
-	opcode = opcode >> 25;
+	/*opcode = opcode >> 25;
 	for(i = 0;i < 6;i++){
 		int temp = 1 & opcode;
 		printf("%d",temp);
 	}
 	printf("\n");
-	
+	*/
 	
 	switch(opcode){
 		case 0x20000000: //ADDI
