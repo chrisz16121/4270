@@ -1,4 +1,4 @@
-nclude <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -302,7 +302,13 @@ void load_program() {
 			PROGRAM_SIZE);
 	fclose(fp);
 }
-
+uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
+	uint32_t r = 0;
+	for (int32_t i = a; i <= b; i++) {
+		r |= 1 << i;
+	}
+	return r;
+}
 /************************************************************/
 /* decode and execute instruction                                                                     */
 /************************************************************/
@@ -311,7 +317,7 @@ void handle_instruction() {
 	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
 	uint32_t mask = createMask(26, 32);
 	uint32_t opcode = instruct & mask;
-	int32_t newMask1, newMask2, immediate, rs, rt, rd, result, a, b;
+	int32_t newMask1, newMask2, immediate, rs, rt, rd, result, a, b, sa;
 
 	/*opcode = opcode >> 25;
 	 for(i = 0;i < 6;i++){
@@ -351,7 +357,15 @@ void handle_instruction() {
 		break;
 	case 0x18000000: //BLEZ
 		break;
-	case 0x38000000: //XORI
+	case 0x38000000: //XORI -- not sure how immediate changes this if at all. Currently written same as XOR
+		newMask1 = createMask(21, 25);
+		newMask2 = createMask(16, 20);
+		rs = newMask1 & instruct;
+		rt = newMask2 & instruct;
+		a = rs & rt;
+		b = ~rs & ~rt;
+		rd = ~a & ~b; //~ gets bitwise complement
+		result; // need to store value of rd into address
 		break;
 	case 0x28000000: //SLTI
 		break;
@@ -430,14 +444,32 @@ void handle_instruction() {
 			result; // need to store value of rd into address
 			break;
 		case 0x00000027: //NOR
+			newMask1 = createMask(21, 25);
+			newMask2 = createMask(16, 20);
+			rs = newMask1 & instruct;
+			rt = newMask2 & instruct;
+			rd = ~(rs | rt);
+			result; //store value of rd into result			
 			break;
 		case 0x0000002A: //SLT
 			break;
 		case 0x00000000: //SLL !!!It is supposed to be all zeroes!!!
+			newMask1 = createMask(16, 20);
+			newMask2 = createMask(6, 10);
+			rt = newMask1 & instruct;
+			sa = newMask2 & instruct;
+			rd = rt << sa;
+			result; //result needs to be stored into rd register
 			break;
 		case 0x00000003: //SRA
 			break;
-		case 0x00000002: //SRL
+		case 0x00000002: //SRL DOUBLE CHECK RESULT BC IT MAY INSERT 1's INSTEAD OF 0's
+			newMask1 = createMask(16, 20);
+			newMask2 = createMask(6, 10);
+			rt = newMask1 & instruct;
+			sa = newMask2 & instruct;
+			rd = rt >> sa;
+			result; //result needs to be stored into rd register
 			break;
 		case 0x00000009: //JALR
 			break;
@@ -594,129 +626,6 @@ void print_program() {
 		break;
 	}
 	/*IMPLEMENT THIS*/
-}
-
-uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
-	uint32_t r = 0;
-	for (int32_t i = a; i <= b; i++) {
-		r |= 1 << i;
-	}
-	return r;
-}
-uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
-uint32_t mask = createMask(26, 32);
-uint32_t opcode = instruct & mask;
-/*opcode = opcode >> 25;
- for(i = 0;i < 6;i++){
- int temp = 1 & opcode;
- printf("%d",temp);
- }
- printf("\n");
- */
-
-switch (opcode) {
-	case 0x20000000: //ADDI
-	break;
-	case 0x24000000://ADDIU
-	break;
-	case 0x30000000://ANDI
-	break;
-	case 0x10000000://BEQ
-	break;
-	case 0x14000000://BNE
-	break;
-	case 0x34000000://ORI
-	break;
-	case 0x1C000000://BGTZ
-	break;
-	case 0x18000000://BLEZ
-	break;
-	case 0x38000000://XORI
-	break;
-	case 0x28000000://SLTI
-	break;
-	case 0x08000000://J
-	break;
-	case 0x0C000000://JAL
-	break;
-	case 0x80000000://LB
-	break;
-	case 0x84000000://LH
-	break;
-	case 0x3C000000://LUI
-	break;
-	case 0x8C000000://LW
-	break;
-	case 0xA0000000://SB
-	break;
-	case 0xA4000000://SH
-	break;
-	case 0xAC000000://SW
-	break;
-	case 0x04000000://BLTZ, BGEZ
-	mask = createMask(16, 20);
-	uint32_t check = instruct & mask;
-	if (check == 0x00000000) {
-		//BLTZ
-	} else {
-		//BGEZ
-	}
-	break;
-	case 0x00000000: //Special
-	mask = createMask(0, 5);
-	uint32_t special = instruct & mask;
-	switch (special) {
-		case 0x00000020: //ADD
-		break;
-		case 0x00000021://ADDU
-		break;
-		case 0x00000024://AND
-		break;
-		case 0x00000022://SUB
-		break;
-		case 0x00000023://SUBU
-		break;
-		case 0x00000018://MULT
-		break;
-		case 0x00000019://MULTU
-		break;
-		case 0x0000001A://DIV
-		break;
-		case 0x0000001B://DIVU
-		break;
-		case 0x00000025://OR
-		break;
-		case 0x00000026://XOR
-		break;
-		case 0x00000027://NOR
-		break;
-		case 0x0000002A://SLT
-		break;
-		case 0x00000000://SLL !!!It is supposed to be all zeroes!!!
-		break;
-		case 0x00000003://SRA
-		break;
-		case 0x00000002://SRL
-		break;
-		case 0x00000009://JALR
-		break;
-		case 0x00000008://JR
-		break;
-		case 0x00000010://MFHI
-		break;
-		case 0x00000012://MFLO
-		break;
-		case 0x00000011://MTHI
-		break;
-		case 0x00000013://MTLO
-		break;
-		default:
-		printf("\n\nInstruction Not Found\n\n");
-	}
-	break;
-	default:
-	printf("\n\nInstruction Not Found\n\n");
-	break;
 }
 
 /***************************************************************/
