@@ -317,7 +317,7 @@ void handle_instruction() {
 	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
 	uint32_t mask = createMask(26, 32);
 	uint32_t opcode = instruct & mask;
-	int32_t newMask1, newMask2, immediate, rs, rt, rd, result, a, b, sa;
+	int32_t newMask1, newMask2, immediate, rs, rt, rd, result, a, b, sa, target;
 
 	/*opcode = opcode >> 25;
 	 for(i = 0;i < 6;i++){
@@ -342,8 +342,22 @@ void handle_instruction() {
 		result; // need to store value of rt into address
 		break;
 	case 0x10000000: //BEQ
+		newMask1 = createMask(21, 25);
+		newMask2 = createMask(16, 20);
+		rs = newMask1 & instruct;
+		rt = newMask2 & instruct;
+		if (rs == rt) {
+			//mem_write_32() Is this right?
+		}
 		break;
 	case 0x14000000: //BNE
+		newMask1 = createMask(21, 25);
+		newMask2 = createMask(16, 20);
+		rs = newMask1 & instruct;
+		rt = newMask2 & instruct;
+		if (rs != rt) {
+			//mem_write_32() Is this right?
+		}
 		break;
 	case 0x34000000: //ORI
 		newMask1 = createMask(0, 15);
@@ -354,8 +368,18 @@ void handle_instruction() {
 		result; // store value of rt into address
 		break;
 	case 0x1C000000: //BGTZ
+		newMask1 = createMask(21, 25);
+		rs = newMask1 & instruct;
+		if (rs > 0) {
+			//mem_write_32() Is this right?
+		}
 		break;
 	case 0x18000000: //BLEZ
+		newMask1 = createMask(21, 25);
+		rs = newMask1 & instruct;
+		if (rs < 0 || rs == 0) {
+			//mem_write_32() Is this right?
+		}
 		break;
 	case 0x38000000: //XORI -- not sure how immediate changes this if at all. Currently written same as XOR
 		newMask1 = createMask(21, 25);
@@ -370,6 +394,9 @@ void handle_instruction() {
 	case 0x28000000: //SLTI
 		break;
 	case 0x08000000: //J
+		newMask1 = createMask(0,25);
+		target = newMask1 & instruct;
+		//Jump to target address
 		break;
 	case 0x0C000000: //JAL
 		break;
@@ -453,7 +480,7 @@ void handle_instruction() {
 			break;
 		case 0x0000002A: //SLT
 			break;
-		case 0x00000000: //SLL !!!It is supposed to be all zeroes!!!
+		case 0x00000000: //SLL !!!It is supposed to be all zeroes!!! Logical means add 0's
 			newMask1 = createMask(16, 20);
 			newMask2 = createMask(6, 10);
 			rt = newMask1 & instruct;
@@ -461,14 +488,19 @@ void handle_instruction() {
 			rd = rt << sa;
 			result; //result needs to be stored into rd register
 			break;
-		case 0x00000003: //SRA
+		case 0x00000003: //SRA Arithmetic means add 1's
+			newMask1 = createMask(16, 20);
+			newMask2 = createMask(6, 10);
+			rt = newMask1 & instruct;
+			sa = newMask2 & instruct;
+			rd = rt >> sa; //I think this will add 1's, but not sure how to specify
 			break;
 		case 0x00000002: //SRL DOUBLE CHECK RESULT BC IT MAY INSERT 1's INSTEAD OF 0's
 			newMask1 = createMask(16, 20);
 			newMask2 = createMask(6, 10);
 			rt = newMask1 & instruct;
 			sa = newMask2 & instruct;
-			rd = rt >> sa;
+			rd = rt >> sa; // I think this adds 1's and idk how to specify to add 0's
 			result; //result needs to be stored into rd register
 			break;
 		case 0x00000009: //JALR
@@ -652,4 +684,5 @@ int main(int argc, char *argv[]) {
 	}
 	return 0;
 }
+
 
