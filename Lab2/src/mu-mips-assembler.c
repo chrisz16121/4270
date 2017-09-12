@@ -279,114 +279,145 @@ void init_memory() {
 /* load program into memory */
 /**************************************************************/
 
-char* find_register(char* register_instruct){
+uint32_t find_register(char* register_instruct){
+	
+	uint32_t register_number;
 
-	switch(register_instruct){
-		char* registerNumber;
-		case '$zero':	//$0
-			registerNumber = "$0";
-			break;
-		case '$at':	//$1
-			registerNumber = "$1";
-			break;	
-		case '$v0':	//$2
-			registerNumber = "$2";
-			break;
-		case '$v1':	//$3
-			registerNumber = "$3";
-			break;
-		case '$a0':	//$4
-			registerNumber = "$4";
-			break;
-		case '$a1':	//$5
-			registerNumber = "$5";
-			break;
-		case '$a2':	//$6
-			registerNumber = "$6";
-			break;
-		case '$a3':	//$7
-			registerNumber = "$7";
-			break;
-		case '$t0':	//$8
-			registerNumber = "$8";
-			break;
-		case '$t1':	//$9
-			registerNumber = "$9";
-			break;
-		case '$t2':	//$10
-			registerNumber = "$10";
-			break;
-		case '$t3':	//$11
-			registerNumber = "$11";
-			break;
-		case '$t4':	//$12
-			registerNumber = "$12";
-			break;
-		case '$t5':	//$13
-			registerNumber = "$13";
-			break;
-		case '$t6':	//$14
-			registerNumber = "$14";
-			break;
-		case '$t7':	//$15
-			registerNumber = "$15";
-			break;
-		case '$s0':	//$16
-			registerNumber = "$16";
-			break;
-		case '$s1':	//$17
-			registerNumber = "$17";
-			break;
-		case '$s2':	//$18
-			registerNumber = "$18";
-			break;
-		case '$s3':	//$19
-			registerNumber = "$19";
-			break;
-		case '$s4':	//$20
-			registerNumber = "$20";
-			break;
-		case '$s5':	//$21
-			registerNumber = "$21";
-			break;
-		case '$s6':	//$22
-			registerNumber = "$22";
-			break;
-		case '$s7':	//$23
-			registerNumber = "$23";
-			break;
-		case '$t8':	//$24
-			registerNumber = "$24";
-			break;
-		case '$t9':	//$25
-			registerNumber = "$25";
-			break;
-		case '$k0':	//$26
-			registerNumber = "$26";
-			break;
-		case '$k1':	//$27
-			registerNumber = "$27";
-			break;
-		case '$gp':	//$28
-			registerNumber = "$28";
-			break;
-		case '$sp':	//$29
-			registerNumber = "$29";
-			break;
-		case '$fp':	//$30
-			registerNumber = "$30";
-			break;
-		case '$ra':	//$31
-			registerNumber = "$31";
-			break;
-		default:
-			printf("\n\nInstruction Not Found\n\n");
-			return null;
-			break;
-		}
+	if(strcmp((*register_instruct),"$zero") == 0){
+	
+		register_number = 0x00000000;
+
+	}else if(strcmp((*register_instruct), "$at") == 0){
+	
+		register_number = 0x00000001;
+	
+	}else if(strcmp((*register_instruct), "$v0") == 0){
+	
+		register_number = 0x00000002;
+	
+	}else if(strcmp((*register_instruct), "$v1") == 0){
+	
+		register_number = 0x00000003;
+	
+	}else if(strcmp((*register_instruct), "$a0") == 0){
+	
+		register_number = 0x00000004;
+	
+	}else if(strcmp((*register_instruct), "$a1") == 0){
+	
+		register_number = 0x00000005;
+	
+	}else if(strcmp((*register_instruct), "$a2") == 0){
+	
+		register_number = 0x00000006;
+	
+	}else if(strcmp((*register_instruct), "$a3") == 0){
+	
+		register_number = 0x00000007;
+	
+	}else if(strcmp((*register_instruct), "$t0") == 0){
+	
+		register_number = 0x00000008;
+	
+	}else if(strcmp((*register_instruct), "$t1") == 0){
+	
+		register_number = 0x00000009;
+	
+	}else if(strcmp((*register_instruct), "$t2") == 0){
+	
+		register_number = 0x0000000A;
+	
+	}else if(strcmp((*register_instruct), "$t3") == 0){
+	
+		register_number = 0x0000000B;
+	
+	}else if(strcmp((*register_instruct), "$t4") == 0){
+	
+		register_number = 0x0000000C;
+	
+	}else if(strcmp((*register_instruct), "$t5") == 0){
+	
+		register_number = 0x0000000D;
+	
+	}else if(strcmp((*register_instruct), "$t6") == 0){
+	
+		register_number = 0x0000000E;
+	
+	}else if(strcmp((*register_instruct), "$t7") == 0){
+	
+		register_number = 0x0000000F;
+	
+	}else if(strcmp((*register_instruct), "$s0") == 0){
+	
+		register_number = 0x00000010;
+	
+	}else if(strcmp((*register_instruct), "$s1") == 0){
+	
+		register_number = 0x00000011;
+	
+	}else if(strcmp((*register_instruct), "$s2") == 0){
+	
+		register_number = 0x00000012;
+	
+	}else if(strcmp((*register_instruct), "$s3") == 0){
+	
+		register_number = 0x00000013;
+	
+	}else if(strcmp((*register_instruct), "$s4") == 0){
+	
+		register_number = 0x00000014;
+	
+	}else if(strcmp((*register_instruct), "$s5") == 0){
+	
+		register_number = 0x00000015;
+	
+	}else if(strcmp((*register_instruct), "$s6") == 0){
+	
+		register_number = 0x00000016;
+	
+	}else if(strcmp((*register_instruct), "$s7") == 0){
+	
+		register_number = 0x00000017;
+	
+	}else if(strcmp((*register_instruct), "$t8") == 0){
+	
+		register_number = 0x00000018;
+	
+	}else if(strcmp((*register_instruct), "$t9") == 0){
+	
+		register_number = 0x00000019;
+	
+	}else if(strcmp((*register_instruct), "$k0") == 0){
+	
+		register_number = 0x0000001A;
+	
+	}else if(strcmp((*register_instruct), "$k1") == 0){
+	
+		register_number = 0x0000001B;
+	
+	}else if(strcmp((*register_instruct), "$gp") == 0){
+	
+		register_number = 0x0000001C;
+	
+	}else if(strcmp((*register_instruct), "$sp") == 0){
+	
+		register_number = 0x0000001D;
+	
+	}else if(strcmp((*register_instruct), "$fp") == 0){
+	
+		register_number = 0x0000001E;
+	
+	}else if(strcmp((*register_instruct), "$ra") == 0){
+	
+		register_number = 0x0000001F;
+	
+	}else{
+		printf("\n\nInstruction Not Found\n\n");
+		return null;
+
+	}
 
 	return registerNumber;
-
 
 }
 
