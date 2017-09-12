@@ -53,11 +53,11 @@ void mdump(uint32_t start, uint32_t stop) {
 	uint32_t address;
 
 	printf("-------------------------------------------------------------\n");
-	printf("Memory content [0x%08x..0x%08x] :\n", start, stop);
+	//printf("Memory content [0x%08x..0x%08x] \n", start, stop);
 	printf("-------------------------------------------------------------\n");
 	printf("\t[Address in Hex (Dec) ]\t[Value]\n");
 	for (address = start; address <= stop; address += 4) {
-		printf("\t0x%08x (%d) :\t0x%08x\n", address, address,
+		//printf("\t0x%08x (%d) \t0x%08x\n", address, address,
 				mem_read_32(address));
 	}
 	printf("\n");
@@ -71,17 +71,17 @@ void rdump() {
 	printf("-------------------------------------\n");
 	printf("Dumping Register Content\n");
 	printf("-------------------------------------\n");
-	printf("# Instructions Executed\t: %u\n", INSTRUCTION_COUNT);
-	printf("PC\t: 0x%08x\n", CURRENT_STATE.PC);
+//	printf("# Instructions Executed\t %u\n", INSTRUCTION_COUNT);
+//	printf("PC\t 0x%08x\n", CURRENT_STATE.PC);
 	printf("-------------------------------------\n");
 	printf("[Register]\t[Value]\n");
 	printf("-------------------------------------\n");
 	for (i = 0; i < MIPS_REGS; i++) {
-		printf("[R%d]\t: 0x%08x\n", i, CURRENT_STATE.REGS[i]);
+//		printf("[R%d]\t 0x%08x\n", i, CURRENT_STATE.REGS[i]);
 	}
 	printf("-------------------------------------\n");
-	printf("[HI]\t: 0x%08x\n", CURRENT_STATE.HI);
-	printf("[LO]\t: 0x%08x\n", CURRENT_STATE.LO);
+//	printf("[HI]\t 0x%08x\n", CURRENT_STATE.HI);
+//	printf("[LO]\t 0x%08x\n", CURRENT_STATE.LO);
 	printf("-------------------------------------\n");
 }
 
@@ -108,133 +108,103 @@ uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
 
 unint32_t translateInstruction( char *instruction ){
 	char *instruct, *val1, *val2, *val3;
-	uint32_t intVal1, intVal2, intVal3;
+	uint32_t intVal1, intVal2, intVal3, mchnCode;
 
 	sscanf(instruction, "%s %s, %s, %s", instruct, val1, val2, val3);
-	switch(*instruct){ //do if elses
-		case "addi": //ADDI
-			
-			break;
-		case "addiu": //ADDIU
-			
-			break;
-		case "andi": //ANDI
-			
-		  	break;
-		case "beq": //BEQ
-			
-			break;
-		case "bne": //BNE
-			
-			break;
-		case "ori": //ORI
-			
-		  break;
-		case "bgtz": //BGTZ
-			
-			break;
-		case "blez": //BLEZ
-			
-			break;
-		case "xori": //XORI
-			
-			break;
-		case "slti": //SLTI
-			break;
-		case "j": //J
-			
-			break;
-		case "jal": //JAL
-			
-			break;
-		case "lb": //LB
-			break;
-		case "lh": //LH
-			break;
-		case "lui": //LUI
-			break;
-		case "lw": //LW
-			break;
-		case "sb": //SB
-			break;
-		case "sh": //SH
-			break;
-		case "sw": //SW
-			break;
-		case "bltz": //BLTZ
-			
-			break;
-		case "bgez": // BGEZ
-			break;
-		//
-		//START OF "SPECIAL" OPCODE INSTRUCTIONS
-		//
-		case "add": //ADD
-			
-			break;
-		case "addu": //ADDU
-			
-			break;
-		case "and": //AND
-			
-			break;
-		case "sub": //SUB
-			
-			break;		
-		case "subu": //SUBU
-			
-			break;
-		case "mult": //MULT
-			
-			break;
-		case "multu": //MULTU
-			
-			break;
-		case "div": //DIV
-			
-			break;	
-		case "divu": //DIVU
-			
-			break;
-		case "or": //OR
-			
-			break;
-		case "xor": //XOR
-			
-			break;
-		case "nor": //NOR
-			
-			break;
-		case "slt": //SLT
-			break;
-		case "sll": //SLL !!!It is supposed to be all zeroes!!! Logical means add 0's
-			
-			break;
-		case "sra": //SRA Arithmetic means 
+
+	if( strcmp( *instruct,  "addi") == 0 ){ //ADDI
 		
-			break;
-		case "srl": //SRL DOUBLE CHECK RESULT BC IT MAY INSERT 1's INSTEAD OF 0's
-			
-			break;
-		case "jalr": //JALR
-			break;		
-		case "jr": //JR
-			break;
-		case "mfhi": //MFHI
-			break;
-		case "mflo": //MFLO
-			break;
-		case "mthi": //MTHI
-			break;	
-		case "mtlo": //MTLO
-			break;
-		case "syscall": 
+	} else if( strcmp( *instruct,  "addiu") == 0 ){ //ADDIU
 		
-			break;
-		default: 
-			printf("\n\nInstruction Not Found\n\n");
-			break;
-	}
+	} else if( strcmp( *instruct,  "andi") == 0 ){ //ANDI
+		
+	} else if( strcmp( *instruct,  "beq") == 0 ){ //BEQ
+		
+	} else if( strcmp( *instruct,  "bne") == 0 ){ //BNE
+		
+	} else if( strcmp( *instruct,  "ori") == 0 ){ //ORI
+		
+	} else if( strcmp( *instruct,  "bgtz") == 0 ){ //BGTZ
+		
+	} else if( strcmp( *instruct,  "blez") == 0 ){ //BLEZ
+		
+	} else if( strcmp( *instruct,  "xori") == 0 ){ //XORI
+		
+	} else if( strcmp( *instruct,  "slti") == 0 ){ //SLTI
+	
+	} else if( strcmp( *instruct,  "j") == 0 ){ //J
+		
+	} else if( strcmp( *instruct,  "jal") == 0 ){ //JAL
+		
+	} else if( strcmp( *instruct,  "lb") == 0 ){ //LB
+		
+	} else if( strcmp( *instruct,  "lh") == 0 ){ //LH
+		
+	} else if( strcmp( *instruct,  "lui") == 0 ){ //LUI
+		
+	} else if( strcmp( *instruct,  "lw") == 0 ){ //LW
+		
+	} else if( strcmp( *instruct,  "sb") == 0 ){ //SB
+	
+	} else if( strcmp( *instruct,  "sh") == 0 ){ //SH
+	
+	} else if( strcmp( *instruct,  "sw") == 0 ){ //SW
+		
+	} else if( strcmp( *instruct,  "bltz") == 0 ){ //BLTZ
+		
+	} else if( strcmp( *instruct,  "bgez") == 0 ){ // BGEZ
+				
+	//START OF "SPECIAL" OPCODE INSTRUCTIONS
+	} else if( strcmp( *instruct,  "add") == 0 ){ //ADD
+		
+	} else if( strcmp( *instruct,  "addu") == 0 ){ //ADDU
+		
+	} else if( strcmp( *instruct,  "and") == 0 ){ //AND
+		
+	} else if( strcmp( *instruct,  "sub") == 0 ){ //SUB
+		
+	} else if( strcmp( *instruct,  "subu") == 0 ){ //SUBU
+		
+	} else if( strcmp( *instruct,  "mult") == 0 ){ //MULT
+		
+	} else if( strcmp( *instruct,  "multu") == 0 ){ //MULTU
+		
+	} else if( strcmp( *instruct,  "div") == 0 ){ //DIV
+		
+	} else if( strcmp( *instruct,  "divu") == 0 ){ //DIVU
+		
+	} else if( strcmp( *instruct,  "or") == 0 ){ //OR
+		
+	} else if( strcmp( *instruct,  "xor") == 0 ){ //XOR
+		
+	} else if( strcmp( *instruct,  "nor") == 0 ){ //NOR
+		
+	} else if( strcmp( *instruct,  "slt") == 0 ){ //SLT
+	
+	} else if( strcmp( *instruct,  "sll") == 0 ){ //SLL !!!It is supposed to be all zeroes!!! Logical means add 0's
+		
+	} else if( strcmp( *instruct,  "sra") == 0 ){ //SRA Arithmetic means 
+	
+	} else if( strcmp( *instruct,  "srl") == 0 ){ //SRL DOUBLE CHECK RESULT BC IT MAY INSERT 1's INSTEAD OF 0's
+		
+	} else if( strcmp( *instruct,  "jalr") == 0 ){ //JALR
+		
+	} else if( strcmp( *instruct,  "jr") == 0 ){ //JR
+		
+	} else if( strcmp( *instruct,  "mfhi") == 0 ){ //MFHI
+		
+	} else if( strcmp( *instruct,  "mflo") == 0 ){ //MFLO
+		
+	} else if( strcmp( *instruct,  "mthi") == 0 ){ //MTHI
+		
+	} else if( strcmp( *instruct,  "mtlo") == 0 ){ //MTLO
+		
+	} else if( strcmp( *instruct,  "syscall") == 0 ){ 
+	
+	} else{ 
+		printf("\n\nInstruction Not Found\n\n");
+	} 
+	return mchnCode;
 }
 
 /* main**************************************************/
@@ -245,18 +215,21 @@ int main(int argc, char *argv[]) {
 
 	if (argc < 2) {
 		printf(
-				"Error: You should provide input file.\nUsage: %s <input program> \n\n",
+				"Error) == 0 ){ You should provide input file.\nUsage) == 0 ){ %s <input program> \n\n",
 				argv[0]);
 		exit(1);
 	}
 
 	strcpy(prog_file, argv[1]);
-	// initialize();
-	// load_program();
-	// help();
-	// while (1) {
-	// 	handle_command();
-	// }
+
+	//while( line of input file != EOF ) {
+		//prase individual line from input file
+		//send line to translateInstruction
+			//return translated machine code
+		//print line of machine code into output file
+	//}
+	//save output file
+
 	return 0;
 }
 
