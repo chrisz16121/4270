@@ -281,109 +281,109 @@ void init_memory() {
 
 char* find_register(char* register_instruct){
 
-switch(register_instruct){
-	char* registerNumber;
-	case '$zero':	//$0
-		registerNumber = "$0";
-		break;
-	case '$at':	//$1
-		registerNumber = "$1";
-		break;	
-	case '$v0':	//$2
-		registerNumber = "$2";
-		break;
-	case '$v1':	//$3
-		registerNumber = "$3";
-		break;
-	case '$a0':	//$4
-		registerNumber = "$4";
-		break;
-	case '$a1':	//$5
-		registerNumber = "$5";
-		break;
-	case '$a2':	//$6
-		registerNumber = "$6";
-		break;
-	case '$a3':	//$7
-		registerNumber = "$7";
-		break;
-	case '$t0':	//$8
-		registerNumber = "$8";
-		break;
-	case '$t1':	//$9
-		registerNumber = "$9";
-		break;
-	case '$t2':	//$10
-		registerNumber = "$10";
-		break;
-	case '$t3':	//$11
-		registerNumber = "$11";
-		break;
-	case '$t4':	//$12
-		registerNumber = "$12";
-		break;
-	case '$t5':	//$13
-		registerNumber = "$13";
-		break;
-	case '$t6':	//$14
-		registerNumber = "$14";
-		break;
-	case '$t7':	//$15
-		registerNumber = "$15";
-		break;
-	case '$s0':	//$16
-		registerNumber = "$16";
-		break;
-	case '$s1':	//$17
-		registerNumber = "$17";
-		break;
-	case '$s2':	//$18
-		registerNumber = "$18";
-		break;
-	case '$s3':	//$19
-		registerNumber = "$19";
-		break;
-	case '$s4':	//$20
-		registerNumber = "$20";
-		break;
-	case '$s5':	//$21
-		registerNumber = "$21";
-		break;
-	case '$s6':	//$22
-		registerNumber = "$22";
-		break;
-	case '$s7':	//$23
-		registerNumber = "$23";
-		break;
-	case '$t8':	//$24
-		registerNumber = "$24";
-		break;
-	case '$t9':	//$25
-		registerNumber = "$25";
-		break;
-	case '$k0':	//$26
-		registerNumber = "$26";
-		break;
-	case '$k1':	//$27
-		registerNumber = "$27";
-		break;
-	case '$gp':	//$28
-		registerNumber = "$28";
-		break;
-	case '$sp':	//$29
-		registerNumber = "$29";
-		break;
-	case '$fp':	//$30
-		registerNumber = "$30";
-		break;
-	case '$ra':	//$31
-		registerNumber = "$31";
-		break;
-	default:
-		printf("\n\nInstruction Not Found\n\n");
-		return null;
-		break;
-	}
+	switch(register_instruct){
+		char* registerNumber;
+		case '$zero':	//$0
+			registerNumber = "$0";
+			break;
+		case '$at':	//$1
+			registerNumber = "$1";
+			break;	
+		case '$v0':	//$2
+			registerNumber = "$2";
+			break;
+		case '$v1':	//$3
+			registerNumber = "$3";
+			break;
+		case '$a0':	//$4
+			registerNumber = "$4";
+			break;
+		case '$a1':	//$5
+			registerNumber = "$5";
+			break;
+		case '$a2':	//$6
+			registerNumber = "$6";
+			break;
+		case '$a3':	//$7
+			registerNumber = "$7";
+			break;
+		case '$t0':	//$8
+			registerNumber = "$8";
+			break;
+		case '$t1':	//$9
+			registerNumber = "$9";
+			break;
+		case '$t2':	//$10
+			registerNumber = "$10";
+			break;
+		case '$t3':	//$11
+			registerNumber = "$11";
+			break;
+		case '$t4':	//$12
+			registerNumber = "$12";
+			break;
+		case '$t5':	//$13
+			registerNumber = "$13";
+			break;
+		case '$t6':	//$14
+			registerNumber = "$14";
+			break;
+		case '$t7':	//$15
+			registerNumber = "$15";
+			break;
+		case '$s0':	//$16
+			registerNumber = "$16";
+			break;
+		case '$s1':	//$17
+			registerNumber = "$17";
+			break;
+		case '$s2':	//$18
+			registerNumber = "$18";
+			break;
+		case '$s3':	//$19
+			registerNumber = "$19";
+			break;
+		case '$s4':	//$20
+			registerNumber = "$20";
+			break;
+		case '$s5':	//$21
+			registerNumber = "$21";
+			break;
+		case '$s6':	//$22
+			registerNumber = "$22";
+			break;
+		case '$s7':	//$23
+			registerNumber = "$23";
+			break;
+		case '$t8':	//$24
+			registerNumber = "$24";
+			break;
+		case '$t9':	//$25
+			registerNumber = "$25";
+			break;
+		case '$k0':	//$26
+			registerNumber = "$26";
+			break;
+		case '$k1':	//$27
+			registerNumber = "$27";
+			break;
+		case '$gp':	//$28
+			registerNumber = "$28";
+			break;
+		case '$sp':	//$29
+			registerNumber = "$29";
+			break;
+		case '$fp':	//$30
+			registerNumber = "$30";
+			break;
+		case '$ra':	//$31
+			registerNumber = "$31";
+			break;
+		default:
+			printf("\n\nInstruction Not Found\n\n");
+			return null;
+			break;
+		}
 
 	return registerNumber;
 
