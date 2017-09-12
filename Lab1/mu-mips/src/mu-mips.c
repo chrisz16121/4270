@@ -406,17 +406,26 @@ void handle_instruction()
 			break;
 		case 0x38000000: //XORI
 			rs = (0x03E00000 & instruct) >> 21;
-	  	rt = (0x001F0000 & instruct) >> 16;
-		  rd = (0x00007C00 & instruct) >> 11;
-		  a = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
-		  b = ~CURRENT_STATE.REGS[rs] & ~CURRENT_STATE.REGS[rt];
-		  NEXT_STATE.REGS[rd] = ~a & ~b; //~ gets bitwise complement
+	  		rt = (0x001F0000 & instruct) >> 16;
+		  	rd = (0x00007C00 & instruct) >> 11;
+		 	a = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
+		  	b = ~CURRENT_STATE.REGS[rs] & ~CURRENT_STATE.REGS[rt];
+		  	NEXT_STATE.REGS[rd] = ~a & ~b; //~ gets bitwise complement
 		break;
 		case 0x28000000: //SLTI
 			break;
 		case 0x08000000: //J
+			target_address = (0x03FFFFFF & instruct);
+			mask = createMask(28,31);
+			a = (CURRENT_STATE.PC & mask);
+			NEXT_STATE.PC = (a | (target_address << 2)) & 0xFFFFFFFC;  
 			break;
 		case 0x0C000000: //JAL
+			target_address = (0x03FFFFFF & instruct);
+			mask = createMask(28,31);
+			a = (CURRENT_STATE.PC & mask);
+			NEXT_STATE.PC = (a | (target_address << 2)) & 0xFFFFFFFC;
+			NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
 			break;
 		case 0x80000000: //LB
 			break;
@@ -461,10 +470,10 @@ void handle_instruction()
 					NEXT_STATE.REGS[rd] = result;
 					break;
 				case 0x00000024: //AND
-          immediate = (0x0000FFFF & instruct);
-		    	rs = (0x03E00000 & instruct) >> 21;
-		    	rt = (0x001F0000 & instruct) >> 16;
-		    	NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] & CURRENT_STATE.REGS[rs];
+					immediate = (0x0000FFFF & instruct);
+					rs = (0x03E00000 & instruct) >> 21;
+					rt = (0x001F0000 & instruct) >> 16;
+					NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] & CURRENT_STATE.REGS[rs];
 					break;
 				case 0x00000022: //SUB
 					rs = (0x03E00000 & instruct) >> 21;
@@ -512,7 +521,7 @@ void handle_instruction()
 					NEXT_STATE.HI = remainder;
 					NEXT_STATE.LO = result;
 					break;
-        			 case 0x00000025: //OR
+    			case 0x00000025: //OR
 				  	rs = (0x03E00000 & instruct) >> 21;
 					rt = (0x001F0000 & instruct) >> 16;
 					rd = (0x00007C00 & instruct) >> 11;
