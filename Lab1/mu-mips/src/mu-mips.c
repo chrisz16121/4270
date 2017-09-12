@@ -312,6 +312,7 @@ void handle_instruction()
 	uint32_t opcode,rs,rt,rd,result,remainder;
 	uint64_t double_result;
 	uint32_t delay_slot_instruct,target_address,offset;
+	uint32_t immediate;
 	opcode = 0xFC000000 & instruct;
 	printf("Instruction fetched: %x\n",instruct);
 	temp_instruct = instruct;
@@ -330,40 +331,45 @@ void handle_instruction()
 	
 	switch(opcode){
 		case 0x20000000: //ADDI
+			rs = (0x03E00000 & instruct) >>= 21;
+			rt = (0x001F0000 & instruct) >>= 16;
+			immediate = (0x0000FFFF & instuct);
+			(int32_t)result = (int32_t)CURRENT_STATE.REGS[rs] + (int32_t)immediate;
+			NEXT_STATE[rt] = result;
 			break;
 		case 0x24000000: //ADDIU
+			rs = (0x03E00000 & instruct) >>= 21;
+			rt = (0x001F0000 & instruct) >>= 16;
+			immediate = (0x0000FFFF & instuct);
+			result = CURRENT_STATE.REGS[rs] + immediate;
+			NEXT_STATE[rt] = result;
 			break;
 		case 0x30000000: //ANDI
 			break;
 		case 0x10000000: //BEQ
 			offset = 0x0000FFFF & instruct;
-			delay_slot_instruct = mem_read_32(CURRENT_STATE.PC + 4);
-			target_address = delay_slot_instruct + offset;
 			rs = (0x03E00000 & instruct) >>= 21;
 			rt = (0x001F0000 & instruct) >>= 16;
 			if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
-				CURRENT_STATE.PC = CURRENT_STATE.PC + offset;
+				NEXT_STATE .PC = CURRENT_STATE.PC + offset;
 			}
 			break;
 		case 0x14000000: //BNE
 			offset = 0x0000FFFF & instruct;
-			delay_slot_instruct = mem_read_32(CURRENT_STATE.PC + 4);
-			target_address = delay_slot_instruct + offset;
 			rs = (0x03E00000 & instruct) >>= 21;
 			rt = (0x001F0000 & instruct) >>= 16;
-			if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
-				CURRENT_STATE.PC = CURRENT_STATE.PC + offset;
+			if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
+				NEXT_STATE .PC = CURRENT_STATE.PC + offset;
 			}
 			break;
 		case 0x34000000: //ORI
 			break;
 		case 0x1C000000: //BGTZ
 			offset = 0x0000FFFF & instruct;
-			delay_slot_instruct = mem_read_32(CURRENT_STATE.PC + 4);
-			target_address = delay_slot_instruct + offset;
 			rs = (0x03E00000 & instruct) >>= 21;
+			rt = (0x001F0000 & instruct) >>= 16;
 			if(CURRENT_STATE.REGS[rs] > 0){
-				CURRENT_STATE.PC = CURRENT_STATE.PC + offset;
+				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
 			}
 			break;
 		case 0x18000000: //BLEZ
