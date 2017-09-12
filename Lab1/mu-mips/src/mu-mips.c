@@ -326,7 +326,7 @@ void handle_instruction()
 	uint64_t double_result;
 	uint32_t delay_slot_instruct,target_address,offset;
 	uint32_t immediate;
-	uint32_t check,special,mask,a,b,sa;
+	uint32_t check,special,mask,a,b,sa,base,virtualAddress,temp;
 	opcode = 0xFC000000 & instruct;
 	printf("Instruction fetched: %x\n",instruct);
 	temp_instruct = instruct;
@@ -383,10 +383,10 @@ void handle_instruction()
 			break;
 		case 0x34000000: //ORI
 			immediate = (0x0000FFFF & instruct);
-		  rs = (0x03E00000 & instruct) >> 21;
-		  rt = immediate | rs;
-		  NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] | CURRENT_STATE.REGS[rs]; // store value of rt into address
-		  break;
+			rs = (0x03E00000 & instruct) >> 21;
+		 	rt = immediate | rs;
+		  	NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] | CURRENT_STATE.REGS[rs]; // store value of rt into address
+		  	break;
 		case 0x1C000000: //BGTZ
 			offset = 0x0000FFFF & instruct;
 			rs = (0x03E00000 & instruct) >> 21;
@@ -413,6 +413,14 @@ void handle_instruction()
 		  	NEXT_STATE.REGS[rd] = ~a & ~b; //~ gets bitwise complement
 		break;
 		case 0x28000000: //SLTI
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			immediate = (0x0000FFFF & instruct);
+			if (CURRENT_STATE.REGS[rs] < immediate) {
+				NEXT_STATE.REGS[rt] = 1;
+			} else {
+				NEXT_STATE.REGS[rt] = 0;
+			}
 			break;
 		case 0x08000000: //J
 			target_address = (0x03FFFFFF & instruct);
@@ -428,32 +436,85 @@ void handle_instruction()
 			NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
 			break;
 		case 0x80000000: //LB
+			offset = (0x0000FFFF & instruct);
+			base = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			virtualAddress = offset + base;
+			NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[virtualAddress] & 0x000000FF;
 			break;
-		case 0x84000000: //LH
+		case 0x84000000: //LH	
+			offset = (0x0000FFFF & instruct);
+			base = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			virtualAddress = offset + base;
+			NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[virtualAddress] & 0x0000FFFF;
 			break;
 		case 0x3C000000: //LUI
+			immediate = (0x0000FFFF & instruct);
+			rt = (0x001F0000 & instruct) >> 16;
+			temp = (immediate << 16) | (0x0000);
+			NEXT_STATE.REGS[rt] = temp;
 			break;
 		case 0x8C000000: //LW
+			offset = (0x0000FFFF & instruct);
+			if(offset > 0x1000) break; // overflow condition
+			base = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			virtualAddress = offset + base;
+			NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[virtualAddress];
 			break;
 		case 0xA0000000: //SB
+			offset = (0x0000FFFF & instruct);
+			base = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			virtualAddress = offset + base;
+			NEXT_STATE.REGS[virtualAddress] = CURRENT_STATE.REGS[rt] & 0x000000FF;
 			break;
 		case 0xA4000000: //SH
+			offset = (0x0000FFFF & instruct);
+			base = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			virtualAddress = offset + base;
+			if ((0x00000001 & virtualAddress) != 0) {
+				printf("This instruction doesn't work");
+			} else {
+				NEXT_STATE.REGS[virtualAddress] = CURRENT_STATE.REGS[rt]
+						& 0x0000FFFF;
+			}
 			break;
 		case 0xAC000000: //SW
-			break;
-		case 0x04000000: //BLTZ, BGEZ
-			mask = createMask(16,20);
-			check = instruct & mask;
-			if(check == 0x00000000){
-				//BLTZ
+			offset = (0x0000FFFF & instruct);
+			base = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			if ((0x00000001 & instruct) != 0 || (0x00000002 & instruct) != 0) {
+				printf("This instruction doesn't work");
+			} else {
+				virtualAddress = offset + base;
+				NEXT_STATE.REGS[virtualAddress] = CURRENT_STATE.REGS[rt];
 			}
-			else{
-				//BGEZ
+			break;
+		case 0x04000000: //BLTZ, BGEZ CHECK THIS
+			mask = createMask(16, 20);
+			temp = CURRENT_STATE.PC + 4;
+			rs = (0x03E00000 & instruct) >> 21;
+			uint32_t check = instruct & mask;
+			if (check == 0x00000000) {
+				if(CURRENT_STATE.REGS[rs] == 1){
+					NEXT_STATE.PC = (offset + temp) << 2; //BLTZ
+				}else{
+				
+				}
+			} else {
+				if(CURRENT_STATE.REGS[rs] == 0){
+					NEXT_STATE.PC = (offset + temp) << 2; //BGEZ
+				}else{
+					
+				}
 			}
 			break;
-		case 0x00000000: //Special
-		mask = createMask(0,5);
-			special = instruct & mask;
+			case 0x00000000: //Special
+			mask = createMask(0,5);
+				special = instruct & mask;
 			switch( special ){
 				case 0x00000020: //ADD
 					rs = (0x03E00000 & instruct) >> 21;
@@ -521,7 +582,7 @@ void handle_instruction()
 					NEXT_STATE.HI = remainder;
 					NEXT_STATE.LO = result;
 					break;
-    			case 0x00000025: //OR
+    				case 0x00000025: //OR
 				  	rs = (0x03E00000 & instruct) >> 21;
 					rt = (0x001F0000 & instruct) >> 16;
 					rd = (0x00007C00 & instruct) >> 11;
@@ -542,26 +603,34 @@ void handle_instruction()
 					NEXT_STATE.REGS[rd] = ~(CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt]);
 					break;
 				case 0x0000002A: //SLT
+					rs = (0x03E00000 & instruct) >> 21;
+					rt = (0x001F0000 & instruct) >> 16;
+					rd = (0x00007C00 & instruct) >> 11;
+					if (CURRENT_STATE.REGS[rs] < CURRENT_STATE.REGS[rt]) {
+						NEXT_STATE.REGS[rd] = 1;
+					} else {
+					NEXT_STATE.REGS[rd] = 0;
+					}
 					break;
 				case 0x00000000: //SLL !!!It is supposed to be all zeroes!!! Logical means add 0's
 					rt = (0x001F0000 & instruct) >> 16;
 					sa = (0x000007C0 & instruct) >> 6;
 					rd = (0x00007C00 & instruct) >> 11;
-					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] << CURRENT_STATE.REGS[sa];
+					NEXT_STATE.REGS[rd] = (CURRENT_STATE.REGS[rt] << CURRENT_STATE.REGS[sa]) & CURRENT_STATE.REGS[sa];
 					break;
 				case 0x00000003: //SRA Arithmetic means 
-				rt = (0x001F0000 & instruct) >> 16;
-				sa = (0x000007C0 & instruct) >> 6;
-				rd = (0x00007C00 & instruct) >> 11;
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> CURRENT_STATE.REGS[sa];//I think this will add 1's, but not sure how to specify
-				break;
+					rt = (0x001F0000 & instruct) >> 16;
+					sa = (0x000007C0 & instruct) >> 6;
+					rd = (0x00007C00 & instruct) >> 11;
+					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> CURRENT_STATE.REGS[sa];//I think this will add 1's, but not sure how to specify
+					break;
 				case 0x00000002: //SRL DOUBLE CHECK RESULT BC IT MAY INSERT 1's INSTEAD OF 0's
 					rt = (0x001F0000 & instruct) >> 16;
 					sa = (0x000007C0 & instruct) >> 6;
 					rd = (0x00007C00 & instruct) >> 11;
 					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt]
 					>> CURRENT_STATE.REGS[sa]; // I think this adds 1's and idk how to specify to add 0's
-				break;
+					break;
 				case 0x00000009: //JALR
 					rs = (0x03E00000 & instruct) >> 21;
 					rd = (0x00007C00 & instruct) >> 11;
