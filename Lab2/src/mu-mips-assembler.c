@@ -98,6 +98,180 @@ void init_memory() {
 	}
 }
 
+/**************************************************************/
+/* load program into memory */
+/**************************************************************/
+
+uint32_t find_register(char* register_instruct){
+	
+	uint32_t register_number;
+
+	if(strcmp((*register_instruct),"$zero") == 0){
+	
+		register_number = 0x00000000;
+
+	}else if(strcmp((*register_instruct), "$at") == 0){
+	
+		register_number = 0x00000001;
+	
+	}else if(strcmp((*register_instruct), "$v0") == 0){
+	
+		register_number = 0x00000002;
+	
+	}else if(strcmp((*register_instruct), "$v1") == 0){
+	
+		register_number = 0x00000003;
+	
+	}else if(strcmp((*register_instruct), "$a0") == 0){
+	
+		register_number = 0x00000004;
+	
+	}else if(strcmp((*register_instruct), "$a1") == 0){
+	
+		register_number = 0x00000005;
+	
+	}else if(strcmp((*register_instruct), "$a2") == 0){
+	
+		register_number = 0x00000006;
+	
+	}else if(strcmp((*register_instruct), "$a3") == 0){
+	
+		register_number = 0x00000007;
+	
+	}else if(strcmp((*register_instruct), "$t0") == 0){
+	
+		register_number = 0x00000008;
+	
+	}else if(strcmp((*register_instruct), "$t1") == 0){
+	
+		register_number = 0x00000009;
+	
+	}else if(strcmp((*register_instruct), "$t2") == 0){
+	
+		register_number = 0x0000000A;
+	
+	}else if(strcmp((*register_instruct), "$t3") == 0){
+	
+		register_number = 0x0000000B;
+	
+	}else if(strcmp((*register_instruct), "$t4") == 0){
+	
+		register_number = 0x0000000C;
+	
+	}else if(strcmp((*register_instruct), "$t5") == 0){
+	
+		register_number = 0x0000000D;
+	
+	}else if(strcmp((*register_instruct), "$t6") == 0){
+	
+		register_number = 0x0000000E;
+	
+	}else if(strcmp((*register_instruct), "$t7") == 0){
+	
+		register_number = 0x0000000F;
+	
+	}else if(strcmp((*register_instruct), "$s0") == 0){
+	
+		register_number = 0x00000010;
+	
+	}else if(strcmp((*register_instruct), "$s1") == 0){
+	
+		register_number = 0x00000011;
+	
+	}else if(strcmp((*register_instruct), "$s2") == 0){
+	
+		register_number = 0x00000012;
+	
+	}else if(strcmp((*register_instruct), "$s3") == 0){
+	
+		register_number = 0x00000013;
+	
+	}else if(strcmp((*register_instruct), "$s4") == 0){
+	
+		register_number = 0x00000014;
+	
+	}else if(strcmp((*register_instruct), "$s5") == 0){
+	
+		register_number = 0x00000015;
+	
+	}else if(strcmp((*register_instruct), "$s6") == 0){
+	
+		register_number = 0x00000016;
+	
+	}else if(strcmp((*register_instruct), "$s7") == 0){
+	
+		register_number = 0x00000017;
+	
+	}else if(strcmp((*register_instruct), "$t8") == 0){
+	
+		register_number = 0x00000018;
+	
+	}else if(strcmp((*register_instruct), "$t9") == 0){
+	
+		register_number = 0x00000019;
+	
+	}else if(strcmp((*register_instruct), "$k0") == 0){
+	
+		register_number = 0x0000001A;
+	
+	}else if(strcmp((*register_instruct), "$k1") == 0){
+	
+		register_number = 0x0000001B;
+	
+	}else if(strcmp((*register_instruct), "$gp") == 0){
+	
+		register_number = 0x0000001C;
+	
+	}else if(strcmp((*register_instruct), "$sp") == 0){
+	
+		register_number = 0x0000001D;
+	
+	}else if(strcmp((*register_instruct), "$fp") == 0){
+	
+		register_number = 0x0000001E;
+	
+	}else if(strcmp((*register_instruct), "$ra") == 0){
+	
+		register_number = 0x0000001F;
+	
+	}else{
+		printf("\n\nInstruction Not Found\n\n");
+		return null;
+
+	}
+
+	return registerNumber;
+
+}
+
+void load_program() {
+	FILE * fp;
+	int i, word;
+	uint32_t address;
+
+	/* Open program file. */
+	fp = fopen(prog_file, "r");
+	if (fp == NULL) {
+		printf("Error: Can't open program file %s\n", prog_file);
+		exit(-1);
+	}
+
+	/* Read in the program. */
+
+	i = 0;
+	while (fscanf(fp, "%x\n", &word) != EOF) {
+		address = MEM_TEXT_BEGIN + i;
+		mem_write_32(address, word);
+		printf("writing 0x%08x into address 0x%08x (%d)\n", word, address,
+				address);
+		i += 4;
+	}
+	PROGRAM_SIZE = i / 4;
+	printf("Program loaded into memory.\n%d words written into memory.\n\n",
+			PROGRAM_SIZE);
+	fclose(fp);
+}
+
 uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
 	uint32_t r = 0;
 	for (int32_t i = a; i <= b; i++) {
