@@ -317,6 +317,7 @@ uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
 /************************************************************/
 void handle_instruction()
 {
+	print_program();
 	int i;
 	int binary_num[32];
 	uint32_t temp_instruct;
@@ -325,11 +326,11 @@ void handle_instruction()
 	uint64_t double_result;
 	uint32_t delay_slot_instruct,target_address,offset;
 	uint32_t immediate;
-	uint32_t check,special,mask;
+	uint32_t check,special,mask,a,b,sa;
 	opcode = 0xFC000000 & instruct;
 	printf("Instruction fetched: %x\n",instruct);
 	temp_instruct = instruct;
-	for(i = 0;i < 32;i++){
+	/*for(i = 0;i < 32;i++){
 		int temp = 1 & temp_instruct;
 		//printf("%d",temp);
 		temp_instruct >> 1;
@@ -338,8 +339,9 @@ void handle_instruction()
 	for(i = 0;i < 32; i ++){
 		printf("%d",binary_num[i]);
 	}
-	printf("\n");
-	printf("\n");
+	*/
+	//printf("\n");
+	//printf("\n");
 	//begin else ifs 
 	
 	switch(opcode){
@@ -359,10 +361,10 @@ void handle_instruction()
 			break;
 		case 0x30000000: //ANDI
 			immediate = (0x0000FFFF & instruct);
-	    rs = (0x03E00000 & instruct) >> 21;
-		  rt = (0x001F0000 & instruct) >> 16;
-		  NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] & CURRENT_STATE.REGS[rs]; // need to store value of rt into address
-		  break;
+	    		rs = (0x03E00000 & instruct) >> 21;
+		  	rt = (0x001F0000 & instruct) >> 16;
+		  	NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] & CURRENT_STATE.REGS[rs]; // need to store value of rt into address
+		  	break;
 		case 0x10000000: //BEQ
 			offset = 0x0000FFFF & instruct;
 			rs = (0x03E00000 & instruct) >> 21;
@@ -510,47 +512,47 @@ void handle_instruction()
 					NEXT_STATE.HI = remainder;
 					NEXT_STATE.LO = result;
 					break;
-         case 0x00000025: //OR
-		  	rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt];
-			break;
-		case 0x00000026: //XOR
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			a = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
-			b = ~CURRENT_STATE.REGS[rs] & ~CURRENT_STATE.REGS[rt];
-			NEXT_STATE.REGS[rd] = ~a & ~b; //~ gets bitwise complement
-			break;
-		case 0x00000027: //NOR
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			NEXT_STATE.REGS[rd] = ~(CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt]);
-			break;
-		case 0x0000002A: //SLT
-			break;
-		case 0x00000000: //SLL !!!It is supposed to be all zeroes!!! Logical means add 0's
-			rt = (0x001F0000 & instruct) >> 16;
-			sa = (0x000007C0 & instruct) >> 6;
-			rd = (0x00007C00 & instruct) >> 11;
-			NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] << CURRENT_STATE.REGS[sa];
-			break;
-		case 0x00000003: //SRA Arithmetic means 
-			rt = (0x001F0000 & instruct) >> 16;
-			sa = (0x000007C0 & instruct) >> 6;
-			rd = (0x00007C00 & instruct) >> 11;
-			NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> CURRENT_STATE.REGS[sa];//I think this will add 1's, but not sure how to specify
-			break;
-		case 0x00000002: //SRL DOUBLE CHECK RESULT BC IT MAY INSERT 1's INSTEAD OF 0's
-			rt = (0x001F0000 & instruct) >> 16;
-			sa = (0x000007C0 & instruct) >> 6;
-			rd = (0x00007C00 & instruct) >> 11;
-			NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt]
+        			 case 0x00000025: //OR
+				  	rs = (0x03E00000 & instruct) >> 21;
+					rt = (0x001F0000 & instruct) >> 16;
+					rd = (0x00007C00 & instruct) >> 11;
+					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt];
+					break;
+				case 0x00000026: //XOR
+					rs = (0x03E00000 & instruct) >> 21;
+					rt = (0x001F0000 & instruct) >> 16;
+					rd = (0x00007C00 & instruct) >> 11;
+					a = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
+					b = ~CURRENT_STATE.REGS[rs] & ~CURRENT_STATE.REGS[rt];
+					NEXT_STATE.REGS[rd] = ~a & ~b; //~ gets bitwise complement
+					break;
+				case 0x00000027: //NOR
+					rs = (0x03E00000 & instruct) >> 21;
+					rt = (0x001F0000 & instruct) >> 16;
+					rd = (0x00007C00 & instruct) >> 11;
+					NEXT_STATE.REGS[rd] = ~(CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt]);
+					break;
+				case 0x0000002A: //SLT
+					break;
+				case 0x00000000: //SLL !!!It is supposed to be all zeroes!!! Logical means add 0's
+					rt = (0x001F0000 & instruct) >> 16;
+					sa = (0x000007C0 & instruct) >> 6;
+					rd = (0x00007C00 & instruct) >> 11;
+					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] << CURRENT_STATE.REGS[sa];
+					break;
+				case 0x00000003: //SRA Arithmetic means 
+				rt = (0x001F0000 & instruct) >> 16;
+				sa = (0x000007C0 & instruct) >> 6;
+				rd = (0x00007C00 & instruct) >> 11;
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> CURRENT_STATE.REGS[sa];//I think this will add 1's, but not sure how to specify
+				break;
+				case 0x00000002: //SRL DOUBLE CHECK RESULT BC IT MAY INSERT 1's INSTEAD OF 0's
+					rt = (0x001F0000 & instruct) >> 16;
+					sa = (0x000007C0 & instruct) >> 6;
+					rd = (0x00007C00 & instruct) >> 11;
+					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt]
 					>> CURRENT_STATE.REGS[sa]; // I think this adds 1's and idk how to specify to add 0's
-			break;
+				break;
 				case 0x00000009: //JALR
 					break;		
 				case 0x00000008: //JR
@@ -563,6 +565,14 @@ void handle_instruction()
 					break;	
 				case 0x00000013: //MTLO
 					break;
+				case 0x0000000C: 
+					if(CURRENT_STATE.REGS[2] = 0xA){
+						printf("We out this thaaaang\n");
+						exit(1);
+					}
+					//printf("We out this thaaaang\n");
+					//NEXT_STATE.REGS[2] = 0xA;
+					break;
 				default:
 					printf("\n\nInstruction Not Found\n\n");
 			}
@@ -572,7 +582,7 @@ void handle_instruction()
 			break;
 	}
 	int dummy = 0;
-	scanf("%d",&dummy);
+	//scanf("%d",&dummy);
 	/*IMPLEMENT THIS*/
 	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
 	NEXT_STATE.PC += 4;
@@ -854,6 +864,13 @@ void print_program(){
 				rs = (0x03E00000 & instruct) >> 21;
 				printf("MTHI %d\n", rs);
 				break;
+			case 0x0000000C: 
+				if(CURRENT_STATE.REGS[2] = 0xA){
+					printf("SYSCALL instruction, exiting program\n");
+				}
+				//printf("We out this thaaaang\n");
+				//NEXT_STATE.REGS[2] = 0xA;
+				break;
 			default:
 				printf("\n\nInstruction Not Found\n\n");
 			}
@@ -864,14 +881,6 @@ void print_program(){
 	}	
 
 	/*IMPLEMENT THIS*/
-}
-
-uint32_t createMask(uint32_t a,uint32_t b){ //a needs to be smaller than b
-	uint32_t r = 0;
-	for (int32_t i=a; i <=b; i++){
-		r |= 1 << i;
-	}
-	return r;
 }
 /* main**************************************************/
 int main(int argc, char *argv[]) {
