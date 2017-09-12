@@ -6,39 +6,43 @@
 
 #include "mu-mips.h"
 
+
 /***************************************************************/
+
 /* Print out a list of commands available                                                                  */
-/***************************************************************/
-void help() {        
-	printf("------------------------------------------------------------------\n\n");
+void help() {
+	printf(
+			"------------------------------------------------------------------\n\n");
 	printf("\t**********MU-MIPS Help MENU**********\n\n");
 	printf("sim\t-- simulate program to completion \n");
 	printf("run <n>\t-- simulate program for <n> instructions\n");
 	printf("rdump\t-- dump register values\n");
 	printf("reset\t-- clears all registers/memory and re-loads the program\n");
 	printf("input <reg> <val>\t-- set GPR <reg> to <val>\n");
-	printf("mdump <start> <stop>\t-- dump memory from <start> to <stop> address\n");
+	printf(
+			"mdump <start> <stop>\t-- dump memory from <start> to <stop> address\n");
 	printf("high <val>\t-- set the HI register to <val>\n");
 	printf("low <val>\t-- set the LO register to <val>\n");
 	printf("print\t-- print the program loaded into memory\n");
 	printf("?\t-- display help menu\n");
 	printf("quit\t-- exit the simulator\n\n");
-	printf("------------------------------------------------------------------\n\n");
+	printf(
+			"------------------------------------------------------------------\n\n");
 }
 uint32_t createMask(uint32_t,uint32_t);
 /***************************************************************/
 /* Read a 32-bit word from memory                                                                            */
 /***************************************************************/
-uint32_t mem_read_32(uint32_t address)
-{
+uint32_t mem_read_32(uint32_t address) {
 	int i;
 	for (i = 0; i < NUM_MEM_REGION; i++) {
-		if ( (address >= MEM_REGIONS[i].begin) &&  ( address <= MEM_REGIONS[i].end) ) {
+		if ((address >= MEM_REGIONS[i].begin)
+				&& (address <= MEM_REGIONS[i].end)) {
 			uint32_t offset = address - MEM_REGIONS[i].begin;
-			return (MEM_REGIONS[i].mem[offset+3] << 24) |
-					(MEM_REGIONS[i].mem[offset+2] << 16) |
-					(MEM_REGIONS[i].mem[offset+1] <<  8) |
-					(MEM_REGIONS[i].mem[offset+0] <<  0);
+			return (MEM_REGIONS[i].mem[offset + 3] << 24)
+					| (MEM_REGIONS[i].mem[offset + 2] << 16)
+					| (MEM_REGIONS[i].mem[offset + 1] << 8)
+					| (MEM_REGIONS[i].mem[offset + 0] << 0);
 		}
 	}
 	return 0;
@@ -47,18 +51,18 @@ uint32_t mem_read_32(uint32_t address)
 /***************************************************************/
 /* Write a 32-bit word to memory                                                                                */
 /***************************************************************/
-void mem_write_32(uint32_t address, uint32_t value)
-{
+void mem_write_32(uint32_t address, uint32_t value) {
 	int i;
 	uint32_t offset;
 	for (i = 0; i < NUM_MEM_REGION; i++) {
-		if ( (address >= MEM_REGIONS[i].begin) && (address <= MEM_REGIONS[i].end) ) {
+		if ((address >= MEM_REGIONS[i].begin)
+				&& (address <= MEM_REGIONS[i].end)) {
 			offset = address - MEM_REGIONS[i].begin;
 
-			MEM_REGIONS[i].mem[offset+3] = (value >> 24) & 0xFF;
-			MEM_REGIONS[i].mem[offset+2] = (value >> 16) & 0xFF;
-			MEM_REGIONS[i].mem[offset+1] = (value >>  8) & 0xFF;
-			MEM_REGIONS[i].mem[offset+0] = (value >>  0) & 0xFF;
+			MEM_REGIONS[i].mem[offset + 3] = (value >> 24) & 0xFF;
+			MEM_REGIONS[i].mem[offset + 2] = (value >> 16) & 0xFF;
+			MEM_REGIONS[i].mem[offset + 1] = (value >> 8) & 0xFF;
+			MEM_REGIONS[i].mem[offset + 0] = (value >> 0) & 0xFF;
 		}
 	}
 }
@@ -66,7 +70,7 @@ void mem_write_32(uint32_t address, uint32_t value)
 /***************************************************************/
 /* Execute one cycle                                                                                                              */
 /***************************************************************/
-void cycle() {                                                
+void cycle() {
 	handle_instruction();
 	CURRENT_STATE = NEXT_STATE;
 	INSTRUCTION_COUNT++;
@@ -75,8 +79,8 @@ void cycle() {
 /***************************************************************/
 /* Simulate MIPS for n cycles                                                                                       */
 /***************************************************************/
-void run(int num_cycles) {                                      
-	
+void run(int num_cycles) {
+
 	if (RUN_FLAG == FALSE) {
 		printf("Simulation Stopped\n\n");
 		return;
@@ -96,40 +100,41 @@ void run(int num_cycles) {
 /***************************************************************/
 /* simulate to completion                                                                                               */
 /***************************************************************/
-void runAll() {                                                     
+void runAll() {
 	if (RUN_FLAG == FALSE) {
 		printf("Simulation Stopped.\n\n");
 		return;
 	}
 
 	printf("Simulation Started...\n\n");
-	while (RUN_FLAG){
+	while (RUN_FLAG) {
 		cycle();
 	}
 	printf("Simulation Finished.\n\n");
 }
 
-/***************************************************************/ 
+/***************************************************************/
 /* Dump a word-aligned region of memory to the terminal                              */
 /***************************************************************/
-void mdump(uint32_t start, uint32_t stop) {          
+void mdump(uint32_t start, uint32_t stop) {
 	uint32_t address;
 
 	printf("-------------------------------------------------------------\n");
 	printf("Memory content [0x%08x..0x%08x] :\n", start, stop);
 	printf("-------------------------------------------------------------\n");
 	printf("\t[Address in Hex (Dec) ]\t[Value]\n");
-	for (address = start; address <= stop; address += 4){
-		printf("\t0x%08x (%d) :\t0x%08x\n", address, address, mem_read_32(address));
+	for (address = start; address <= stop; address += 4) {
+		printf("\t0x%08x (%d) :\t0x%08x\n", address, address,
+				mem_read_32(address));
 	}
 	printf("\n");
 }
 
 /***************************************************************/
-/* Dump current values of registers to the teminal                                              */   
+/* Dump current values of registers to the teminal                                              */
 /***************************************************************/
-void rdump() {                               
-	int i; 
+void rdump() {
+	int i;
 	printf("-------------------------------------\n");
 	printf("Dumping Register Content\n");
 	printf("-------------------------------------\n");
@@ -138,7 +143,7 @@ void rdump() {
 	printf("-------------------------------------\n");
 	printf("[Register]\t[Value]\n");
 	printf("-------------------------------------\n");
-	for (i = 0; i < MIPS_REGS; i++){
+	for (i = 0; i < MIPS_REGS; i++) {
 		printf("[R%d]\t: 0x%08x\n", i, CURRENT_STATE.REGS[i]);
 	}
 	printf("-------------------------------------\n");
@@ -148,9 +153,9 @@ void rdump() {
 }
 
 /***************************************************************/
-/* Read a command from standard input.                                                               */  
+/* Read a command from standard input.                                                               */
 /***************************************************************/
-void handle_command() {                         
+void handle_command() {
 	char buffer[20];
 	uint32_t start, stop, cycles;
 	uint32_t register_no;
@@ -159,102 +164,101 @@ void handle_command() {
 
 	printf("MU-MIPS SIM:> ");
 
-	if (scanf("%s", buffer) == EOF){
+	if (scanf("%s", buffer) == EOF) {
 		exit(0);
 	}
 
-	switch(buffer[0]) {
-		case 'S':
-		case 's':
-			runAll(); 
+	switch (buffer[0]) {
+	case 'S':
+	case 's':
+		runAll();
+		break;
+	case 'M':
+	case 'm':
+		if (scanf("%x %x", &start, &stop) != 2) {
 			break;
-		case 'M':
-		case 'm':
-			if (scanf("%x %x", &start, &stop) != 2){
+		}
+		mdump(start, stop);
+		break;
+	case '?':
+		help();
+		break;
+	case 'Q':
+	case 'q':
+		printf("**************************\n");
+		printf("Exiting MU-MIPS! Good Bye...\n");
+		printf("**************************\n");
+		exit(0);
+	case 'R':
+	case 'r':
+		if (buffer[1] == 'd' || buffer[1] == 'D') {
+			rdump();
+		} else if (buffer[1] == 'e' || buffer[1] == 'E') {
+			reset();
+		} else {
+			if (scanf("%d", &cycles) != 1) {
 				break;
 			}
-			mdump(start, stop);
+			run(cycles);
+		}
+		break;
+	case 'I':
+	case 'i':
+		if (scanf("%u %i", &register_no, &register_value) != 2) {
 			break;
-		case '?':
-			help();
+		}
+		CURRENT_STATE.REGS[register_no] = register_value;
+		NEXT_STATE.REGS[register_no] = register_value;
+		break;
+	case 'H':
+	case 'h':
+		if (scanf("%i", &hi_reg_value) != 1) {
 			break;
-		case 'Q':
-		case 'q':
-			printf("**************************\n");
-			printf("Exiting MU-MIPS! Good Bye...\n");
-			printf("**************************\n");
-			exit(0);
-		case 'R':
-		case 'r':
-			if (buffer[1] == 'd' || buffer[1] == 'D'){
-				rdump();
-			}else if(buffer[1] == 'e' || buffer[1] == 'E'){
-				reset();
-			}
-			else {
-				if (scanf("%d", &cycles) != 1) {
-					break;
-				}
-				run(cycles);
-			}
+		}
+		CURRENT_STATE.HI = hi_reg_value;
+		NEXT_STATE.HI = hi_reg_value;
+		break;
+	case 'L':
+	case 'l':
+		if (scanf("%i", &lo_reg_value) != 1) {
 			break;
-		case 'I':
-		case 'i':
-			if (scanf("%u %i", &register_no, &register_value) != 2){
-				break;
-			}
-			CURRENT_STATE.REGS[register_no] = register_value;
-			NEXT_STATE.REGS[register_no] = register_value;
-			break;
-		case 'H':
-		case 'h':
-			if (scanf("%i", &hi_reg_value) != 1){
-				break;
-			}
-			CURRENT_STATE.HI = hi_reg_value; 
-			NEXT_STATE.HI = hi_reg_value; 
-			break;
-		case 'L':
-		case 'l':
-			if (scanf("%i", &lo_reg_value) != 1){
-				break;
-			}
-			CURRENT_STATE.LO = lo_reg_value;
-			NEXT_STATE.LO = lo_reg_value;
-			break;
-		case 'P':
-		case 'p':
-			print_program(); 
-			break;
-		default:
-			printf("Invalid Command.\n");
-			break;
+		}
+		CURRENT_STATE.LO = lo_reg_value;
+		NEXT_STATE.LO = lo_reg_value;
+		break;
+	case 'P':
+	case 'p':
+		print_program();
+		break;
+	default:
+		printf("Invalid Command.\n");
+		break;
 	}
 }
 
 /***************************************************************/
 /* reset registers/memory and reload program                                                    */
 /***************************************************************/
-void reset() {   
+void reset() {
 	int i;
 	/*reset registers*/
-	for (i = 0; i < MIPS_REGS; i++){
+	for (i = 0; i < MIPS_REGS; i++) {
 		CURRENT_STATE.REGS[i] = 0;
 	}
 	CURRENT_STATE.HI = 0;
 	CURRENT_STATE.LO = 0;
-	
+
 	for (i = 0; i < NUM_MEM_REGION; i++) {
 		uint32_t region_size = MEM_REGIONS[i].end - MEM_REGIONS[i].begin + 1;
 		memset(MEM_REGIONS[i].mem, 0, region_size);
 	}
-	
+
 	/*load program*/
 	load_program();
-	
+
 	/*reset PC*/
 	INSTRUCTION_COUNT = 0;
-	CURRENT_STATE.PC =  MEM_TEXT_BEGIN;
+	CURRENT_STATE.PC = MEM_TEXT_BEGIN;
 	NEXT_STATE = CURRENT_STATE;
 	RUN_FLAG = TRUE;
 }
@@ -262,7 +266,7 @@ void reset() {
 /***************************************************************/
 /* Allocate and set memory to zero                                                                            */
 /***************************************************************/
-void init_memory() {                                           
+void init_memory() {
 	int i;
 	for (i = 0; i < NUM_MEM_REGION; i++) {
 		uint32_t region_size = MEM_REGIONS[i].end - MEM_REGIONS[i].begin + 1;
@@ -274,7 +278,7 @@ void init_memory() {
 /**************************************************************/
 /* load program into memory                                                                                      */
 /**************************************************************/
-void load_program() {                   
+void load_program() {
 	FILE * fp;
 	int i, word;
 	uint32_t address;
@@ -289,19 +293,27 @@ void load_program() {
 	/* Read in the program. */
 
 	i = 0;
-	while( fscanf(fp, "%x\n", &word) != EOF ) {
+	while (fscanf(fp, "%x\n", &word) != EOF) {
 		address = MEM_TEXT_BEGIN + i;
 		mem_write_32(address, word);
-		printf("writing 0x%08x into address 0x%08x (%d)\n", word, address, address);
+		printf("writing 0x%08x into address 0x%08x (%d)\n", word, address,
+				address);
 		i += 4;
 	}
-	PROGRAM_SIZE = i/4;
-	printf("Program loaded into memory.\n%d words written into memory.\n\n", PROGRAM_SIZE);
+	PROGRAM_SIZE = i / 4;
+	printf("Program loaded into memory.\n%d words written into memory.\n\n",
+			PROGRAM_SIZE);
 	fclose(fp);
 }
-
+uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
+	uint32_t r = 0;
+	for (int32_t i = a; i <= b; i++) {
+		r |= 1 << i;
+	}
+	return r;
+}
 /************************************************************/
-/* decode and execute instruction                                                                     */ 
+/* decode and execute instruction                                                                     */
 /************************************************************/
 void handle_instruction()
 {
@@ -346,7 +358,11 @@ void handle_instruction()
 			NEXT_STATE.REGS[rt] = result;
 			break;
 		case 0x30000000: //ANDI
-			break;
+			immediate = (0x0000FFFF & instruct);
+	    rs = (0x03E00000 & instruct) >> 21;
+		  rt = (0x001F0000 & instruct) >> 16;
+		  NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] & CURRENT_STATE.REGS[rs]; // need to store value of rt into address
+		  break;
 		case 0x10000000: //BEQ
 			offset = 0x0000FFFF & instruct;
 			rs = (0x03E00000 & instruct) >> 21;
@@ -364,7 +380,11 @@ void handle_instruction()
 			}
 			break;
 		case 0x34000000: //ORI
-			break;
+			immediate = (0x0000FFFF & instruct);
+		  rs = (0x03E00000 & instruct) >> 21;
+		  rt = immediate | rs;
+		  NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] | CURRENT_STATE.REGS[rs]; // store value of rt into address
+		  break;
 		case 0x1C000000: //BGTZ
 			offset = 0x0000FFFF & instruct;
 			rs = (0x03E00000 & instruct) >> 21;
@@ -383,7 +403,13 @@ void handle_instruction()
 			}
 			break;
 		case 0x38000000: //XORI
-			break;
+			rs = (0x03E00000 & instruct) >> 21;
+	  	rt = (0x001F0000 & instruct) >> 16;
+		  rd = (0x00007C00 & instruct) >> 11;
+		  a = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
+		  b = ~CURRENT_STATE.REGS[rs] & ~CURRENT_STATE.REGS[rt];
+		  NEXT_STATE.REGS[rd] = ~a & ~b; //~ gets bitwise complement
+		break;
 		case 0x28000000: //SLTI
 			break;
 		case 0x08000000: //J
@@ -433,6 +459,10 @@ void handle_instruction()
 					NEXT_STATE.REGS[rd] = result;
 					break;
 				case 0x00000024: //AND
+          immediate = (0x0000FFFF & instruct);
+		    	rs = (0x03E00000 & instruct) >> 21;
+		    	rt = (0x001F0000 & instruct) >> 16;
+		    	NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] & CURRENT_STATE.REGS[rs];
 					break;
 				case 0x00000022: //SUB
 					rs = (0x03E00000 & instruct) >> 21;
@@ -480,20 +510,47 @@ void handle_instruction()
 					NEXT_STATE.HI = remainder;
 					NEXT_STATE.LO = result;
 					break;
-				case 0x00000025: //OR
-					break;
-				case 0x00000026: //XOR
-					break;
-				case 0x00000027: //NOR
-					break;		
-				case 0x0000002A: //SLT
-					break;
-				case 0x00000000: //SLL !!!It is supposed to be all zeroes!!!
-					break;
-				case 0x00000003: //SRA
-					break;
-				case 0x00000002: //SRL
-					break;	
+         case 0x00000025: //OR
+		  	rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			rd = (0x00007C00 & instruct) >> 11;
+			NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt];
+			break;
+		case 0x00000026: //XOR
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			rd = (0x00007C00 & instruct) >> 11;
+			a = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
+			b = ~CURRENT_STATE.REGS[rs] & ~CURRENT_STATE.REGS[rt];
+			NEXT_STATE.REGS[rd] = ~a & ~b; //~ gets bitwise complement
+			break;
+		case 0x00000027: //NOR
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			rd = (0x00007C00 & instruct) >> 11;
+			NEXT_STATE.REGS[rd] = ~(CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt]);
+			break;
+		case 0x0000002A: //SLT
+			break;
+		case 0x00000000: //SLL !!!It is supposed to be all zeroes!!! Logical means add 0's
+			rt = (0x001F0000 & instruct) >> 16;
+			sa = (0x000007C0 & instruct) >> 6;
+			rd = (0x00007C00 & instruct) >> 11;
+			NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] << CURRENT_STATE.REGS[sa];
+			break;
+		case 0x00000003: //SRA Arithmetic means 
+			rt = (0x001F0000 & instruct) >> 16;
+			sa = (0x000007C0 & instruct) >> 6;
+			rd = (0x00007C00 & instruct) >> 11;
+			NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> CURRENT_STATE.REGS[sa];//I think this will add 1's, but not sure how to specify
+			break;
+		case 0x00000002: //SRL DOUBLE CHECK RESULT BC IT MAY INSERT 1's INSTEAD OF 0's
+			rt = (0x001F0000 & instruct) >> 16;
+			sa = (0x000007C0 & instruct) >> 6;
+			rd = (0x00007C00 & instruct) >> 11;
+			NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt]
+					>> CURRENT_STATE.REGS[sa]; // I think this adds 1's and idk how to specify to add 0's
+			break;
 				case 0x00000009: //JALR
 					break;		
 				case 0x00000008: //JR
@@ -514,8 +571,6 @@ void handle_instruction()
 			printf("\n\nInstruction Not Found\n\n");
 			break;
 	}
-
-	
 	int dummy = 0;
 	scanf("%d",&dummy);
 	/*IMPLEMENT THIS*/
@@ -524,11 +579,10 @@ void handle_instruction()
 	//Bump NEXT_STATE
 }
 
-
 /************************************************************/
-/* Initialize Memory                                                                                                    */ 
+/* Initialize Memory                                                                                                    */
 /************************************************************/
-void initialize() { 
+void initialize() {
 	init_memory();
 	CURRENT_STATE.PC = MEM_TEXT_BEGIN;
 	NEXT_STATE = CURRENT_STATE;
@@ -536,8 +590,9 @@ void initialize() {
 }
 
 /************************************************************/
-/* Print the program loaded into memory (in MIPS assembly format)    */ 
+/* Print the program loaded into memory (in MIPS assembly format)    */
 /************************************************************/
+
 void print_program(){
 	int i;
 	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
@@ -807,6 +862,7 @@ void print_program(){
 			printf("\n\nInstruction Not Found\n\n");
 			break;
 	}	
+
 	/*IMPLEMENT THIS*/
 }
 
@@ -817,15 +873,16 @@ uint32_t createMask(uint32_t a,uint32_t b){ //a needs to be smaller than b
 	}
 	return r;
 }
-/***************************************************************/
 /* main**************************************************/
-int main(int argc, char *argv[]) {                              
+int main(int argc, char *argv[]) {
 	printf("\n**************************\n");
 	printf("Welcome to MU-MIPS SIM...\n");
 	printf("**************************\n\n");
-	
+
 	if (argc < 2) {
-		printf("Error: You should provide input file.\nUsage: %s <input program> \n\n",  argv[0]);
+		printf(
+				"Error: You should provide input file.\nUsage: %s <input program> \n\n",
+				argv[0]);
 		exit(1);
 	}
 
@@ -833,8 +890,9 @@ int main(int argc, char *argv[]) {
 	initialize();
 	load_program();
 	help();
-	while (1){
+	while (1) {
 		handle_command();
 	}
 	return 0;
 }
+
