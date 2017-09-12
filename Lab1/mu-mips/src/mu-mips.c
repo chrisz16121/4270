@@ -6,10 +6,9 @@
 
 #include "mu-mips.h"
 
-<<<<<<< HEAD
+
 /***************************************************************/
-=======
->>>>>>> Tyler
+
 /* Print out a list of commands available                                                                  */
 void help() {
 	printf(
@@ -30,7 +29,7 @@ void help() {
 	printf(
 			"------------------------------------------------------------------\n\n");
 }
-
+uint32_t createMask(uint32_t,uint32_t);
 /***************************************************************/
 /* Read a 32-bit word from memory                                                                            */
 /***************************************************************/
@@ -316,7 +315,6 @@ uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
 /************************************************************/
 /* decode and execute instruction                                                                     */
 /************************************************************/
-<<<<<<< HEAD
 void handle_instruction()
 {
 	int i;
@@ -327,13 +325,14 @@ void handle_instruction()
 	uint64_t double_result;
 	uint32_t delay_slot_instruct,target_address,offset;
 	uint32_t immediate;
+	uint32_t check,special,mask;
 	opcode = 0xFC000000 & instruct;
 	printf("Instruction fetched: %x\n",instruct);
 	temp_instruct = instruct;
 	for(i = 0;i < 32;i++){
 		int temp = 1 & temp_instruct;
 		//printf("%d",temp);
-		temp_instruct >>= 1;
+		temp_instruct >> 1;
 		binary_num[31-i] = temp;
 	}
 	for(i = 0;i < 32; i ++){
@@ -345,43 +344,51 @@ void handle_instruction()
 	
 	switch(opcode){
 		case 0x20000000: //ADDI
-			rs = (0x03E00000 & instruct) >>= 21;
-			rt = (0x001F0000 & instruct) >>= 16;
-			immediate = (0x0000FFFF & instuct);
-			(int32_t)result = (int32_t)CURRENT_STATE.REGS[rs] + (int32_t)immediate;
-			NEXT_STATE[rt] = result;
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			immediate = (0x0000FFFF & instruct);
+			result = CURRENT_STATE.REGS[rs] + (int32_t)immediate;
+			NEXT_STATE.REGS[rt] = result;
 			break;
 		case 0x24000000: //ADDIU
-			rs = (0x03E00000 & instruct) >>= 21;
-			rt = (0x001F0000 & instruct) >>= 16;
-			immediate = (0x0000FFFF & instuct);
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			immediate = (0x0000FFFF & instruct);
 			result = CURRENT_STATE.REGS[rs] + immediate;
-			NEXT_STATE[rt] = result;
+			NEXT_STATE.REGS[rt] = result;
 			break;
 		case 0x30000000: //ANDI
-			break;
+			immediate = (0x0000FFFF & instruct);
+	    rs = (0x03E00000 & instruct) >> 21;
+		  rt = (0x001F0000 & instruct) >> 16;
+		  NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] & CURRENT_STATE.REGS[rs]; // need to store value of rt into address
+		  break;
 		case 0x10000000: //BEQ
 			offset = 0x0000FFFF & instruct;
-			rs = (0x03E00000 & instruct) >>= 21;
-			rt = (0x001F0000 & instruct) >>= 16;
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
 			if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
-				NEXT_STATE .PC = CURRENT_STATE.PC + offset;
+				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
 			}
 			break;
 		case 0x14000000: //BNE
 			offset = 0x0000FFFF & instruct;
-			rs = (0x03E00000 & instruct) >>= 21;
-			rt = (0x001F0000 & instruct) >>= 16;
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
 			if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
-				NEXT_STATE .PC = CURRENT_STATE.PC + offset;
+				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
 			}
 			break;
 		case 0x34000000: //ORI
-			break;
+			immediate = (0x0000FFFF & instruct);
+		  rs = (0x03E00000 & instruct) >> 21;
+		  rt = immediate | rs;
+		  NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] | CURRENT_STATE.REGS[rs]; // store value of rt into address
+		  break;
 		case 0x1C000000: //BGTZ
 			offset = 0x0000FFFF & instruct;
-			rs = (0x03E00000 & instruct) >>= 21;
-			rt = (0x001F0000 & instruct) >>= 16;
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
 			if(CURRENT_STATE.REGS[rs] > 0){
 				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
 			}
@@ -390,13 +397,19 @@ void handle_instruction()
 			offset = 0x0000FFFF & instruct;
 			delay_slot_instruct = mem_read_32(CURRENT_STATE.PC + 4);
 			target_address = delay_slot_instruct + offset;
-			rs = (0x03E00000 & instruct) >>= 21;
+			rs = (0x03E00000 & instruct) >> 21;
 			if(CURRENT_STATE.REGS[rs] <= 0){
 				CURRENT_STATE.PC = CURRENT_STATE.PC + offset;
 			}
 			break;
 		case 0x38000000: //XORI
-			break;
+			rs = (0x03E00000 & instruct) >> 21;
+	  	rt = (0x001F0000 & instruct) >> 16;
+		  rd = (0x00007C00 & instruct) >> 11;
+		  a = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
+		  b = ~CURRENT_STATE.REGS[rs] & ~CURRENT_STATE.REGS[rt];
+		  NEXT_STATE.REGS[rd] = ~a & ~b; //~ gets bitwise complement
+		break;
 		case 0x28000000: //SLTI
 			break;
 		case 0x08000000: //J
@@ -419,7 +432,7 @@ void handle_instruction()
 			break;
 		case 0x04000000: //BLTZ, BGEZ
 			mask = createMask(16,20);
-			uint32_t check = instruct & mask;
+			check = instruct & mask;
 			if(check == 0x00000000){
 				//BLTZ
 			}
@@ -429,231 +442,76 @@ void handle_instruction()
 			break;
 		case 0x00000000: //Special
 		mask = createMask(0,5);
-			uint32_t special = instruct & mask;
+			special = instruct & mask;
 			switch( special ){
 				case 0x00000020: //ADD
-					rs = (0x03E00000 & instruct) >>= 21;
-					rt = (0x001F0000 & instruct) >>= 16;
-					rd = (0x00007C00 & instruct) >>= 11;
+					rs = (0x03E00000 & instruct) >> 21;
+					rt = (0x001F0000 & instruct) >> 16;
+					rd = (0x00007C00 & instruct) >> 11;
 					result = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
 					NEXT_STATE.REGS[rd] = result;
 					break;
 				case 0x00000021: //ADDU
-					rs = (0x03E00000 & instruct) >>= 21;
-					rt = (0x001F0000 & instruct) >>= 16;
-					rd = (0x00007C00 & instruct) >>= 11;
+					rs = (0x03E00000 & instruct) >> 21;
+					rt = (0x001F0000 & instruct) >> 16;
+					rd = (0x00007C00 & instruct) >> 11;
 					result = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
 					NEXT_STATE.REGS[rd] = result;
 					break;
 				case 0x00000024: //AND
+          immediate = (0x0000FFFF & instruct);
+		    	rs = (0x03E00000 & instruct) >> 21;
+		    	rt = (0x001F0000 & instruct) >> 16;
+		    	NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] & CURRENT_STATE.REGS[rs];
 					break;
 				case 0x00000022: //SUB
-					rs = (0x03E00000 & instruct) >>= 21;
-					rt = (0x001F0000 & instruct) >>= 16;
-					rd = (0x00007C00 & instruct) >>= 11;
+					rs = (0x03E00000 & instruct) >> 21;
+					rt = (0x001F0000 & instruct) >> 16;
+					rd = (0x00007C00 & instruct) >> 11;
 					result = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
 					NEXT_STATE.REGS[rd] = result;
 					break;		
 				case 0x00000023: //SUBU
-					rs = (0x03E00000 & instruct) >>= 21;
-					rt = (0x001F0000 & instruct) >>= 16;
-					rd = (0x00007C00 & instruct) >>= 11;
+					rs = (0x03E00000 & instruct) >> 21;
+					rt = (0x001F0000 & instruct) >> 16;
+					rd = (0x00007C00 & instruct) >> 11;
 					result = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
 					NEXT_STATE.REGS[rd] = result;
 					break;
 				case 0x00000018: //MULT
-					rs = (0x03E00000 & instruct) >>= 21;
-					rt = (0x001F0000 & instruct) >>= 16;
-					double_result = CURRENT_STATE.REGS[rs] * CURRENT_STATE[rt];
-					NEXT_STATE.HI = (uint32_t)((double_result & 0xFFFFFFFF00000000) >>= 32);
+					rs = (0x03E00000 & instruct) >> 21;
+					rt = (0x001F0000 & instruct) >> 16;
+					double_result = CURRENT_STATE.REGS[rs] * CURRENT_STATE.REGS[rt];
+					NEXT_STATE.HI = (uint32_t)((double_result & 0xFFFFFFFF00000000) >> 32);
 					NEXT_STATE.LO = (uint32_t)(double_result & 0x00000000FFFFFFFF);
 					//implement 2's complement
 					break;
 				case 0x00000019: //MULTU
-					rs = (0x03E00000 & instruct) >>= 21;
-					rt = (0x001F0000 & instruct) >>= 16;
-					double_result = CURRENT_STATE.REGS[rs] * CURRENT_STATE[rt];
-					NEXT_STATE.HI = (uint32_t)((double_result & 0xFFFFFFFF00000000) >>= 32);
+					rs = (0x03E00000 & instruct) >> 21;
+					rt = (0x001F0000 & instruct) >> 16;
+					double_result = CURRENT_STATE.REGS[rs] * CURRENT_STATE.REGS[rt];
+					NEXT_STATE.HI = (uint32_t)((double_result & 0xFFFFFFFF00000000) >> 32);
 					NEXT_STATE.LO = (uint32_t)(double_result & 0x00000000FFFFFFFF);
 					break;
 				case 0x0000001A: //DIV
-					rs = (0x03E00000 & instruct) >>= 21;
-					rt = (0x001F0000 & instruct) >>= 16;
-					result = CURRENT_STATE[rs] / CURRENT_STATE[rt];
-					remainder = CURRENT_STATE[rs] % CURRENT_STATE[rt];
+					rs = (0x03E00000 & instruct) >> 21;
+					rt = (0x001F0000 & instruct) >> 16;
+					result = CURRENT_STATE.REGS[rs] / CURRENT_STATE.REGS[rt];
+					remainder = CURRENT_STATE.REGS[rs] % CURRENT_STATE.REGS[rt];
 					NEXT_STATE.HI = remainder;
 					NEXT_STATE.LO = result;
 					//implement 2's complement
 					break;	
 				case 0x0000001B: //DIVU
-					rs = (0x03E00000 & instruct) >>= 21;
-					rt = (0x001F0000 & instruct) >>= 16;
-					result = CURRENT_STATE[rs] / CURRENT_STATE[rt];
-					remainder = CURRENT_STATE[rs] % CURRENT_STATE[rt];
+					rs = (0x03E00000 & instruct) >> 21;
+					rt = (0x001F0000 & instruct) >> 16;
+					result = CURRENT_STATE.REGS[rs] / CURRENT_STATE.REGS[rt];
+					remainder = CURRENT_STATE.REGS[rs] % CURRENT_STATE.REGS[rt];
 					NEXT_STATE.HI = remainder;
 					NEXT_STATE.LO = result;
 					break;
-				case 0x00000025: //OR
-					break;
-				case 0x00000026: //XOR
-					break;
-				case 0x00000027: //NOR
-					break;		
-				case 0x0000002A: //SLT
-					break;
-				case 0x00000000: //SLL !!!It is supposed to be all zeroes!!!
-					break;
-				case 0x00000003: //SRA
-					break;
-				case 0x00000002: //SRL
-					break;	
-				case 0x00000009: //JALR
-					break;		
-				case 0x00000008: //JR
-					break;
-				case 0x00000010: //MFHI
-					break;
-				case 0x00000012: //MFLO
-					break;
-				case 0x00000011: //MTHI
-					break;	
-				case 0x00000013: //MTLO
-					break;
-				default:
-					printf("\n\nInstruction Not Found\n\n");
-			}
-			break;
-		default: 
-			printf("\n\nInstruction Not Found\n\n");
-			break;
-=======
-void handle_instruction() {
-
-	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
-	uint32_t mask = createMask(26, 32);
-	uint32_t opcode = instruct & mask;
-	int32_t newMask1, newMask2, immediate, rs, rt, rd, a, b, sa,
-			target, special;
-
-	/*opcode = opcode >> 25;
-	 for(i = 0;i < 6;i++){
-	 int temp = 1 & opcode;
-	 printf("%d",temp);
-	 }
-	 printf("\n");
-	 */
-
-	switch (opcode) {
-	case 0x20000000: //ADDI
-		break;
-	case 0x24000000: //ADDIU
-		break;
-	case 0x30000000: //ANDI
-		immediate = (0x0000FFFF & instruct);
-		rs = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] & CURRENT_STATE.REGS[rs]; // need to store value of rt into address
-		break;
-	case 0x10000000: //BEQ
-		rs = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		if (CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]) {
-			//mem_write_32() Is this right?
-		}
-		break;
-	case 0x14000000: //BNE
-		rs = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		if (rs != rt) {
-			//mem_write_32() Is this right?
-		}
-		break;
-	case 0x34000000: //ORI
-		immediate = (0x0000FFFF & instruct);
-		rs = (0x03E00000 & instruct) >> 21;
-		rt = immediate | rs;
-		NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] | CURRENT_STATE.REGS[rs]; // store value of rt into address
-		break;
-	case 0x1C000000: //BGTZ
-		rs = (0x03E00000 & instruct) >> 21;
-		if (CURRENT_STATE.REGS[rs] > 0) {
-			//mem_write_32() Is this right?
-		}
-		break;
-	case 0x18000000: //BLEZ
-		rs = (0x03E00000 & instruct) >> 21;
-		if (CURRENT_STATE.REGS[rs] < 0 || CURRENT_STATE.REGS[rs] == 0) {
-			//mem_write_32() Is this right?
-		}
-		break;
-	case 0x38000000: //XORI -- not sure how immediate changes this if at all. Currently written same as XOR
-		rs = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		rd = (0x00007C00 & instruct) >> 11;
-		a = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
-		b = ~CURRENT_STATE.REGS[rs] & ~CURRENT_STATE.REGS[rt];
-		NEXT_STATE.REGS[rd] = ~a & ~b; //~ gets bitwise complement
-		break;
-	case 0x28000000: //SLTI
-		break;
-	case 0x08000000: //J
-		newMask1 = createMask(0, 25);
-		target = newMask1 & instruct;
-		//Jump to target address
-		break;
-	case 0x0C000000: //JAL
-		break;
-	case 0x80000000: //LB
-		break;
-	case 0x84000000: //LH
-		break;
-	case 0x3C000000: //LUI
-		break;
-	case 0x8C000000: //LW
-		break;
-	case 0xA0000000: //SB
-		break;
-	case 0xA4000000: //SH
-		break;
-	case 0xAC000000: //SW
-		break;
-	case 0x04000000: //BLTZ, BGEZ
-		mask = createMask(16, 20);
-		uint32_t check = instruct & mask;
-		if (check == 0x00000000) {
-			//BLTZ
-		} else {
-			//BGEZ
-		}
-		break;
-	case 0x00000000: //Special
-		mask = createMask(0, 5);
-		special = instruct & mask;
-		switch (special) {
-		case 0x00000020: //ADD
-			break;
-		case 0x00000021: //ADDU
-			break;
-		case 0x00000024: //AND
-			immediate = (0x0000FFFF & instruct);
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] & CURRENT_STATE.REGS[rs];
-			break;
-		case 0x00000022: //SUB
-			break;
-		case 0x00000023: //SUBU
-			break;
-		case 0x00000018: //MULT
-			break;
-		case 0x00000019: //MULTU
-			break;
-		case 0x0000001A: //DIV
-			break;
-		case 0x0000001B: //DIVU
-			break;
-		case 0x00000025: //OR
-			rs = (0x03E00000 & instruct) >> 21;
+         case 0x00000025: //OR
+		  	rs = (0x03E00000 & instruct) >> 21;
 			rt = (0x001F0000 & instruct) >> 16;
 			rd = (0x00007C00 & instruct) >> 11;
 			NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt];
@@ -693,29 +551,26 @@ void handle_instruction() {
 			NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt]
 					>> CURRENT_STATE.REGS[sa]; // I think this adds 1's and idk how to specify to add 0's
 			break;
-		case 0x00000009: //JALR
+				case 0x00000009: //JALR
+					break;		
+				case 0x00000008: //JR
+					break;
+				case 0x00000010: //MFHI
+					break;
+				case 0x00000012: //MFLO
+					break;
+				case 0x00000011: //MTHI
+					break;	
+				case 0x00000013: //MTLO
+					break;
+				default:
+					printf("\n\nInstruction Not Found\n\n");
+			}
 			break;
-		case 0x00000008: //JR
-			break;
-		case 0x00000010: //MFHI
-			break;
-		case 0x00000012: //MFLO
-			break;
-		case 0x00000011: //MTHI
-			break;
-		case 0x00000013: //MTLO
-			break;
-		default:
+		default: 
 			printf("\n\nInstruction Not Found\n\n");
-		}
-		break;
-	default:
-		printf("\n\nInstruction Not Found\n\n");
-		break;
->>>>>>> Tyler
+			break;
 	}
-
-	
 	int dummy = 0;
 	scanf("%d",&dummy);
 	/*IMPLEMENT THIS*/
@@ -737,12 +592,15 @@ void initialize() {
 /************************************************************/
 /* Print the program loaded into memory (in MIPS assembly format)    */
 /************************************************************/
-<<<<<<< HEAD
+
 void print_program(){
 	int i;
 	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
 	uint32_t mask = createMask(26,32);
-	uint32_t opcode = instruct & mask;	
+	uint32_t opcode = instruct & mask;
+	uint32_t rs,rt,rd,base,sa;	
+	uint32_t special,check;
+	uint32_t immediate,offset,target;
 	/*opcode = opcode >> 25;
 	for(i = 0;i < 6;i++){
 		int temp = 1 & opcode;
@@ -750,548 +608,273 @@ void print_program(){
 	}
 	printf("\n");
 	*/
-	
-	switch(opcode){
+	switch (opcode) {
 		case 0x20000000: //ADDI
-			uint32_t rs = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t immediate = (0x0000FFFF & instruct);
-			printf("ADDI %d, %d, %d\n", rs, rt, immediate); 
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			immediate = (0x0000FFFF & instruct);
+			printf("ADDI %d, %d, %d\n", rs, rt, immediate);
 			break;
 		case 0x24000000: //ADDIU
-			uint32_t rs = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t immediate = (0x0000FFFF & instruct);
-			printf("ADDIU %d, %d, %d\n", rs, rt, immediate); 
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			immediate = (0x0000FFFF & instruct);
+			printf("ADDIU %d, %d, %d\n", rs, rt, immediate);
 			break;
 		case 0x30000000: //ANDI
-			uint32_t rs = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t immediate = (0x0000FFFF & instruct);
-			printf("ANDI %d, %d, %d\n", rs, rt, immediate); 
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			immediate = (0x0000FFFF & instruct);
+			printf("ANDI %d, %d, %d\n", rs, rt, immediate);
 			break;
 		case 0x10000000: //BEQ
-			uint32_t rs = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t offset = (0x0000FFFF & instruct);
-			printf("BEQ %d, %d, %d\n", rs, rt, offset); 
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			offset = (0x0000FFFF & instruct);
+			printf("BEQ %d, %d, %d\n", rs, rt, offset);
 			break;
 		case 0x14000000: //BNE
-			uint32_t rs = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t offset = (0x0000FFFF & instruct);
-			printf("BNE %d, %d, %d\n", rs, rt, offset); 
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			offset = (0x0000FFFF & instruct);
+			printf("BNE %d, %d, %d\n", rs, rt, offset);
 			break;
 		case 0x34000000: //ORI
-			uint32_t rs = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t immediate = (0x0000FFFF & instruct);
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;	
+			immediate = (0x0000FFFF & instruct);
 			printf("ORI %d, %d, %d\n", rs, rt, immediate);
 			break;
 		case 0x1C000000: //BGTZ
-			uint32_t rs = (0x03E00000 & instruct) >>= 21;
-			uint32_t offset = (0x0000FFFF & instruct);
-			printf("BGTZ %d, %d\n", rs, offset); 
+			rs = (0x03E00000 & instruct) >> 21;
+			offset = (0x0000FFFF & instruct);
+			printf("BGTZ %d, %d\n", rs, offset);
 			break;
 		case 0x18000000: //BLEZ
-			uint32_t rs = (0x03E00000 & instruct) >>= 21;
-			uint32_t offset = (0x0000FFFF & instruct);
+			rs = (0x03E00000 & instruct) >> 21;
+			offset = (0x0000FFFF & instruct);
 			printf("BLEZ %d, %d\n", rs, offset);
 			break;
 		case 0x38000000: //XORI
-			uint32_t rs = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t immediate = (0x0000FFFF & instruct);
-			printf("XORI %d, %d, %d\n", rt, rs, immediate); 
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			immediate = (0x0000FFFF & instruct);
+			printf("XORI %d, %d, %d\n", rt, rs, immediate);
 			break;
 		case 0x28000000: //SLTI
-			uint32_t rs = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t immediate = (0x0000FFFF & instruct);
+			rs = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			immediate = (0x0000FFFF & instruct);
 			printf("SLTI %d, %d, %d\n", rt, rs, immediate);
 			break;
 		case 0x08000000: //J
-			uint32_t target = (0x03FFFFFF & instruct);
+			target = (0x03FFFFFF & instruct);
 			printf("JAL %d\n", target);
 			break;
 		case 0x0C000000: //JAL
-			uint32_t target = (0x03FFFFFF & instruct);
+			target = (0x03FFFFFF & instruct);
 			printf("JAL %d\n", target);
 			break;
 		case 0x80000000: //LB
-			uint32_t base = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t offset = (0x0000FFFF & instruct);
+			base = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			offset = (0x0000FFFF & instruct);
 			printf("LB %d, %d(%d)\n", rt, offset, base);
 			break;
 		case 0x84000000: //LH
-			uint32_t base = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t offset = (0x0000FFFF & instruct);
+			base = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			offset = (0x0000FFFF & instruct);
 			printf("LH %d, %d(%d)\n", rt, offset, base);
 			break;
 		case 0x3C000000: //LUI
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t immediate = (0x0000FFFF & instruct);
-			printf("LUI %d, %d\n", rt, immediate); 
+			rt = (0x001F0000 & instruct) >> 16;
+			immediate = (0x0000FFFF & instruct);
+			printf("LUI %d, %d\n", rt, immediate);
 			break;
 		case 0x8C000000: //LW
-			uint32_t base = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t offset = (0x0000FFFF & instruct);
+			base = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			offset = (0x0000FFFF & instruct);
 			printf("LW %d, %d(%d)\n", rt, offset, base);
 			break;
 		case 0xA0000000: //SB
-			uint32_t base = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t offset = (0x0000FFFF & instruct);
+			base = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			offset = (0x0000FFFF & instruct);
 			printf("SB %d, %d(%d)\n", rt, offset, base);
 			break;
 		case 0xA4000000: //SH
-			uint32_t base = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t offset = (0x0000FFFF & instruct);
+			base = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			offset = (0x0000FFFF & instruct);
 			printf("SH %d, %d(%d)\n", rt, offset, base);
 			break;
 		case 0xAC000000: //SW
-			uint32_t base = (0x03E00000 & instruct) >>= 21;
-			uint32_t rt = (0x001F0000 & instruct) >>= 16;
-			uint32_t offset = (0x0000FFFF & instruct);
+			base = (0x03E00000 & instruct) >> 21;
+			rt = (0x001F0000 & instruct) >> 16;
+			offset = (0x0000FFFF & instruct);
 			printf("SH %d, %d(%d)\n", rt, offset, base);
 			break;
 		case 0x04000000: //BLTZ, BGEZ
-			mask = createMask(16,20);
-			uint32_t check = instruct & mask;
-			if(check == 0x00000000){
+			mask = createMask(16, 20);
+			check = instruct & mask;
+			if (check == 0x00000000) {
 				//BLTZ
-				uint32_t rs = (0x03E00000 & instruct) >>= 21;
-				uint32_t offset = (0x0000FFFF & instruct);
-				printf("BLTZ %d, %d\n", rs, offset); 
+				rs = (0x03E00000 & instruct) >> 21;
+				offset = (0x0000FFFF & instruct);
+				printf("BLTZ %d, %d\n", rs, offset);
 			}
 			else{
 				//BGEZ
-				uint32_t rs = (0x03E00000 & instruct) >>= 21;
-				uint32_t offset = (0x0000FFFF & instruct);
-				printf("BGEZ %d, %d\n", rs, offset); 
+				rs = (0x03E00000 & instruct) >> 21;
+				offset = (0x0000FFFF & instruct);
+				printf("BGEZ %d, %d\n", rs, offset);
 			}
 			break;
 		case 0x00000000: //Special
-			mask = createMask(0,5);
-			uint32_t special = instruct & mask;
-			switch( special ){
-				case 0x00000020: //ADD
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("ADD %d, %d, %d\n",rd, rs, rt);
-					break;
-				case 0x00000021: //ADDU
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("ADDU %d, %d, %d\n",rd, rs, rt);
-					break;
-				case 0x00000024: //AND
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("AND %d, %d, %d\n",rd, rs, rt);
-					break;
-				case 0x00000022: //SUB
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("SUB %d, %d, %d\n",rd, rs, rt);
-					break;		
-				case 0x00000023: //SUBU
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("SUBU %d, %d, %d\n",rd, rs, rt);
-					break;
-				case 0x00000018: //MULT
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					printf("MULT %d, %d\n" rs, rt);
-					break;
-				case 0x00000019: //MULTU
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					printf("MULTU %d, %d\n" rs, rt);
-					break;
-				case 0x0000001A: //DIV
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					printf("DIVU %d, %d\n" rs, rt);
-					break;	
-				case 0x0000001B: //DIVU
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					printf("DIVU %d, %d\n" rs, rt);
-					break;
-				case 0x00000025: //OR
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("OR %d, %d, %d\n",rd, rs, rt);
-					break;
-				case 0x00000026: //XOR
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("XOR %d, %d, %d\n",rd, rs, rt);
-					break;
-				case 0x00000027: //NOR
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("NOR %d, %d, %d\n",rd, rs, rt);
-					break;		
-				case 0x0000002A: //SLT
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("NOR %d, %d, %d\n",rd, rs, rt);
-					break;
-				case 0x00000000: //SLL !!!It is supposed to be all zeroes!!!
-					uint32_t sa = (0x000003E0 & instruct) >>= 6;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("SLL %d, %d, %d\n",rd, rt, sa);	
-					break;
-				case 0x00000003: //SRA
-					uint32_t sa = (0x000003E0 & instruct) >>= 6;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("SRA %d, %d, %d\n",rd, rt, sa);
-					break;
-				case 0x00000002: //SRL
-					uint32_t sa = (0x000003E0 & instruct) >>= 6;
-					uint32_t rt = (0x001F0000 & instruct) >>= 16;
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("SRL %d, %d, %d\n",rd, rt, sa);
-					break;	
-				case 0x00000009: //JALR
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("JALR %d\n", rs);
-					printf("JALR %d, %d\n", rd, rs);
-					break;		
-				case 0x00000008: //JR
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					printf("JR %d\n", rs);
-					break;
-				case 0x00000010: //MFHI
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("MFHI %d\n",rd);
-					break;
-				case 0x00000012: //MFLO
-					uint32_t rd = (0x00007C00 & instruct) >>= 11;
-					printf("MFLO %d\n",rd);
-					break;
-				case 0x00000011: //MTHI
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					printf("MTHI %d\n", rs);
-					break;	
-				case 0x00000013: //MTLO
-					uint32_t rs = (0x03E00000 & instruct) >>= 21;
-					printf("MTHI %d\n", rs);
-					break;
-				default:
-					printf("\n\nInstruction Not Found\n\n");
-			}
-			break;
-		default: 
-			printf("\n\nInstruction Not Found\n\n");
-			break;
-=======
-void print_program() {
-	int i;
-	uint32_t instruct = mem_read_32(CURRENT_STATE.PC);
-	uint32_t mask = createMask(26, 32);
-	uint32_t opcode = instruct & mask;
-	uint32_t rs, rt, rd, sa, immediate, offset, target, base, special, check;
-	/*opcode = opcode >> 25;
-	 for(i = 0;i < 6;i++){
-	 int temp = 1 & opcode;
-	 printf("%d",temp);
-	 }
-	 printf("\n");
-	 */
-
-	switch (opcode) {
-	case 0x20000000: //ADDI
-		rs = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		immediate = (0x0000FFFF & instruct);
-		printf("ADDI %d, %d, %d\n", rs, rt, immediate);
-		break;
-	case 0x24000000: //ADDIU
-		rs = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		immediate = (0x0000FFFF & instruct);
-		printf("ADDIU %d, %d, %d\n", rs, rt, immediate);
-		break;
-	case 0x30000000: //ANDI
-		rs = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		immediate = (0x0000FFFF & instruct);
-		printf("ANDI %d, %d, %d\n", rs, rt, immediate);
-		break;
-	case 0x10000000: //BEQ
-		rs = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		offset = (0x0000FFFF & instruct);
-		printf("BEQ %d, %d, %d\n", rs, rt, offset);
-		break;
-	case 0x14000000: //BNE
-		rs = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		offset = (0x0000FFFF & instruct);
-		printf("BNE %d, %d, %d\n", rs, rt, offset);
-		break;
-	case 0x34000000: //ORI
-		rs = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		immediate = (0x0000FFFF & instruct);
-		printf("ORI %d, %d, %d\n", rs, rt, immediate);
-		break;
-	case 0x1C000000: //BGTZ
-		rs = (0x03E00000 & instruct) >> 21;
-		offset = (0x0000FFFF & instruct);
-		printf("BGTZ %d, %d\n", rs, offset);
-		break;
-	case 0x18000000: //BLEZ
-		rs = (0x03E00000 & instruct) >> 21;
-		offset = (0x0000FFFF & instruct);
-		printf("BLEZ %d, %d\n", rs, offset);
-		break;
-	case 0x38000000: //XORI
-		rs = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		immediate = (0x0000FFFF & instruct);
-		printf("XORI %d, %d, %d\n", rt, rs, immediate);
-		break;
-	case 0x28000000: //SLTI
-		rs = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		immediate = (0x0000FFFF & instruct);
-		printf("SLTI %d, %d, %d\n", rt, rs, immediate);
-		break;
-	case 0x08000000: //J
-		target = (0x03FFFFFF & instruct);
-		printf("JAL %d\n", target);
-		break;
-	case 0x0C000000: //JAL
-		target = (0x03FFFFFF & instruct);
-		printf("JAL %d\n", target);
-		break;
-	case 0x80000000: //LB
-		base = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		offset = (0x0000FFFF & instruct);
-		printf("LB %d, %d(%d)\n", rt, offset, base);
-		break;
-	case 0x84000000: //LH
-		base = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		offset = (0x0000FFFF & instruct);
-		printf("LH %d, %d(%d)\n", rt, offset, base);
-		break;
-	case 0x3C000000: //LUI
-		rt = (0x001F0000 & instruct) >> 16;
-		immediate = (0x0000FFFF & instruct);
-		printf("LUI %d, %d\n", rt, immediate);
-		break;
-	case 0x8C000000: //LW
-		base = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		offset = (0x0000FFFF & instruct);
-		printf("LW %d, %d(%d)\n", rt, offset, base);
-		break;
-	case 0xA0000000: //SB
-		base = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		offset = (0x0000FFFF & instruct);
-		printf("SB %d, %d(%d)\n", rt, offset, base);
-		break;
-	case 0xA4000000: //SH
-		base = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		offset = (0x0000FFFF & instruct);
-		printf("SH %d, %d(%d)\n", rt, offset, base);
-		break;
-	case 0xAC000000: //SW
-		base = (0x03E00000 & instruct) >> 21;
-		rt = (0x001F0000 & instruct) >> 16;
-		offset = (0x0000FFFF & instruct);
-		printf("SH %d, %d(%d)\n", rt, offset, base);
-		break;
-	case 0x04000000: //BLTZ, BGEZ
-		mask = createMask(16, 20);
-		check = instruct & mask;
-		if (check == 0x00000000) {
-			//BLTZ
-			rs = (0x03E00000 & instruct) >> 21;
-			offset = (0x0000FFFF & instruct);
-			printf("BLTZ %d, %d\n", rs, offset);
-		} else {
-			//BGEZ
-			rs = (0x03E00000 & instruct) >> 21;
-			offset = (0x0000FFFF & instruct);
-			printf("BGEZ %d, %d\n", rs, offset);
-		}
-		break;
-	case 0x00000000: //Special
-		mask = createMask(0, 5);
-		special = instruct & mask;
+			mask = createMask(0, 5);
+			special = instruct & mask;
 		switch (special) {
-		case 0x00000020: //ADD
-			rs = (0x03E00000 & instruct) >> 21;
+			case 0x00000020: //ADD
+				rs = (0x03E00000 & instruct) >> 21;
+				rt = (0x001F0000 & instruct) >> 16;
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("ADD %d, %d, %d\n", rd, rs, rt);
+				break;
+			case 0x00000021: //ADDU
+				rs = (0x03E00000 & instruct) >> 21;
+				rt = (0x001F0000 & instruct) >> 16;
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("ADDU %d, %d, %d\n", rd, rs, rt);
+				break;
+			case 0x00000024: //AND
+				rs = (0x03E00000 & instruct) >> 21;
+				rt = (0x001F0000 & instruct) >> 16;
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("AND %d, %d, %d\n", rd, rs, rt);
+				break;
+			case 0x00000022: //SUB
+				rs = (0x03E00000 & instruct) >> 21;
+				rt = (0x001F0000 & instruct) >> 16;
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("SUB %d, %d, %d\n", rd, rs, rt);
+				break;
+			case 0x00000023: //SUBU
+				rs = (0x03E00000 & instruct) >> 21;
+				rt = (0x001F0000 & instruct) >> 16;
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("SUBU %d, %d, %d\n", rd, rs, rt);
+				break;
+			case 0x00000018: //MULT
+				rs = (0x03E00000 & instruct) >> 21;
+				rt = (0x001F0000 & instruct) >> 16;
+				printf("MULT %d, %d\n", rs, rt);
+				break;
+			case 0x00000019: //MULTU
+				rs = (0x03E00000 & instruct) >> 21;
+				rt = (0x001F0000 & instruct) >> 16;
+				printf("MULTU %d, %d\n", rs, rt);
+				break;
+			case 0x0000001A: //DIV
+				rs = (0x03E00000 & instruct) >> 21;
+				rt = (0x001F0000 & instruct) >> 16;
+				printf("DIVU %d, %d\n", rs, rt);
+				break;
+			case 0x0000001B: //DIVU
+				rs = (0x03E00000 & instruct) >> 21;
+				rt = (0x001F0000 & instruct) >> 16;
+				printf("DIVU %d, %d\n", rs, rt);
+				break;
+			case 0x00000025: //OR
+			rs = (0x03E00000 & instruct) >> 21;	
 			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("ADD %d, %d, %d\n", rd, rs, rt);
-			break;
-		case 0x00000021: //ADDU
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("ADDU %d, %d, %d\n", rd, rs, rt);
-			break;
-		case 0x00000024: //AND
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("AND %d, %d, %d\n", rd, rs, rt);
-			break;
-		case 0x00000022: //SUB
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("SUB %d, %d, %d\n", rd, rs, rt);
-			break;
-		case 0x00000023: //SUBU
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("SUBU %d, %d, %d\n", rd, rs, rt);
-			break;
-		case 0x00000018: //MULT
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			printf("MULT %d, %d\n" rs, rt);
-			break;
-		case 0x00000019: //MULTU
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			printf("MULTU %d, %d\n" rs, rt);
-			break;
-		case 0x0000001A: //DIV
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			printf("DIVU %d, %d\n" rs, rt);
-			break;
-		case 0x0000001B: //DIVU
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			printf("DIVU %d, %d\n" rs, rt);
-			break;
-		case 0x00000025: //OR
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("OR %d, %d, %d\n", rd, rs, rt);
-			break;
-		case 0x00000026: //XOR
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("XOR %d, %d, %d\n", rd, rs, rt);
-			break;
-		case 0x00000027: //NOR
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("NOR %d, %d, %d\n", rd, rs, rt);
-			break;
-		case 0x0000002A: //SLT
-			rs = (0x03E00000 & instruct) >> 21;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("NOR %d, %d, %d\n", rd, rs, rt);
-			break;
-		case 0x00000000: //SLL !!!It is supposed to be all zeroes!!!
-			sa = (0x000003E0 & instruct) >> 6;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("SLL %d, %d, %d\n", rd, rt, sa);
-			break;
-		case 0x00000003: //SRA
-			sa = (0x000003E0 & instruct) >> 6;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("SRA %d, %d, %d\n", rd, rt, sa);
-			break;
-		case 0x00000002: //SRL
-			sa = (0x000003E0 & instruct) >> 6;
-			rt = (0x001F0000 & instruct) >> 16;
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("SRL %d, %d, %d\n", rd, rt, sa);
-			break;
-		case 0x00000009: //JALR
-			rs = (0x03E00000 & instruct) >> 21;
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("JALR %d\n", rs);
-			printf("JALR %d, %d\n", rd, rs);
-			break;
-		case 0x00000008: //JR
-			rs = (0x03E00000 & instruct) >> 21;
-			printf("JR %d\n", rs);
-			break;
-		case 0x00000010: //MFHI
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("MFHI %d\n", rd);
-			break;
-		case 0x00000012: //MFLO
-			rd = (0x00007C00 & instruct) >> 11;
-			printf("MFLO %d\n", rd);
-			break;
-		case 0x00000011: //MTHI
-			rs = (0x03E00000 & instruct) >> 21;
-			printf("MTHI %d\n", rs);
-			break;
-		case 0x00000013: //MTLO
-			rs = (0x03E00000 & instruct) >> 21;
-			printf("MTHI %d\n", rs);
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("OR %d, %d, %d\n", rd, rs, rt);
+				break;
+			case 0x00000026: //XOR
+				rs = (0x03E00000 & instruct) >> 21;
+				rt = (0x001F0000 & instruct) >> 16;
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("XOR %d, %d, %d\n", rd, rs, rt);
+				break;
+			case 0x00000027: //NOR
+				rs = (0x03E00000 & instruct) >> 21;
+				rt = (0x001F0000 & instruct) >> 16;
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("NOR %d, %d, %d\n", rd, rs, rt);
+				break;
+			case 0x0000002A: //SLT
+				rs = (0x03E00000 & instruct) >> 21;
+				rt = (0x001F0000 & instruct) >> 16;
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("NOR %d, %d, %d\n", rd, rs, rt);
+				break;
+			case 0x00000000: //SLL !!!It is supposed to be all zeroes!!!
+				sa = (0x000003E0 & instruct) >> 6;
+				rt = (0x001F0000 & instruct) >> 16;
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("SLL %d, %d, %d\n", rd, rt, sa);
+				break;
+			case 0x00000003: //SRA
+				sa = (0x000003E0 & instruct) >> 6;
+				rt = (0x001F0000 & instruct) >> 16;
+				rd = (0x00007C00 & instruct) >> 11;	
+				printf("SRA %d, %d, %d\n", rd, rt, sa);
+				break;
+			case 0x00000002: //SRL
+				sa = (0x000003E0 & instruct) >> 6;
+				rt = (0x001F0000 & instruct) >> 16;
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("SRL %d, %d, %d\n", rd, rt, sa);
+				break;
+			case 0x00000009: //JALR
+				rs = (0x03E00000 & instruct) >> 21;
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("JALR %d\n", rs);
+				printf("JALR %d, %d\n", rd, rs);
+				break;
+			case 0x00000008: //JR
+				rs = (0x03E00000 & instruct) >> 21;
+				printf("JR %d\n", rs);
+				break;
+			case 0x00000010: //MFHI
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("MFHI %d\n", rd);
+				break;
+			case 0x00000012: //MFLO
+				rd = (0x00007C00 & instruct) >> 11;
+				printf("MFLO %d\n", rd);
+				break;
+			case 0x00000011: //MTHI
+				rs = (0x03E00000 & instruct) >> 21;
+				printf("MTHI %d\n", rs);
+				break;
+			case 0x00000013: //MTLO
+				rs = (0x03E00000 & instruct) >> 21;
+				printf("MTHI %d\n", rs);
+				break;
+			default:
+				printf("\n\nInstruction Not Found\n\n");
+			}
 			break;
 		default:
 			printf("\n\nInstruction Not Found\n\n");
-		}
-		break;
-	default:
-		printf("\n\nInstruction Not Found\n\n");
-		break;
->>>>>>> Tyler
-	}
+			break;
+	}	
+
 	/*IMPLEMENT THIS*/
 }
 
-uint32_t createMask( uint32_t a, uint32_t b){ //a needs to be smaller than b
+uint32_t createMask(uint32_t a,uint32_t b){ //a needs to be smaller than b
 	uint32_t r = 0;
 	for (int32_t i=a; i <=b; i++){
 		r |= 1 << i;
 	}
 	return r;
 }
-/***************************************************************/
-<<<<<<< HEAD
 /* main**************************************************/
-int main(int argc, char *argv[]) {                              
-=======
-/* main                                                                                                                                   */
-/***************************************************************/
 int main(int argc, char *argv[]) {
->>>>>>> Tyler
 	printf("\n**************************\n");
 	printf("Welcome to MU-MIPS SIM...\n");
 	printf("**************************\n\n");
