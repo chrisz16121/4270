@@ -554,16 +554,31 @@ void handle_instruction()
 					>> CURRENT_STATE.REGS[sa]; // I think this adds 1's and idk how to specify to add 0's
 				break;
 				case 0x00000009: //JALR
+					rs = (0x03E00000 & instruct) >> 21;
+					rd = (0x00007C00 & instruct) >> 11;
+					temp_instruct = CURRENT_STATE.REGS[rs];
+					CURRENT_STATE.REGS[rs] = CURRENT_STATE.PC + 8;
+					NEXT_STATE.PC = temp_instruct;
 					break;		
 				case 0x00000008: //JR
+					rs = (0x03E00000 & instruct) >> 21;
+					NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
 					break;
 				case 0x00000010: //MFHI
+					rd = (0x00007C00 & instruct) >> 11;
+					NEXT_STATE.REGS[rd] = CURRENT_STATE.HI;
 					break;
 				case 0x00000012: //MFLO
+					rd = (0x00007C00 & instruct) >> 11;
+					NEXT_STATE.REGS[rd] = CURRENT_STATE.LO;
 					break;
 				case 0x00000011: //MTHI
+					rs = (0x03E00000 & instruct) >> 21;
+					NEXT_STATE.HI = CURRENT_STATE.REGS[rs];
 					break;	
 				case 0x00000013: //MTLO
+					rs = (0x03E00000 & instruct) >> 21;
+					NEXT_STATE.LO = CURRENT_STATE.REGS[rs];
 					break;
 				case 0x0000000C: 
 					if(CURRENT_STATE.REGS[2] = 0xA){
@@ -679,7 +694,7 @@ void print_program(){
 			break;
 		case 0x08000000: //J
 			target = (0x03FFFFFF & instruct);
-			printf("JAL %d\n", target);
+			printf("J %d\n", target);
 			break;
 		case 0x0C000000: //JAL
 			target = (0x03FFFFFF & instruct);
@@ -797,8 +812,8 @@ void print_program(){
 				printf("DIVU %d, %d\n", rs, rt);
 				break;
 			case 0x00000025: //OR
-			rs = (0x03E00000 & instruct) >> 21;	
-			rt = (0x001F0000 & instruct) >> 16;
+				rs = (0x03E00000 & instruct) >> 21;	
+				rt = (0x001F0000 & instruct) >> 16;
 				rd = (0x00007C00 & instruct) >> 11;
 				printf("OR %d, %d, %d\n", rd, rs, rt);
 				break;
