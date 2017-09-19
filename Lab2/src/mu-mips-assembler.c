@@ -57,7 +57,7 @@ void mdump(uint32_t start, uint32_t stop) {
 	printf("-------------------------------------------------------------\n");
 	printf("\t[Address in Hex (Dec) ]\t[Value]\n");
 	for (address = start; address <= stop; address += 4) {
-		//printf("\t0x%08x (%d) \t0x%08x\n", address, address,
+		printf("\t0x%08x (%d) \t0x%08x\n", address, address,
 				mem_read_32(address));
 	}
 	printf("\n");
@@ -102,7 +102,7 @@ void init_memory() {
 /* load program into memory */
 /**************************************************************/
 
-uint32_t find_register(char* register_instruct){
+/*uint32_t find_register(char* register_instruct){
 	
 	uint32_t register_number;
 
@@ -244,34 +244,6 @@ uint32_t find_register(char* register_instruct){
 
 }
 
-void load_program() {
-	FILE * fp;
-	int i, word;
-	uint32_t address;
-
-	/* Open program file. */
-	fp = fopen(prog_file, "r");
-	if (fp == NULL) {
-		printf("Error: Can't open program file %s\n", prog_file);
-		exit(-1);
-	}
-
-	/* Read in the program. */
-
-	i = 0;
-	while (fscanf(fp, "%x\n", &word) != EOF) {
-		address = MEM_TEXT_BEGIN + i;
-		mem_write_32(address, word);
-		printf("writing 0x%08x into address 0x%08x (%d)\n", word, address,
-				address);
-		i += 4;
-	}
-	PROGRAM_SIZE = i / 4;
-	printf("Program loaded into memory.\n%d words written into memory.\n\n",
-			PROGRAM_SIZE);
-	fclose(fp);
-}
-
 uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
 	uint32_t r = 0;
 	for (int32_t i = a; i <= b; i++) {
@@ -380,7 +352,7 @@ unint32_t translateInstruction( char *instruction ){
 	} 
 	return mchnCode;
 }
-
+*/
 /* main**************************************************/
 int main(int argc, char *argv[]) {
 	printf("\n**************************\n");
@@ -395,7 +367,25 @@ int main(int argc, char *argv[]) {
 	}
 
 	strcpy(prog_file, argv[1]);
-
+	
+	FILE* fp = fopen(prog_file,"r");
+	char char_array[100];
+	char* string;
+	char temp;
+	int i,j,k,l;
+	int dummy;
+	if( fp == NULL){
+		printf("could not open file\n");
+		return 1;
+	}
+	while(fgets (char_array, 60, fp)!=NULL){
+		string = malloc(60 * sizeof(char)); 
+		strcpy(string,char_array);
+		//printf("%s\n",string);
+		//printf("%s\n",char_array);
+		translateInstruction(string);
+	}
+	*/
 	//while( line of input file != EOF ) {
 		//prase individual line from input file
 		//send line to translateInstruction
