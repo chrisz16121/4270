@@ -368,24 +368,32 @@ int main(int argc, char *argv[]) {
 
 	strcpy(prog_file, argv[1]);
 	
-	FILE* fp = fopen(prog_file,"r");
+	FILE* fp_in = fopen(prog_file,"r");
+	FILE* fp_out = fopen("#YOLO_swag_420_blaze_it_4_jezus_faggits.txt","w");
 	char char_array[100];
-	char* string;
-	char temp;
-	int i,j,k,l;
-	int dummy;
-	if( fp == NULL){
+	char* input_instruction;
+	uint32_t output_instruction;
+	if( fp_in == NULL){
 		printf("could not open file\n");
 		return 1;
 	}
-	while(fgets (char_array, 60, fp)!=NULL){
-		string = malloc(60 * sizeof(char)); 
-		strcpy(string,char_array);
+	if( fp_out == NULL){
+		printf("could not open file\n");
+		return 1;
+	}
+	while(fgets (char_array, 60, fp_in)!=NULL){
+		input_instruction = malloc(60 * sizeof(char)); 
+		strcpy(input_instruction,char_array);
 		//printf("%s\n",string);
 		//printf("%s\n",char_array);
-		translateInstruction(string);
+		output_instruction = translateInstruction(input_instruction);
+		fprintf(fp_out,"%x\n",output_instruction);		
 	}
-	*/
+	fclose(fp_in);
+	fclose(fp_out);
+	
+
+
 	//while( line of input file != EOF ) {
 		//prase individual line from input file
 		//send line to translateInstruction
@@ -393,7 +401,7 @@ int main(int argc, char *argv[]) {
 		//print line of machine code into output file
 	//}
 	//save output file
-
+	
 	return 0;
 }
 
