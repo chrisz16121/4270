@@ -448,6 +448,7 @@ void load_program() {
 			PROGRAM_SIZE);
 	fclose(fp);
 }
+
 uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
 	uint32_t r = 0;
 	for (int32_t i = a; i <= b; i++) {
