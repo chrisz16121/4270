@@ -244,5 +244,3 @@ array:
 	.align 4
 	.asciiz "10"
 	.align 4
-	.asciiz "Jack"
-	.align 4
