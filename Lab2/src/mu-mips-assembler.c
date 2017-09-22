@@ -263,77 +263,95 @@ uint32_t translateInstruction( char *instruction ){
 	/*
 	if( strcmp( *instruct,  "addi") == 0 ){ //ADDI
 		intVal1 = find_register( *val1 );
-		rs = (0x03E00000 | intVal1 ) << 21;
+		intVal1 = intVal1 << 21;
+		rs = (0x03E00000 | intVal1 );
 		intVal2 = find_register( *val2 );
-		rt = (0x001F0000 | intVal2) << 16;
+		intVal2 = intVal2 << 16;
+		rt = (0x001F0000 | intVal2);
 		intVal3 = find_register( *val3 );
 		immediate = (0x0000FFFF | intVal3);
 		mchnCode = 0x20000000 & rs & rt & immediate;
 	} else if( strcmp( *instruct,  "addiu") == 0 ){ //ADDIU
 		intVal1 = find_register( *val1 );
-		rs = (0x03E00000 | intVal1 ) << 21;
+		intVal1 = intVal1 << 21;
+		rs = (0x03E00000 | intVal1 );
 		intVal2 = find_register( *val2 );
-		rt = (0x001F0000 | intVal2) << 16;
+		intVal2 = intVal2 << 16;
+		rt = (0x001F0000 | intVal2);
 		intVal3 = find_register( *val3 );
 		immediate = (0x0000FFFF | intVal3);
 		mchnCode = 0x24000000 & rs & rt & immediate;
 	} else if( strcmp( *instruct,  "andi") == 0 ){ //ANDI
 		intVal1 = find_register( *val1 );
-		rs = (0x03E00000 | intVal1 ) << 21;
+		intVal1 = intVal1 << 21;
+		rs = (0x03E00000 | intVal1 );
 		intVal2 = find_register( *val2 );
-		rt = (0x001F0000 | intVal2) << 16;
+		intVal2 = intVal2 << 16;
+		rt = (0x001F0000 | intVal2);
 		intVal3 = find_register( *val3 );
 		immediate = (0x0000FFFF | intVal3);
 		mchnCode = 0x30000000 & rs & rt & immediate;
 	} else if( strcmp( *instruct,  "beq") == 0 ){ //BEQ
 		intVal1 = find_register( *val1 );
-		rs = (0x03E00000 | intVal1 ) << 21;
+		intVal1 = intVal1 << 21;
+		rs = (0x03E00000 | intVal1 );
 		intVal2 = find_register( *val2 );
-		rt = (0x001F0000 | intVal2) << 16;
+		rt = (0x001F0000 | intVal2);
+		intVal2 = intVal2 << 16;
 		intVal3 = find_register( *val3 );
 		offset = (0x0000FFFF | intVal3);
 		mchnCode = 0x10000000 & rs & rt & offset;
 	} else if( strcmp( *instruct,  "bne") == 0 ){ //BNE
 		intVal1 = find_register( *val1 );
-		rs = (0x03E00000 | intVal1 ) << 21;
+		intVal1 = intVal1 << 21;
+		rs = (0x03E00000 | intVal1 );
 		intVal2 = find_register( *val2 );
-		rt = (0x001F0000 | intVal2) << 16;
+		intVal2 = intVal2 << 16;
+		rt = (0x001F0000 | intVal2);
 		intVal3 = find_register( *val3 );
 		offset = (0x0000FFFF | intVal3);
 		mchnCode = 0x14000000 & rs & rt & offset;
 	} else if( strcmp( *instruct,  "ori") == 0 ){ //ORI
 		intVal1 = find_register( *val1 );
-		rs = (0x03E00000 | intVal1 ) << 21;
+		intVal1 = intVal1 << 21;
+		rs = (0x03E00000 | intVal1 );
 		intVal2 = find_register( *val2 );
-		rt = (0x001F0000 | intVal2) << 16;
+		intVal2 = intVal2 << 16;
+		rt = (0x001F0000 | intVal2);
 		intVal3 = find_register( *val3 );
 		immediate = (0x0000FFFF | intVal3);
 		mchnCode = 0x34000000 & rs & rt & immediate;
 	} else if( strcmp( *instruct,  "bgtz") == 0 ){ //BGTZ
 		intVal1 = find_register( *val1 );
-		rs = (0x03E00000 | intVal1 ) << 21;
+		intVal1 = intVal1 << 21;
+		rs = (0x03E00000 | intVal1 );
 		intVal3 = find_register( *val3 );
 		offset = (0x0000FFFF | intVal3);
 		mchnCode = 0x1C000000 & rs & offset;
 	} else if( strcmp( *instruct,  "blez") == 0 ){ //BLEZ
 		intVal1 = find_register( *val1 );
-		rs = (0x03E00000 | intVal1 ) << 21;
+		intVal1 = intVal1;
+		rs = (0x03E00000 | intVal1 );
 		intVal3 = find_register( *val3 );
 		offset = (0x0000FFFF | intVal3);
 		mchnCode = 0x1C000000 & rs & offset;	
 	} else if( strcmp( *instruct,  "xori") == 0 ){ //XORI
 		intVal1 = find_register( *val1 );
-		rt = (0x001F0000 | intVal1) << 16;
+		intVal1 = intVal1 << 16;
+		rt = (0x001F0000 | intVal1);
 		intVal2 = find_register( *val2 );
-		rs = (0x03E00000 | intVal2 ) << 21;
+		intVal2 = intVal2 << 21;
+		rs = (0x03E00000 | intVal2 );
 		intVal3 = find_register( *val3 );
 		immediate = (0x0000FFFF | intVal3);
 		mchnCode = 0x34000000 & rs & rt & immediate;
 	} else if( strcmp( *instruct,  "slti") == 0 ){ //SLTI
 		intVal1 = find_register( *val1 );
-		rt = (0x001F0000 | intVal1) << 16;
+		intVal1 = intVal1 << 16;
+		rt = (0x001F0000 | intVal1);
 		intVal2 = find_register( *val2 );
-		rs = (0x03E00000 | intVal2 ) << 21;
+		rs = (0x03E00000 | intVal2 );
+		intVal2 = intVal2 << 21;
 		intVal3 = find_register( *val3 );
 		immediate = (0x0000FFFF | intVal3);
 		mchnCode = 0x34000000 & rs & rt & immediate;
@@ -346,19 +364,21 @@ uint32_t translateInstruction( char *instruction ){
 		target = 0x03FFFFFF | intVal1;
 		mchnCode = 0x0C0000000 & target;	
 	} else if( strcmp( *instruct,  "lb") == 0 ){ //LB
-		/*intVal1 = find_register( *val1 );
-		rt = (0x001F0000 | intVal1 ) << 16;
-
+		/*
+		intVal1 = find_register( *val1 );
+		rt = (0x001F0000 | intVal1 );
+			
+		sscanf(var2, "%d(%d)", val2, val3 );
+		
 		offset = (0x0000FFFF | intVal3);
 		mchnCode = 0x34000000 & rs & rt & immediate;
 		*/
-		//need to find a way to seperate val2 by ()s
+		//found a way to seperate val2 by ()s
 	} else if( strcmp( *instruct,  "lh") == 0 ){ //LH
-		
-		//need to find a way to seperate val2 by ()s
 	} else if( strcmp( *instruct,  "lui") == 0 ){ //LUI
 		intVal1 = find_register( *val1 );
-		rt = (0x001F0000 | intVal1) << 16;
+		intVal1 = intVal1 << 16;
+		rt = (0x001F0000 | intVal1);
 		intVal2 = find_register( *val2 );
 		immediate = (0x0000FFFF | intVal2);
 		mchnCode = 0x3C000000 & rt & immediate;
@@ -386,90 +406,122 @@ uint32_t translateInstruction( char *instruction ){
 		intVal1 = find_register( *val1 );
 		intVal2 = find_register( *val2 );
 		intVal3 = find_register( *val3 );
-		rd = (0x00007C00 | intVal1) << 11;
-		rs = (0x03E00000 | intVal2 ) << 21;
-		rt = (0x001F0000 | intVal3) << 16;
+		intVal1 = intVal1 << 11;
+		rd = (0x00007C00 | intVal1);
+		intVal2 = intVal2 << 21;
+		rs = (0x03E00000 | intVal2 );
+		intVal3 = intVal3 << 16;
+		rt = (0x001F0000 | intVal3);
 		mchnCode = 0x00000000 & rd & rs & rt & 0x00000020;
 	} else if( strcmp( *instruct,  "addu") == 0 ){ //ADDU
 		intVal1 = find_register( *val1 );
 		intVal2 = find_register( *val2 );
 		intVal3 = find_register( *val3 );
-		rd = (0x00007C00 | intVal1) << 11;
-		rs = (0x03E00000 | intVal2 ) << 21;
-		rt = (0x001F0000 | intVal3) << 16;
+		intVal1 = intVal1 << 11;
+		rd = (0x00007C00 | intVal1);
+		intVal2 = intVal2 << 21;
+		rs = (0x03E00000 | intVal2 );
+		intVal3 = intVal3 << 16;
+		rt = (0x001F0000 | intVal3);
 		mchnCode = 0x00000000 & rd & rs & rt & 0x00000021;
 	} else if( strcmp( *instruct,  "and") == 0 ){ //AND
 		intVal1 = find_register( *val1 );
 		intVal2 = find_register( *val2 );
 		intVal3 = find_register( *val3 );
-		rd = (0x00007C00 | intVal1) << 11;
-		rs = (0x03E00000 | intVal2 ) << 21;
-		rt = (0x001F0000 | intVal3) << 16;
+		intVal1 = intVal1 << 11;
+		rd = (0x00007C00 | intVal1);
+		intVal2 = intVal2 << 21;
+		rs = (0x03E00000 | intVal2 );
+		intVal3 = intVal3 << 16;
+		rt = (0x001F0000 | intVal3);
 		mchnCode = 0x00000000 & rd & rs & rt & 0x00000024;
 	} else if( strcmp( *instruct,  "sub") == 0 ){ //SUB
 		intVal1 = find_register( *val1 );
 		intVal2 = find_register( *val2 );
 		intVal3 = find_register( *val3 );
-		rd = (0x00007C00 | intVal1) << 11;
-		rs = (0x03E00000 | intVal2 ) << 21;
-		rt = (0x001F0000 | intVal3) << 16;
+		intVal1 = intVal1 << 11;
+		rd = (0x00007C00 | intVal1);
+		intVal2 = intVal2 << 21;
+		rs = (0x03E00000 | intVal2 )21;
+		intVal3 = intVal3 << 16;
+		rt = (0x001F0000 | intVal3);
 		mchnCode = 0x00000000 & rd & rs & rt & 0x00000022;
 	} else if( strcmp( *instruct,  "subu") == 0 ){ //SUBU
 		intVal1 = find_register( *val1 );
 		intVal2 = find_register( *val2 );
 		intVal3 = find_register( *val3 );
-		rd = (0x00007C00 | intVal1) << 11;
-		rs = (0x03E00000 | intVal2 ) << 21;
-		rt = (0x001F0000 | intVal3) << 16;
+		intVal1 = intVal1 << 11;
+		rd = (0x00007C00 | intVal1);
+		intVal2 = intVal2 << 21;
+		rs = (0x03E00000 | intVal2 );
+		intVal3 = intVal3 << 16;
+		rt = (0x001F0000 | intVal3);
 		mchnCode = 0x00000000 & rd & rs & rt & 0x00000023;
 	} else if( strcmp( *instruct,  "mult") == 0 ){ //MULT
 		intVal1 = find_register( *val1 );
 		intVal2 = find_register( *val2 );
-		rs = (0x03E00000 | intVal1 ) << 21;
-		rt = (0x001F0000 | intVal2) << 16;
+		intVal1 = intVal1 << 21;
+		rs = (0x03E00000 | intVal1 );
+		intVal2 = intVal2 << 16;
+		rt = (0x001F0000 | intVal2);
 		mchnCode = 0x00000000 & rs & rt & 0x00000018;
 	} else if( strcmp( *instruct,  "multu") == 0 ){ //MULTU
 		intVal1 = find_register( *val1 );
 		intVal2 = find_register( *val2 );
-		rs = (0x03E00000 | intVal1 ) << 21;
-		rt = (0x001F0000 | intVal2) << 16;
+		intVal1 = intVal1 << 21;
+		rs = (0x03E00000 | intVal1 );
+		intVal2 = intVal2 << 16;
+		rt = (0x001F0000 | intVal2);
 		mchnCode = 0x00000000 & rs & rt & 0x00000019;
 	} else if( strcmp( *instruct,  "div") == 0 ){ //DIV
 		intVal1 = find_register( *val1 );
 		intVal2 = find_register( *val2 );
-		rs = (0x03E00000 | intVal1 ) << 21;
-		rt = (0x001F0000 | intVal2) << 16;
+		intVal1 = intVal1 << 21;
+		rs = (0x03E00000 | intVal1 );
+		intVal2 = intVal2 << 16;
+		rt = (0x001F0000 | intVal2);
 		mchnCode = 0x00000000 & rs & rt & 0x0000001A;
 	} else if( strcmp( *instruct,  "divu") == 0 ){ //DIVU
 		intVal1 = find_register( *val1 );
 		intVal2 = find_register( *val2 );
-		rs = (0x03E00000 | intVal1 ) << 21;
-		rt = (0x001F0000 | intVal2) << 16;
+		intVal1 = intVal1 << 21;
+		rs = (0x03E00000 | intVal1 );
+		intVal2 = intVal2 << 16;
+		rt = (0x001F0000 | intVal2);
 		mchnCode = 0x00000000 & rs & rt & 0x0000001B;
 	} else if( strcmp( *instruct,  "or") == 0 ){ //OR
 		intVal1 = find_register( *val1 );
 		intVal2 = find_register( *val2 );
 		intVal3 = find_register( *val3 );
-		rd = (0x00007C00 | intVal1) << 11;
-		rs = (0x03E00000 | intVal2 ) << 21;
-		rt = (0x001F0000 | intVal3) << 16;
+		intVal1 = intVal1 << 11;
+		rd = (0x00007C00 | intVal1);
+		intVal2 = intVal2 << 21;
+		rs = (0x03E00000 | intVal2 );
+		intVal3 = intVal3 << 16;
+		rt = (0x001F0000 | intVal3);
 		mchnCode = 0x00000000 & rd & rs & rt & 0x00000025;	
 	} else if( strcmp( *instruct,  "xor") == 0 ){ //XOR
-			intVal1 = find_register( *val1 );
+		intVal1 = find_register( *val1 );
 		intVal2 = find_register( *val2 );
-		intVal3 = find_register( *val3 );
-		rd = (0x00007C00 | intVal1) << 11;
-		rs = (0x03E00000 | intVal2 ) << 21;
-		rt = (0x001F0000 | intVal3) << 16;
+		intVal3 = find_register( *val3 );	
+		intVal1 = intVal1 << 11;
+		rd = (0x00007C00 | intVal1);
+		intVal2 = intVal2 << 21;
+		rs = (0x03E00000 | intVal2 );
+		intVal3 = intVal3 << 16;
+		rt = (0x001F0000 | intVal3);
 		mchnCode = 0x00000000 & rd & rs & rt & 0x00000026;
 	} else if( strcmp( *instruct,  "nor") == 0 ){ //NOR
   
 		intVal1 = find_register( *val1 );
 		intVal2 = find_register( *val2 );
 		intVal3 = find_register( *val3 );
-		rd = (0x00007C00 | intVal1) << 11;
-		rs = (0x03E00000 | intVal2 ) << 21;
-		rt = (0x001F0000 | intVal3) << 16;
+		intVal1 = intVal1 << 11;
+		rd = (0x00007C00 | intVal1);
+		intVal2 = intVal2 << 21;
+		rs = (0x03E00000 | intVal2 );
+		intVal3 = intVal3 << 16;
+		rt = (0x001F0000 | intVal3);
 		mchnCode = 0x00000000 & rd & rs & rt & 0x00000027;
 	} else if( strcmp( *instruct,  "slt") == 0 ){ //SLT
 	
