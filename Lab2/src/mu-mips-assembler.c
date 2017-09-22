@@ -5,7 +5,7 @@
 #include <assert.h>
 
 #include "mu-mips.h"
-
+uint32_t translateInstruction(char*);
 uint32_t createMask(uint32_t,uint32_t);
 /***************************************************************/
 /* Read a 32-bit word from memory                                                                            */
@@ -251,13 +251,13 @@ uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
 	}
 	return r;
 }
-
-unint32_t translateInstruction( char *instruction ){
+*/
+uint32_t translateInstruction( char *instruction ){
 	char *instruct, *val1, *val2, *val3;
 	uint32_t intVal1, intVal2, intVal3, mchnCode;
-
+	
 	sscanf(instruction, "%s %s, %s, %s", instruct, val1, val2, val3);
-
+	/*
 	if( strcmp( *instruct,  "addi") == 0 ){ //ADDI
 		
 	} else if( strcmp( *instruct,  "addiu") == 0 ){ //ADDIU
@@ -325,9 +325,10 @@ unint32_t translateInstruction( char *instruction ){
 		
 	} else if( strcmp( *instruct,  "nor") == 0 ){ //NOR
 		
-	} else if( strcmp( *instruct,  "slt") == 0 ){ //SLT
-	
-	} else if( strcmp( *instruct,  "sll") == 0 ){ //SLL !!!It is supposed to be all zeroes!!! Logical means add 0's
+	} else if( strcmp( *instruct,  "slt") == 0 ){ //SLT     //START HERE TOPH
+		
+	} 
+	else if( strcmp( *instruct,  "sll") == 0 ){ //SLL !!!It is supposed to be all zeroes!!! Logical means add 0's
 		
 	} else if( strcmp( *instruct,  "sra") == 0 ){ //SRA Arithmetic means 
 	
@@ -349,10 +350,12 @@ unint32_t translateInstruction( char *instruction ){
 	
 	} else{ 
 		printf("\n\nInstruction Not Found\n\n");
-	} 
+	}
+	*/ 
 	return mchnCode;
+	
 }
-*/
+
 /* main**************************************************/
 int main(int argc, char *argv[]) {
 	printf("\n**************************\n");
@@ -385,23 +388,12 @@ int main(int argc, char *argv[]) {
 		input_instruction = malloc(60 * sizeof(char)); 
 		strcpy(input_instruction,char_array);
 		//printf("%s\n",string);
-		//printf("%s\n",char_array);
+		printf("%s\n",char_array);
 		output_instruction = translateInstruction(input_instruction);
 		fprintf(fp_out,"%x\n",output_instruction);		
 	}
 	fclose(fp_in);
 	fclose(fp_out);
-	
-
-
-	//while( line of input file != EOF ) {
-		//prase individual line from input file
-		//send line to translateInstruction
-			//return translated machine code
-		//print line of machine code into output file
-	//}
-	//save output file
-	
 	return 0;
 }
 
