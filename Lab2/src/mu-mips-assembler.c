@@ -5,7 +5,7 @@
 #include <assert.h>
 
 #include "mu-mips.h"
-
+uint32_t translateInstruction(char*);
 uint32_t createMask(uint32_t,uint32_t);
 /***************************************************************/
 /* Read a 32-bit word from memory                                                                            */
@@ -57,7 +57,7 @@ void mdump(uint32_t start, uint32_t stop) {
 	printf("-------------------------------------------------------------\n");
 	printf("\t[Address in Hex (Dec) ]\t[Value]\n");
 	for (address = start; address <= stop; address += 4) {
-		//printf("\t0x%08x (%d) \t0x%08x\n", address, address,
+		printf("\t0x%08x (%d) \t0x%08x\n", address, address,
 				mem_read_32(address));
 	}
 	printf("\n");
@@ -102,7 +102,7 @@ void init_memory() {
 /* load program into memory */
 /**************************************************************/
 
-uint32_t find_register(char* register_instruct){
+/*uint32_t find_register(char* register_instruct){
 	
 	uint32_t register_number;
 
@@ -244,34 +244,6 @@ uint32_t find_register(char* register_instruct){
 
 }
 
-void load_program() {
-	FILE * fp;
-	int i, word;
-	uint32_t address;
-
-	/* Open program file. */
-	fp = fopen(prog_file, "r");
-	if (fp == NULL) {
-		printf("Error: Can't open program file %s\n", prog_file);
-		exit(-1);
-	}
-
-	/* Read in the program. */
-
-	i = 0;
-	while (fscanf(fp, "%x\n", &word) != EOF) {
-		address = MEM_TEXT_BEGIN + i;
-		mem_write_32(address, word);
-		printf("writing 0x%08x into address 0x%08x (%d)\n", word, address,
-				address);
-		i += 4;
-	}
-	PROGRAM_SIZE = i / 4;
-	printf("Program loaded into memory.\n%d words written into memory.\n\n",
-			PROGRAM_SIZE);
-	fclose(fp);
-}
-
 uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
 	uint32_t r = 0;
 	for (int32_t i = a; i <= b; i++) {
@@ -279,8 +251,8 @@ uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
 	}
 	return r;
 }
-
-unint32_t translateInstruction( char *instruction ){
+*/
+uint32_t translateInstruction( char *instruction ){
 	char *instruct, *val1, *val2, *val3;
 	uint32_t intVal1, intVal2, intVal3, mchnCode;
 	uint32_t rs,rt,rd,base,sa;	
@@ -288,7 +260,7 @@ unint32_t translateInstruction( char *instruction ){
 	uint32_t immediate,offset,target;
 
 	sscanf(instruction, "%s %s, %s, %s", instruct, val1, val2, val3);
-
+	/*
 	if( strcmp( *instruct,  "addi") == 0 ){ //ADDI
 		intVal1 = find_register( *val1 );
 		rs = (0x03E00000 | intVal1 ) << 21;
@@ -491,6 +463,7 @@ unint32_t translateInstruction( char *instruction ){
 		rt = (0x001F0000 | intVal3) << 16;
 		mchnCode = 0x00000000 & rd & rs & rt & 0x00000026;
 	} else if( strcmp( *instruct,  "nor") == 0 ){ //NOR
+  
 		intVal1 = find_register( *val1 );
 		intVal2 = find_register( *val2 );
 		intVal3 = find_register( *val3 );
@@ -522,8 +495,10 @@ unint32_t translateInstruction( char *instruction ){
 	
 	} else{ 
 		printf("\n\nInstruction Not Found\n\n");
-	} 
+	}
+	*/ 
 	return mchnCode;
+	
 }
 
 /* main**************************************************/
@@ -540,15 +515,30 @@ int main(int argc, char *argv[]) {
 	}
 
 	strcpy(prog_file, argv[1]);
-
-	//while( line of input file != EOF ) {
-		//prase individual line from input file
-		//send line to translateInstruction
-			//return translated machine code
-		//print line of machine code into output file
-	//}
-	//save output file
-
+	
+	FILE* fp_in = fopen(prog_file,"r");
+	FILE* fp_out = fopen("#YOLO_swag_420_blaze_it_4_jezus_faggits.txt","w");
+	char char_array[100];
+	char* input_instruction;
+	uint32_t output_instruction;
+	if( fp_in == NULL){
+		printf("could not open file\n");
+		return 1;
+	}
+	if( fp_out == NULL){
+		printf("could not open file\n");
+		return 1;
+	}
+	while(fgets (char_array, 60, fp_in)!=NULL){
+		input_instruction = malloc(60 * sizeof(char)); 
+		strcpy(input_instruction,char_array);
+		//printf("%s\n",string);
+		printf("%s\n",char_array);
+		output_instruction = translateInstruction(input_instruction);
+		fprintf(fp_out,"%x\n",output_instruction);		
+	}
+	fclose(fp_in);
+	fclose(fp_out);
 	return 0;
 }
 
