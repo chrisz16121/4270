@@ -524,27 +524,91 @@ uint32_t translateInstruction( char *instruction ){
 		rt = (0x001F0000 | intVal3);
 		mchnCode = 0x00000000 & rd & rs & rt & 0x00000027;
 	} else if( strcmp( *instruct,  "slt") == 0 ){ //SLT		//chris started here!
-		
+		intVal1 = find_register( *val1 );
+		intVal2 = find_register( *val2 );
+		intVal3 = find_register( *val3 );
+		rd = (0x0000F800 | intVal1);
+		intVal2 = intVal2 << 21;
+		rs = (0x03E00000 | intVal2);
+		intVal3 = intVal3 << 16;
+		rt = (0x001F0000 | intVal3);
+		mchnCode = 0x00000000 & rd & rs & rt & 0x0000002A;
 	} else if( strcmp( *instruct,  "sll") == 0 ){ //SLL !!!It is supposed to be all zeroes!!! Logical means add 0's
-		
+		intVal1 = find_register( *val1 );
+		intVal2 = find_register( *val2 );
+		intVal3 = find_register( *val3 );
+		intVal1 = intVal1 << 11;
+		rd = (0x0000F800 | intVal1);
+		intVal2 = intVal2 << 16;
+		rt = (0x001F0000 | intVal2);
+		intVal3 = intVal3 << 6;
+		sa = (0x00007C00 | intVal3);
+		mchnCode = 0x00000000 & rd & rt & sa & 0x00000000;
 	} else if( strcmp( *instruct,  "sra") == 0 ){ //SRA Arithmetic means 
-	
+		intVal1 = find_register( *val1 );
+		intVal2 = find_register( *val2 );
+		intVal3 = find_register( *val3 );
+		intVal1 = intVal1 << 11;
+		rd = (0x0000F800 | intVal1);
+		intVal2 = intVal2 << 16;
+		rt = (0x001F0000 | intVal2);
+		intVal3 = intVal3 << 6;
+		sa = (0x00007C00 | intVal3);
+		mchnCode = 0x00000000 & rd & rt & sa & 0x00000003;
 	} else if( strcmp( *instruct,  "srl") == 0 ){ //SRL DOUBLE CHECK RESULT BC IT MAY INSERT 1's INSTEAD OF 0's
-		
+		intVal1 = find_register( *val1 );
+		intVal2 = find_register( *val2 );
+		intVal3 = find_register( *val3 );
+		intVal1 = intVal1 << 11;
+		rd = (0x0000F800 | intVal1);
+		intVal2 = intVal2 << 16;
+		rt = (0x001F0000 | intVal2);
+		intVal3 = intVal3 << 6;
+		sa = (0x00007C00 | intVal3);
+		mchnCode = 0x00000000 & rd & rt & sa & 0x00000002;
 	} else if( strcmp( *instruct,  "jalr") == 0 ){ //JALR
-		
+		if(va12 == NULL){
+			intVal1 = find_register( *val1 );
+			intVal1 = intVal1 << 21;
+			rs = (0x03E00000 | intVal1);
+			mchnCode = 0x00000000 & rs & 0x00000009;
+		}
+		else{
+			intVal1 = find_register( *val1 );
+			intVal2 = find_register( *val2 );
+			intVal1 = intVal1 << 11;
+			rd = (0x0000F800 | intVal1);
+			intVal2 = intVal2 << 21;
+			rs = (0x03E00000 | intVal2);
+			mchnCode = 0x00000000 & rs & rd & 0x00000009;
+		}
 	} else if( strcmp( *instruct,  "jr") == 0 ){ //JR
-		
+		intVal1 = find_register( *val1 );
+		intVal1 = intVal1 << 21;
+		rs = (0x03E00000 | intVal1);
+		mchnCode = 0x00000000 & rs & 0x00000008;
 	} else if( strcmp( *instruct,  "mfhi") == 0 ){ //MFHI
-		
+		intVal1 = find_register( *val1 );
+		intVal1 = intVal1 << 11;
+		rd = (0x0000F800 | intVal1);
+		mchnCode = 0x00000000 & rd & 0x00000010;
 	} else if( strcmp( *instruct,  "mflo") == 0 ){ //MFLO
-		
+		intVal1 = find_register( *val1 );
+		intVal1 = intVal1 << 11;
+		rd = (0x0000F800 | intVal1);
+		mchnCode = 0x00000000 & rd & 0x00000012;
 	} else if( strcmp( *instruct,  "mthi") == 0 ){ //MTHI
-		
+		intVal1 = find_register( *val1 );
+		intVal1 = intVal1 << 21;
+		rs = (0x03E0000 | intVal1);
+		mchnCode = 0x00000000 & rs & 0x00000011;
 	} else if( strcmp( *instruct,  "mtlo") == 0 ){ //MTLO
-		
+		intVal1 = find_register( *val1 );
+		intVal1 = intVal1 << 21;
+		rs = (0x03E0000 | intVal1);
+		mchnCode = 0x00000000 & rs & 0x00000013;
 	} else if( strcmp( *instruct,  "syscall") == 0 ){ 
-	
+		mchnCode = 0x00000000 & 0x0000000C;
 	} else{ 
 		printf("\n\nInstruction Not Found\n\n");
 	}
