@@ -523,8 +523,8 @@ uint32_t translateInstruction( char *instruction ){
 		intVal3 = intVal3 << 16;
 		rt = (0x001F0000 | intVal3);
 		mchnCode = 0x00000000 & rd & rs & rt & 0x00000027;
-	} else if( strcmp( *instruct,  "slt") == 0 ){ //SLT
-	
+	} else if( strcmp( *instruct,  "slt") == 0 ){ //SLT		//chris started here!
+		
 	} else if( strcmp( *instruct,  "sll") == 0 ){ //SLL !!!It is supposed to be all zeroes!!! Logical means add 0's
 		
 	} else if( strcmp( *instruct,  "sra") == 0 ){ //SRA Arithmetic means 
