@@ -281,6 +281,10 @@ uint32_t translateInstruction( char *instruction ){
 		intVal2 = find_register( val2 );
 		rt = intVal2 << 21;
 		immediate = (uint32_t) strtoul(val3, &dumby, 16);
+		if( immediate > 0xFFFF0000 ) {
+			immediate = immediate >> 2;
+			immediate = 0xFFFFFFFF & immediate;
+		}
 		immediate = 0x0000FFFF & immediate;
 		mchnCode = 0x20000000 | rs | rt | immediate;
 	} else if( strcmp( instruct,  "addiu") == 0 ){ //ADDIU
@@ -290,6 +294,10 @@ uint32_t translateInstruction( char *instruction ){
 		intVal2 = find_register( val2 );
 		rt = intVal2 << 21;
 		immediate = (uint32_t)strtoul(val3, &dumby, 16);
+		if( immediate > 0xFFFF0000 ) {
+			immediate = immediate >> 2;
+			immediate = 0xFFFFFFFF & immediate;
+		}
 		immediate = 0x0000FFFF & immediate;
 		mchnCode = 0x24000000 | rs | rt | immediate;
 
@@ -299,6 +307,10 @@ uint32_t translateInstruction( char *instruction ){
 		intVal2 = find_register( val2 );
 		rs = intVal2 << 21;
 		immediate = (uint32_t) strtoul(val3, &dumby, 16);
+		if( immediate > 0xFFFF0000 ) {
+			immediate = immediate >> 2;
+			immediate = 0xFFFFFFFF & immediate;
+		}
 		immediate = 0x0000FFFF & immediate;
 		mchnCode = 0x30000000 | rs | rt | immediate;
 	} else if( strcmp( instruct,  "beq") == 0 ){ //BEQ
@@ -307,6 +319,10 @@ uint32_t translateInstruction( char *instruction ){
 		intVal2 = find_register( val2 );
 		rt = intVal2 << 16;//21;
 		offset = (uint32_t) strtoul(val3, &dumby, 16);
+		if( offset > 0xFFFF0000 ) {
+			offset = offset >> 2;
+			offset = 0xFFFFFFFF & offset;
+		}
 		offset = 0x0000FFFF & offset;
 		mchnCode = 0x10000000 | rs | rt | offset;
 	} else if( strcmp( instruct,  "bne") == 0 ){ //BNE
@@ -315,6 +331,10 @@ uint32_t translateInstruction( char *instruction ){
 		intVal2 = find_register( val2 );
 		rt = intVal2 << 16;//21;
 		offset = (uint32_t) strtoul(val3, &dumby, 16);
+		if( offset > 0xFFFF0000 ) {
+			offset = offset >> 2;
+			offset = 0xFFFFFFFF & offset;
+		}
 		offset = 0x0000FFFF & offset;
 		mchnCode = 0x14000000 | rs | rt | offset;
 	} else if( strcmp( instruct,  "ori") == 0 ){ //ORI
@@ -323,18 +343,30 @@ uint32_t translateInstruction( char *instruction ){
 		intVal2 = find_register( val2 );
 		rs = intVal2 << 21;
 		immediate = (uint32_t) strtoul(val3, &dumby, 16);
+		if( immediate > 0xFFFF0000 ) {
+			immediate = immediate >> 2;
+			immediate = 0xFFFFFFFF & immediate;
+		}
 		immediate = 0x0000FFFF & immediate;
 		mchnCode = 0x34000000 | rs | rt | immediate;
 	} else if( strcmp( instruct,  "bgtz") == 0 ){ //BGTZ
 		intVal1 = find_register( val1 );
 		rs = intVal1 << 21;//16;
 		offset = (uint32_t) strtoul(val3, &dumby, 16);
+		if( offset > 0xFFFF0000 ) {
+			offset = offset >> 2;
+			offset = 0xFFFFFFFF & offset;
+		}
 		offset = 0x0000FFFF & offset;
 		mchnCode = 0x1C000000 | rs | offset;
 	} else if( strcmp( instruct,  "blez") == 0 ){ //BLEZ
 		intVal1 = find_register( val1 );
 		rs = intVal1 << 21;
 		offset = (uint32_t) strtoul(val3, &dumby, 16);
+		if( offset > 0xFFFF0000 ) {
+			offset = offset >> 2;
+			offset = 0xFFFFFFFF & offset;
+		}
 		offset = 0x0000FFFF & offset;
 		mchnCode = 0x1C000000 | rs | offset;	
 	} else if( strcmp( instruct,  "xori") == 0 ){ //XORI
@@ -343,6 +375,10 @@ uint32_t translateInstruction( char *instruction ){
 		intVal2 = find_register( val2 );
 		rs = intVal2 << 21;
 		immediate = (uint32_t) strtoul(val3, &dumby, 16);
+		if( immediate > 0xFFFF0000 ) {
+			immediate = immediate >> 2;
+			immediate = 0xFFFFFFFF & immediate;
+		}
 		immediate = 0x0000FFFF & immediate;
 		mchnCode = 0x34000000 | rs | rt | immediate;
 	} else if( strcmp( instruct,  "slti") == 0 ){ //SLTI
@@ -351,14 +387,26 @@ uint32_t translateInstruction( char *instruction ){
 		intVal2 = find_register( val2 );
 		rs = intVal2 << 21;
 		immediate = (uint32_t) strtoul(val3, &dumby, 16);
+		if( immediate > 0xFFFF0000 ) {
+			immediate = immediate >> 2;
+			immediate = 0xFFFFFFFF & immediate;
+		}
 		immediate = 0x0000FFFF & immediate;
 		mchnCode = 0x34000000 | rs | rt | immediate;
 	} else if( strcmp( instruct,  "j") == 0 ){ //J
 		target = (uint32_t) strtoul(val1, &dumby, 16);
+		if( target > 0xFFFF0000 ) {
+			target = target >> 2;
+			target = 0xFFFFFFFF & target;
+		}
 		target = 0x0000FFFF & target;
 		mchnCode = 0x080000000 | target;	
 	} else if( strcmp( instruct,  "jal") == 0 ){ //JAL
 		target = (uint32_t) strtoul(val1, &dumby, 16);
+		if( target > 0xFFFF0000 ) {
+			target = target >> 2;
+			target = 0xFFFFFFFF & target;
+		}
 		target = 0x0000FFFF & target;
 		mchnCode = 0x0C0000000 | target;	
 	} else if( strcmp( instruct,  "lb") == 0 ){ //LB
@@ -366,6 +414,10 @@ uint32_t translateInstruction( char *instruction ){
 		rt = intVal1 << 16;
 		sscanf(val2, "%s(%s)", val2, val3 );
 		offset = (uint32_t) strtoul(val2, &dumby, 16);
+		if( offset > 0xFFFF0000 ) {
+			offset = offset >> 2;
+			offset = 0xFFFFFFFF & offset;
+		}
 		offset = 0x0000FFFF & offset;
 		intVal3 = find_register( val3 );
 		base = intVal3 << 16;
@@ -375,6 +427,10 @@ uint32_t translateInstruction( char *instruction ){
 		rt = intVal1 << 16;
 		sscanf(val2, "%s(%s)", val2, val3 );
 		offset = (uint32_t) strtoul(val2, &dumby, 16);
+		if( offset > 0xFFFF0000 ) {
+			offset = offset >> 2;
+			offset = 0xFFFFFFFF & offset;
+		}
 		offset = 0x0000FFFF & offset;
 		intVal3 = find_register( val3 );
 		base = intVal3 << 21;
@@ -383,6 +439,10 @@ uint32_t translateInstruction( char *instruction ){
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
 		immediate = (uint32_t) strtoul(val2, &dumby, 16);
+		if( immediate > 0xFFFF0000 ) {
+			immediate = immediate >> 2;
+			immediate = 0xFFFFFFFF & immediate;
+		}
 		immediate = 0x0000FFFF & immediate;
 		mchnCode = 0x3C000000 | rt | immediate;
 	} else if( strcmp( instruct,  "lw") == 0 ){ //LW
@@ -390,6 +450,10 @@ uint32_t translateInstruction( char *instruction ){
 		rt = intVal1 << 16;
 		sscanf(val2, "%s(%s)", val2, val3 );
 		offset = (uint32_t) strtoul(val2, &dumby, 16);
+		if( offset > 0xFFFF0000 ) {
+			offset = offset >> 2;
+			offset = 0xFFFFFFFF & offset;
+		}
 		offset = 0x0000FFFF & offset;
 		intVal3 = find_register( val3 );
 		base = intVal3 << 21;
@@ -399,6 +463,10 @@ uint32_t translateInstruction( char *instruction ){
 		rt = intVal1 << 16;
 		sscanf(val2, "%s(%s)", val2, val3 );
 		offset = (uint32_t) strtoul(val2, &dumby, 16);
+		if( offset > 0xFFFF0000 ) {
+			offset = offset >> 2;
+			offset = 0xFFFFFFFF & offset;
+		}
 		offset = 0x0000FFFF & offset;
 		intVal3 = find_register( val3 );
 		base = intVal3 << 21;
@@ -408,6 +476,10 @@ uint32_t translateInstruction( char *instruction ){
 		rt = intVal1 << 16;
 		sscanf(val2, "%s(%s)", val2, val3 );
 		offset = (uint32_t) strtoul(val2, &dumby, 16);
+		if( offset > 0xFFFF0000 ) {
+			offset = offset >> 2;
+			offset = 0xFFFFFFFF & offset;
+		}
 		offset = 0x0000FFFF & offset;
 		intVal3 = find_register( val3 );
 		base = intVal3 << 21;
@@ -417,6 +489,10 @@ uint32_t translateInstruction( char *instruction ){
 		rt = intVal1 << 16;
 		sscanf(val2, "%s(%s)", val2, val3 );
 		offset = (uint32_t) strtoul(val2, &dumby, 16);
+		if( offset > 0xFFFF0000 ) {
+			offset = offset >> 2;
+			offset = 0xFFFFFFFF & offset;
+		}
 		offset = 0x0000FFFF & offset;
 		intVal3 = find_register( val3 );
 		base = intVal3 << 21;
@@ -425,12 +501,20 @@ uint32_t translateInstruction( char *instruction ){
 		intVal1 = find_register( val1 );
 		rs = intVal1 >> 21;
 		offset = (uint32_t) strtoul(val3, &dumby, 16);
+		if( offset > 0xFFFF0000 ) {
+			offset = offset >> 2;
+			offset = 0xFFFFFFFF & offset;
+		}
 		offset = 0x0000FFFF & offset;
 		mchnCode = 0x04000000 | rs | offset;	
 	} else if( strcmp( instruct,  "bgez") == 0 ){ // BGEZ
 		intVal1 = find_register( val1 );
 		rs = intVal1 >> 21;
 		offset = (uint32_t) strtoul(val3, &dumby, 16);
+		if( offset > 0xFFFF0000 ) {
+			offset = offset >> 2;
+			offset = 0xFFFFFFFF & offset;
+		}
 		offset = 0x0000FFFF & offset;
 		mchnCode = 0x04010000 | rs | offset;	
 
