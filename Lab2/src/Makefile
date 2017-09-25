@@ -1,4 +1,4 @@
-mu-mips: mu-mips.c
+mu-mips: mu-mips-assembler.c
 	gcc -Wall -g -O2 $^ -o $@
 
 .PHONY: clean
