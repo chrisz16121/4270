@@ -257,13 +257,17 @@ uint32_t translateInstruction( char *instruction ){
 	char* val1;
 	char* val2;
 	char* val3;
+	instruct = malloc( 64 * sizeof(char));
+	val1 = malloc( 64 * sizeof(char));
+	val2 = malloc( 64 * sizeof(char));
+	val3 = malloc( 64 * sizeof(char));
 	uint32_t intVal1, intVal2, intVal3, mchnCode;
 	uint32_t rs,rt,rd,base,sa;	
 	uint32_t special,check;
 	uint32_t immediate,offset,target;
 
-	sscanf(instruction, "%s %s, %s, %s", instruct, val1, val2, val3);
-	
+	sscanf(instruction, "%s %s %s %s", instruct, val1, val2, val3);
+	printf("check |%s|%s|%s|%s|\n", instruct, val1, val2, val3);
 
 	if( strcmp( instruct,  "addi") == 0 ){ //ADDI
 		intVal1 = find_register( val1 );
@@ -368,92 +372,92 @@ uint32_t translateInstruction( char *instruction ){
 		target = 0x03FFFFFF | intVal1;
 		mchnCode = 0x0C0000000 & target;	
 
-	} else if( strcmp( *instruct,  "lb") == 0 ){ //LB
-		intVal1 = find_register( *val1 );
+	} else if( strcmp( instruct,  "lb") == 0 ){ //LB
+		intVal1 = find_register( val1 );
 		intVal1 = intVal1 << 16;
 		rt = (0x001F0000 | intVal1 );
-		sscanf(val2, "%d(%d)", val2, val3 );
-		intVal2 = find_register( *val2 );
+		sscanf(val2, "%s(%s)", val2, val3 );
+		intVal2 = find_register( val2 );
 		offset = (0x0000FFFF | intVal2);
-		intVal3 = find_register( *val3 );
+		intVal3 = find_register( val3 );
 		intVal3 = intVal3 << 21;
 		base = (0x03E00000 | intVal3);
 		mchnCode = 0x80000000 & base & rt & offset;
-	} else if( strcmp( *instruct,  "lh") == 0 ){ //LH
-		intVal1 = find_register( *val1 );
+	} else if( strcmp( instruct,  "lh") == 0 ){ //LH
+		intVal1 = find_register( val1 );
 		intVal1 = intVal1 << 16;
 		rt = (0x001F0000 | intVal1 );
-		sscanf(val2, "%d(%d)", val2, val3 );
-		intVal2 = find_register( *val2 );
+		sscanf(val2, "%s(%s)", val2, val3 );
+		intVal2 = find_register( val2 );
 		offset = (0x0000FFFF | intVal2);
-		intVal3 = find_register( *val3 );
+		intVal3 = find_register( val3 );
 		intVal3 = intVal3 << 21;
 		base = (0x03E00000 | intVal3);
 		mchnCode = 0x84000000 & base & rt & offset;
-	} else if( strcmp( *instruct,  "lui") == 0 ){ //LUI
-		intVal1 = find_register( *val1 );
+	} else if( strcmp( instruct,  "lui") == 0 ){ //LUI
+		intVal1 = find_register( val1 );
 		intVal1 = intVal1 << 16;
 		rt = (0x001F0000 | intVal1);
 		intVal2 = find_register( val2 );
 		immediate = (0x0000FFFF | intVal2);
 		mchnCode = 0x3C000000 & rt & immediate;
 
-	} else if( strcmp( *instruct,  "lw") == 0 ){ //LW
-		intVal1 = find_register( *val1 );
+	} else if( strcmp( instruct,  "lw") == 0 ){ //LW
+		intVal1 = find_register( val1 );
 		intVal1 = intVal1 << 16;
 		rt = (0x001F0000 | intVal1 );
-		sscanf(val2, "%d(%d)", val2, val3 );
-		intVal2 = find_register( *val2 );
+		sscanf(val2, "%s(%s)", val2, val3 );
+		intVal2 = find_register( val2 );
 		offset = (0x0000FFFF | intVal2);
-		intVal3 = find_register( *val3 );
+		intVal3 = find_register( val3 );
 		intVal3 = intVal3 << 21;
 		base = (0x03E00000 | intVal3);
 		mchnCode = 0x8C000000 & base & rt & offset;
-	} else if( strcmp( *instruct,  "sb") == 0 ){ //SB
-		intVal1 = find_register( *val1 );
+	} else if( strcmp( instruct,  "sb") == 0 ){ //SB
+		intVal1 = find_register( val1 );
 		intVal1 = intVal1 << 16;
 		rt = (0x001F0000 | intVal1 );
-		sscanf(val2, "%d(%d)", val2, val3 );
-		intVal2 = find_register( *val2 );
+		sscanf(val2, "%s(%s)", val2, val3 );
+		intVal2 = find_register( val2 );
 		offset = (0x0000FFFF | intVal2);
-		intVal3 = find_register( *val3 );
+		intVal3 = find_register( val3 );
 		intVal3 = intVal3 << 21;
 		base = (0x03E00000 | intVal3);
 		mchnCode = 0xA0000000 & base & rt & offset;
-	} else if( strcmp( *instruct,  "sh") == 0 ){ //SH
-		intVal1 = find_register( *val1 );
+	} else if( strcmp( instruct,  "sh") == 0 ){ //SH
+		intVal1 = find_register( val1 );
 		intVal1 = intVal1 << 16;
 		rt = (0x001F0000 | intVal1 );
-		sscanf(val2, "%d(%d)", val2, val3 );
-		intVal2 = find_register( *val2 );
+		sscanf(val2, "%s(%s)", val2, val3 );
+		intVal2 = find_register( val2 );
 		offset = (0x0000FFFF | intVal2);
-		intVal3 = find_register( *val3 );
+		intVal3 = find_register( val3 );
 		intVal3 = intVal3 << 21;
 		base = (0x03E00000 | intVal3);
 		mchnCode = 0xA4000000 & base & rt & offset;
-	} else if( strcmp( *instruct,  "sw") == 0 ){ //SW
-		intVal1 = find_register( *val1 );
+	} else if( strcmp( instruct,  "sw") == 0 ){ //SW
+		intVal1 = find_register( val1 );
 		intVal1 = intVal1 << 16;
 		rt = (0x001F0000 | intVal1 );
-		sscanf(val2, "%d(%d)", val2, val3 );
-		intVal2 = find_register( *val2 );
+		sscanf(val2, "%s(%s)", val2, val3 );
+		intVal2 = find_register( val2 );
 		offset = (0x0000FFFF | intVal2);
-		intVal3 = find_register( *val3 );
+		intVal3 = find_register( val3 );
 		intVal3 = intVal3 << 21;
 		base = (0x03E00000 | intVal3);
 		mchnCode = 0xAC000000 & base & rt & offset;
-	} else if( strcmp( *instruct,  "bltz") == 0 ){ //BLTZ
-		intVal1 = find_register( *val1 );
+	} else if( strcmp( instruct,  "bltz") == 0 ){ //BLTZ
+		intVal1 = find_register( val1 );
 		intVal1 = intVal1 >> 21;
 		rs = (0x03E00000 | intVal1 );
-		intVal3 = find_register( *val3 );
+		intVal3 = find_register( val3 );
 		offset = (0x0000FFFF | intVal3);
 		mchnCode = 0x04000000 & rs & offset;	
-	} else if( strcmp( *instruct,  "bgez") == 0 ){ // BGEZ
-		intVal1 = find_register( *val1 );
+	} else if( strcmp( instruct,  "bgez") == 0 ){ // BGEZ
+		intVal1 = find_register( val1 );
 		intVal1 = intVal1 >> 21;
 		rs = (0x03E00000 | intVal1 );
-		intVal3 = find_register( *val3 );
+		intVal3 = find_register( val3 );
 		offset = (0x0000FFFF | intVal3);
 		mchnCode = 0x04010000 & rs & offset;	
 
@@ -703,9 +707,9 @@ int main(int argc, char *argv[]) {
 	while(fgets (char_array, 60, fp_in)!=NULL){
 		input_instruction = malloc(60 * sizeof(char)); 
 		strcpy(input_instruction,char_array);
-		//printf("%s\n",string);
 		printf("%s\n",char_array);
 		output_instruction = translateInstruction(input_instruction);
+		printf("%d\n",output_instruction);
 		fprintf(fp_out,"%x\n",output_instruction);		
 	}
 	fclose(fp_in);
