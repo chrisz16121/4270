@@ -1,7 +1,7 @@
 # bubble sort
 
     .data
-Arr:        .word       5,4,3,2,1
+Arr:        .word       5,3,6,8,9,1,4,7,2,10
 
     .text
     .globl  main
