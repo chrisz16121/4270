@@ -3,4 +3,4 @@ mu-mips: mu-mips-assembler.c
 
 .PHONY: clean
 clean:
-	rm -rf *.o *~ mu-mips
+	rm -rf *.o *~ mu-mips-assembler
