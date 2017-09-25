@@ -268,7 +268,7 @@ uint32_t translateInstruction( char *instruction ){
 
 	sscanf(instruction, "%s %[^, ]%*[, ] %[^, ]%*[, ] %[^, ]%*[, ]", instruct, val1, val2, val3);
 	printf("check |%s|%s|%s|%s|\n", instruct, val1, val2, val3);
-
+	
 	if( strcmp( instruct,  "addi") == 0 ){ //ADDI
 		intVal1 = find_register( val1 );
 		rs = intVal1 << 21;
@@ -277,12 +277,20 @@ uint32_t translateInstruction( char *instruction ){
 		immediate = find_register( val3 );
 		mchnCode = 0x20000000 | rs | rt | immediate;
 	} else if( strcmp( instruct,  "addiu") == 0 ){ //ADDIU
+		//printf("PLEASE\n");
 		intVal1 = find_register( val1 );
 		rs = intVal1 << 21;
 		intVal2 = find_register( val2 );
+		intVal2 = intVal2 << 16;
+		rt = (0x001F0000 | intVal2);
+		intVal3 = find_register( val3 );
+		immediate = (0x0000FFFF | intVal3);
+		mchnCode = 0x24000000 & rs & rt & immediate;
+		//printf("The machine code: %x\n",mchnCode);
 		rt = intVal2 << 16;
 		immediate = find_register( val3 );
 		mchnCode = 0x24000000 | rs | rt | immediate;
+
 	} else if( strcmp( instruct,  "andi") == 0 ){ //ANDI
 		intVal1 = find_register( val1 );
 		rs = intVal1 << 21;
@@ -582,7 +590,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	strcpy(prog_file, argv[1]);
-	
+	//printf("is this even real?");
 	FILE* fp_in = fopen(prog_file,"r");
 	FILE* fp_out = fopen("#YOLO_swag_420_blaze_it_4_jezus_faggits.txt","w");
 	char char_array[100];
