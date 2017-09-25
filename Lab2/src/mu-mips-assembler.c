@@ -290,7 +290,6 @@ uint32_t translateInstruction( char *instruction ){
 		rt = intVal2 << 16;
 		immediate = find_register( val3 );
 		mchnCode = 0x24000000 | rs | rt | immediate;
-
 	} else if( strcmp( instruct,  "andi") == 0 ){ //ANDI
 		intVal1 = find_register( val1 );
 		rs = intVal1 << 21;
