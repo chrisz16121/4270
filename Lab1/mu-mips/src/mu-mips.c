@@ -435,19 +435,25 @@ void handle_instruction()
 			NEXT_STATE.PC = (a | (target_address << 2)) & 0xFFFFFFFC;
 			NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 8;
 			break;
-		case 0x80000000: //LB
+		case 0x80000000: //LB*
+			//only loading a byte, so do we need to get rid of the lower or upper 24 bits?
 			offset = (0x0000FFFF & instruct);
 			base = (0x03E00000 & instruct) >> 21;
 			rt = (0x001F0000 & instruct) >> 16;
 			virtualAddress = offset + base;
-			NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[virtualAddress] & 0x000000FF;
+			//NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[virtualAddress] & 0x000000FF;
+			//NEXT_STATE.REGS[rt] = mem_read_32(virtualAddress);
+			NEXT_STATE.REGS[rt] = (mem_read_32(virtualAddress) & 0x000000FF);
 			break;
-		case 0x84000000: //LH	
+		case 0x84000000: //LH*	
+			//same question for the halfword
 			offset = (0x0000FFFF & instruct);
 			base = (0x03E00000 & instruct) >> 21;
 			rt = (0x001F0000 & instruct) >> 16;
 			virtualAddress = offset + base;
-			NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[virtualAddress] & 0x0000FFFF;
+			//NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[virtualAddress] & 0x0000FFFF;
+			//NEXT_STATE.REGS[rt] = mem_read_32(virtualAddress);
+			NEXT_STATE.REGS[rt] = (mem_read_32(virtualAddress) & 0x0000FFFF);
 			break;
 		case 0x3C000000: //LUI
 			immediate = (0x0000FFFF & instruct);
@@ -455,22 +461,27 @@ void handle_instruction()
 			temp = (immediate << 16) | (0x0000);
 			NEXT_STATE.REGS[rt] = temp;
 			break;
-		case 0x8C000000: //LW
+		case 0x8C000000: //LW*
+			//no bit masking here, read function returns a word
 			offset = (0x0000FFFF & instruct);
 			if(offset > 0x1000) break; // overflow condition
 			base = (0x03E00000 & instruct) >> 21;
 			rt = (0x001F0000 & instruct) >> 16;
 			virtualAddress = offset + base;
-			NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[virtualAddress];
+			//NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[virtualAddress];
+			NEXT_STATE.REGS[rt] = mem_read_32(virtualAddress);
 			break;
-		case 0xA0000000: //SB
+		case 0xA0000000: //SB*
+			//this one needs bit masking..
 			offset = (0x0000FFFF & instruct);
 			base = (0x03E00000 & instruct) >> 21;
 			rt = (0x001F0000 & instruct) >> 16;
 			virtualAddress = offset + base;
-			NEXT_STATE.REGS[virtualAddress] = CURRENT_STATE.REGS[rt] & 0x000000FF;
+			//NEXT_STATE.REGS[virtualAddress] = CURRENT_STATE.REGS[rt] & 0x000000FF;
+			mem_write_32(virtualAddress,(CURRENT_STATE.REGS[RT] & 0x000000FF));
 			break;
-		case 0xA4000000: //SH
+		case 0xA4000000: //SH*
+			//another one with bit masking
 			offset = (0x0000FFFF & instruct);
 			base = (0x03E00000 & instruct) >> 21;
 			rt = (0x001F0000 & instruct) >> 16;
@@ -478,8 +489,8 @@ void handle_instruction()
 			if ((0x00000001 & virtualAddress) != 0) {
 				printf("This instruction doesn't work");
 			} else {
-				NEXT_STATE.REGS[virtualAddress] = CURRENT_STATE.REGS[rt]
-						& 0x0000FFFF;
+				//NEXT_STATE.REGS[virtualAddress] = CURRENT_STATE.REGS[rt] & 0x0000FFFF;
+				mem_write_32(virtualAddress,(CURRENT_STATE.REGS[RT] & 0x0000FFFF));
 			}
 			break;
 		case 0xAC000000: //SW
@@ -490,7 +501,8 @@ void handle_instruction()
 				printf("This instruction doesn't work");
 			} else {
 				virtualAddress = offset + base;
-				NEXT_STATE.REGS[virtualAddress] = CURRENT_STATE.REGS[rt];
+				//NEXT_STATE.REGS[virtualAddress] = CURRENT_STATE.REGS[rt];
+				mem_write_32(virtualAddress,CURRENT_STATE.REGS[RT]);
 			}
 			break;
 		case 0x04000000: //BLTZ, BGEZ CHECK THIS
