@@ -274,7 +274,8 @@ uint32_t translateInstruction( char *instruction ){
 		rs = intVal1 << 21;
 		intVal2 = find_register( val2 );
 		rt = intVal2 << 16;
-		immediate = find_register( val3 );
+		immediate = (uint32_t) *val3;
+		//immediate = find_register( val3 );
 		mchnCode = 0x20000000 | rs | rt | immediate;
 	} else if( strcmp( instruct,  "addiu") == 0 ){ //ADDIU
 		//printf("PLEASE\n");
@@ -288,7 +289,8 @@ uint32_t translateInstruction( char *instruction ){
 		mchnCode = 0x24000000 & rs & rt & immediate;
 		//printf("The machine code: %x\n",mchnCode);
 		rt = intVal2 << 16;
-		immediate = find_register( val3 );
+		immediate = (uint32_t) *val3;
+		//immediate = find_register( val3 );
 		mchnCode = 0x24000000 | rs | rt | immediate;
 
 	} else if( strcmp( instruct,  "andi") == 0 ){ //ANDI
@@ -296,64 +298,75 @@ uint32_t translateInstruction( char *instruction ){
 		rs = intVal1 << 21;
 		intVal2 = find_register( val2 );
 		rt = intVal2 << 16;
-		immediate = find_register( val3 );
+		// immediate = find_register( val3 );
+		immediate = (uint32_t) *val3;
 		mchnCode = 0x30000000 | rs | rt | immediate;
 	} else if( strcmp( instruct,  "beq") == 0 ){ //BEQ
 		intVal1 = find_register( val1 );
 		rs = intVal1 << 21;
 		intVal2 = find_register( val2 );
 		rt = intVal2 << 16;
-		offset = find_register( val3 );
+		// offset = find_register( val3 );
+		offset = (uint32_t) *val3;
 		mchnCode = 0x10000000 | rs | rt | offset;
 	} else if( strcmp( instruct,  "bne") == 0 ){ //BNE
 		intVal1 = find_register( val1 );
 		rs = intVal1 << 21;
 		intVal2 = find_register( val2 );
 		rt = intVal2 << 16;
-		offset = find_register( val3 );
+		// offset = find_register( val3 );
+		offset = (uint32_t) *val3;
 		mchnCode = 0x14000000 | rs | rt | offset;
 	} else if( strcmp( instruct,  "ori") == 0 ){ //ORI
 		intVal1 = find_register( val1 );
 		rs = intVal1 << 21;
 		intVal2 = find_register( val2 );
 		rt = intVal2 << 16;
-		immediate = find_register( val3 );
+		// immediate = find_register( val3 );
+		immediate = (uint32_t) *val3;
 		mchnCode = 0x34000000 | rs | rt | immediate;
 	} else if( strcmp( instruct,  "bgtz") == 0 ){ //BGTZ
 		intVal1 = find_register( val1 );
 		rs = intVal1 << 21;
-		offset = find_register( val3 );
+		// offset = find_register( val3 );
+		offset = (uint32_t) *val3;
 		mchnCode = 0x1C000000 | rs | offset;
 	} else if( strcmp( instruct,  "blez") == 0 ){ //BLEZ
 		intVal1 = find_register( val1 );
 		rs = intVal1 << 16;
-		offset = find_register( val3 );
+		// offset = find_register( val3 );
+		offset = (uint32_t) *val3;
 		mchnCode = 0x1C000000 | rs | offset;	
 	} else if( strcmp( instruct,  "xori") == 0 ){ //XORI
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
 		intVal2 = find_register( val2 );
 		rs = intVal2 << 21;
-		immediate = find_register( val3 );
+		// immediate = find_register( val3 );
+		immediate = (uint32_t) *val3;
 		mchnCode = 0x34000000 | rs | rt | immediate;
 	} else if( strcmp( instruct,  "slti") == 0 ){ //SLTI
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
 		intVal2 = find_register( val2 );
 		rs = intVal2 << 21;
-		immediate = find_register( val3 );
+		// immediate = find_register( val3 );
+		immediate = (uint32_t) *val3;
 		mchnCode = 0x34000000 | rs | rt | immediate;
 	} else if( strcmp( instruct,  "j") == 0 ){ //J
-		target = find_register( val1 );
+		// target = find_register( val1 );
+		target = (uint32_t) *val1;
 		mchnCode = 0x080000000 | target;	
 	} else if( strcmp( instruct,  "jal") == 0 ){ //JAL
-		target = find_register( val1 );
+		// target = find_register( val1 );
+		target = (uint32_t) *val1;
 		mchnCode = 0x0C0000000 | target;	
 	} else if( strcmp( instruct,  "lb") == 0 ){ //LB
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
 		sscanf(val2, "%s(%s)", val2, val3 );
-		offset = find_register( val2 );
+		// offset = find_register( val2 );
+		offset = (uint32_t) *val2;
 		intVal3 = find_register( val3 );
 		base = intVal3 << 21;
 		mchnCode = 0x80000000 | base | rt | offset;
@@ -361,20 +374,23 @@ uint32_t translateInstruction( char *instruction ){
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
 		sscanf(val2, "%s(%s)", val2, val3 );
-		offset = find_register( val2 );
+		// offset = find_register( val2 );
+		offset = (uint32_t) *val2;
 		intVal3 = find_register( val3 );
 		base = intVal3 << 21;
 		mchnCode = 0x84000000 | base | rt | offset;
 	} else if( strcmp( instruct,  "lui") == 0 ){ //LUI
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
-		immediate = find_register( val2 );
+		// immediate = find_register( val2 );
+		immediate = (uint32_t) *val2;
 		mchnCode = 0x3C000000 | rt | immediate;
 	} else if( strcmp( instruct,  "lw") == 0 ){ //LW
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
 		sscanf(val2, "%s(%s)", val2, val3 );
-		offset = find_register( val2 );
+		// offset = find_register( val2 );
+		offset = (uint32_t) *val2;
 		intVal3 = find_register( val3 );
 		base = intVal3 << 21;
 		mchnCode = 0x8C000000 | base | rt | offset;
@@ -382,7 +398,8 @@ uint32_t translateInstruction( char *instruction ){
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
 		sscanf(val2, "%s(%s)", val2, val3 );
-		offset = find_register( val2 );
+		// offset = find_register( val2 );
+		offset = (uint32_t) *val2;
 		intVal3 = find_register( val3 );
 		base = intVal3 << 21;
 		mchnCode = 0xA0000000 | base | rt | offset;
@@ -390,7 +407,8 @@ uint32_t translateInstruction( char *instruction ){
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
 		sscanf(val2, "%s(%s)", val2, val3 );
-		offset = find_register( val2 );
+		// offset = find_register( val2 );
+		offset = (uint32_t) *val2;
 		intVal3 = find_register( val3 );
 		base = intVal3 << 21;
 		mchnCode = 0xA4000000 | base | rt | offset;
@@ -398,19 +416,22 @@ uint32_t translateInstruction( char *instruction ){
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
 		sscanf(val2, "%s(%s)", val2, val3 );
-		offset = find_register( val2 );
+		// offset = find_register( val2 );
+		offset = (uint32_t) *val2;
 		intVal3 = find_register( val3 );
 		base = intVal3 << 21;
 		mchnCode = 0xAC000000 | base | rt | offset;
 	} else if( strcmp( instruct,  "bltz") == 0 ){ //BLTZ
 		intVal1 = find_register( val1 );
 		rs = intVal1 >> 21;
-		offset = find_register( val3 );
+		// offset = find_register( val3 );
+		offset = (uint32_t) *val3;
 		mchnCode = 0x04000000 | rs | offset;	
 	} else if( strcmp( instruct,  "bgez") == 0 ){ // BGEZ
 		intVal1 = find_register( val1 );
 		rs = intVal1 >> 21;
-		offset = find_register( val3 );
+		// offset = find_register( val3 );
+		offset = (uint32_t) *val3;
 		mchnCode = 0x04010000 | rs | offset;	
 
 	//START OF "SPECIAL" OPCODE INSTRUCTIONS
@@ -592,7 +613,7 @@ int main(int argc, char *argv[]) {
 	strcpy(prog_file, argv[1]);
 	//printf("is this even real?");
 	FILE* fp_in = fopen(prog_file,"r");
-	FILE* fp_out = fopen("#YOLO_swag_420_blaze_it_4_jezus_faggits.txt","w");
+	FILE* fp_out = fopen("AssemblerOutput.txt","w");
 	char char_array[100];
 	char* input_instruction;
 	uint32_t output_instruction;
