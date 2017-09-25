@@ -359,51 +359,96 @@ void handle_instruction()
 			result = CURRENT_STATE.REGS[rs] + immediate;
 			NEXT_STATE.REGS[rt] = result;
 			break;
-		case 0x30000000: //ANDI
+			case 0x30000000: //ANDI--Corrected?
 			immediate = (0x0000FFFF & instruct);
-	    		rs = (0x03E00000 & instruct) >> 21;
+	    	rs = (0x03E00000 & instruct) >> 21;
 		  	rt = (0x001F0000 & instruct) >> 16;
-		  	NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] & CURRENT_STATE.REGS[rs]; // need to store value of rt into address
+		  	NEXT_STATE.REGS[rt] = immediate & CURRENT_STATE.REGS[rs]; // need to store value of rt into address
 		  	break;
-		case 0x10000000: //BEQ
-			offset = 0x0000FFFF & instruct;
+		case 0x10000000: //BEQ--Corrected?
+			offset = (0x0000FFFF & instruct) << 2;
 			rs = (0x03E00000 & instruct) >> 21;
 			rt = (0x001F0000 & instruct) >> 16;
 			if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
 				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
 			}
 			break;
-		case 0x14000000: //BNE
-			offset = 0x0000FFFF & instruct;
+		case 0x14000000: //BNE--Corrected?
+			offset = (0x0000FFFF & instruct) << 2;
 			rs = (0x03E00000 & instruct) >> 21;
 			rt = (0x001F0000 & instruct) >> 16;
-			if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
+			if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
 				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
 			}
 			break;
-		case 0x34000000: //ORI
+		case 0x34000000: //ORI--Corrected?
 			immediate = (0x0000FFFF & instruct);
 			rs = (0x03E00000 & instruct) >> 21;
 		 	rt = immediate | rs;
-		  	NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] | CURRENT_STATE.REGS[rs]; // store value of rt into address
+		  	NEXT_STATE.REGS[rt] = immediate | CURRENT_STATE.REGS[rs]; // store value of rt into address
 		  	break;
-		case 0x1C000000: //BGTZ
-			offset = 0x0000FFFF & instruct;
+		case 0x1C000000: //BGTZ--Corrected?
+			offset = (0x0000FFFF & instruct) << 2;
 			rs = (0x03E00000 & instruct) >> 21;
 			rt = (0x001F0000 & instruct) >> 16;
 			if(CURRENT_STATE.REGS[rs] > 0){
 				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
 			}
 			break;
-		case 0x18000000: //BLEZ
-			offset = 0x0000FFFF & instruct;
+		case 0x18000000: //BLEZ--Corrected?
+			offset = (0x0000FFFF & instruct) << 2;
 			delay_slot_instruct = mem_read_32(CURRENT_STATE.PC + 4);
 			target_address = delay_slot_instruct + offset;
 			rs = (0x03E00000 & instruct) >> 21;
 			if(CURRENT_STATE.REGS[rs] <= 0){
-				CURRENT_STATE.PC = CURRENT_STATE.PC + offset;
+				CURRENT_STATE.PC += offset;
 			}
 			break;
+		// case 0x30000000: //ANDI
+// 			immediate = (0x0000FFFF & instruct);
+// 	    		rs = (0x03E00000 & instruct) >> 21;
+// 		  	rt = (0x001F0000 & instruct) >> 16;
+// 		  	NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] & CURRENT_STATE.REGS[rs]; // need to store value of rt into address
+// 		  	break;
+// 		case 0x10000000: //BEQ
+// 			offset = 0x0000FFFF & instruct;
+// 			rs = (0x03E00000 & instruct) >> 21;
+// 			rt = (0x001F0000 & instruct) >> 16;
+// 			if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
+// 				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+// 			}
+// 			break;
+// 		case 0x14000000: //BNE
+// 			offset = 0x0000FFFF & instruct;
+// 			rs = (0x03E00000 & instruct) >> 21;
+// 			rt = (0x001F0000 & instruct) >> 16;
+// 			if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
+// 				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+// 			}
+// 			break;
+// 		case 0x34000000: //ORI
+// 			immediate = (0x0000FFFF & instruct);
+// 			rs = (0x03E00000 & instruct) >> 21;
+// 		 	rt = immediate | rs;
+// 		  	NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[immediate] | CURRENT_STATE.REGS[rs]; // store value of rt into address
+// 		  	break;
+// 		case 0x1C000000: //BGTZ
+// 			offset = 0x0000FFFF & instruct;
+// 			rs = (0x03E00000 & instruct) >> 21;
+// 			rt = (0x001F0000 & instruct) >> 16;
+// 			if(CURRENT_STATE.REGS[rs] > 0){
+// 				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+// 			}
+// 			break;
+// 		case 0x18000000: //BLEZ
+// 			offset = 0x0000FFFF & instruct;
+// 			delay_slot_instruct = mem_read_32(CURRENT_STATE.PC + 4);
+// 			target_address = delay_slot_instruct + offset;
+// 			rs = (0x03E00000 & instruct) >> 21;
+// 			if(CURRENT_STATE.REGS[rs] <= 0){
+// 				CURRENT_STATE.PC = CURRENT_STATE.PC + offset;
+// 			}
+// 			break;
 		case 0x38000000: //XORI
 			rs = (0x03E00000 & instruct) >> 21;
 	  		rt = (0x001F0000 & instruct) >> 16;
