@@ -537,13 +537,11 @@ uint32_t translateInstruction( char *instruction ){
 		//printf("show me 6: %s\n",val3);
 		//intVal3 = find_register( val3 );
 		//printf("%x\n",find_register(val3));
-		
 		intVal3 = 0x00000006;
 		printf("Assembled %d + %d = %d\n",intVal1,intVal2,intVal3);
 		rd = intVal1 << 11;
 		rs = intVal2 << 21;
 		rt = intVal3 << 16;
-		
 		mchnCode = 0x00000000 | rd | rs | rt | 0x00000021;
 		printf("instruction: %x\n",mchnCode);
 	} else if( strcmp( instruct,  "and") == 0 ){ //AND
