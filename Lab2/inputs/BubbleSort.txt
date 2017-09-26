@@ -1,6 +1,3 @@
-addiu $gp, $zero, 0x9
-sll $gp, $gp, 4		#10010000 address
-
 addiu $a0, $zero, 0x5
 sw $a0, 0($gp)
 
@@ -11,26 +8,28 @@ addiu $a0, $zero, 0x6
 sw $a0, 8($gp)
 
 addiu $a0, $zero, 0x8
-sw $a0, C($gp)
+sw $a0, 12($gp)
 
 addiu $a0, $zero, 0x9
-sw $a0, 10($gp)
+sw $a0, 16($gp)
 
 addiu $a0, $zero, 0x1
-sw $a0, 14($gp)
-
-addiu $a0, $zero, 0x4
-sw $a0, 18($gp)
-
-addiu $a0, $zero, 0x7
-sw $a0, 1C($gp)
-
-addiu $a0, $zero, 0x2
 sw $a0, 20($gp)
 
-addiu $a0, $zero, 0xa
+addiu $a0, $zero, 0x4
 sw $a0, 24($gp)
 
+addiu $a0, $zero, 0x7
+sw $a0, 28($gp)
+
+addiu $a0, $zero, 0x2
+sw $a0, 32($gp)
+
+addiu $a0, $zero, 0xa
+sw $a0, 36($gp)
+
+#Values are now stored in memory
+######################################
 addiu $s0, $zero, 0xa	#upper bound i
 addiu $s1, $zero, 0x1   #lower bound i
 
@@ -41,23 +40,38 @@ addiu $a2, $zero, 0x0	#address pointer
 
 
 OUTERLOOP:
-beq $s1, $s0, END
+beq $s1, $s0, END		#if upper i == lower i, go to end
 
 INNERLOOP:
-beq $a1, $a0, OUTERLOOP
-lw $t0, $a2($gp)
-add $a2, 0x4
-lw $t1, $a2($gp)
+beq $a1, $a0, RESET		#if upper j == lower j, go to reset
+add $s5, $a2, $gp		#Calculate address of value
+lw $t0, 0($s5)			#load value at offset into $t0
+add $a2, $a2, 4			#bump offset
+add $s5, $a2, $gp		#Calculate address of value
+lw $t1, 0($s5)			#load value at offset $t1
 
-slt $s0,$t1,$t0      # checks if $t0 > $t1
-beq $s0,1, SWAP     # if $t0 > $t1, goes to SWAP 
-add $s1, 0x1
-add $a1, 0x1
-bne 
+slt $s0,$t1,$t0       		#checks if $t0 > $t1
+beq $s0,0x1, SWAP      		#if $t0 > $t1, go to SWAP 
+add $a1, $a1, 0x1		#lower j++
+j INNERLOOP 			#loop back to INNERLOOP
 
 SWAP:
- 
-j INNERLOOP
+sub $a2, $a2, 0x4		#reset offset $a2 to previous value
+add $s5, $a2, $gp		#Calculate address of value
+sw $t1, 0($s5)			#store new value to memory	
+add $a2, $a2, 0x4		#bump offset
+add $s5, $a2, $gp		#Calculate address of value
+sw $t0, 0($s5)			#store new value to memory
+
+add $a1, $a1, 0x1		#lower j++
+j INNERLOOP			#jump back to INNERLOOP
 
 END:
 syscall
+
+RESET:
+addiu $a1, $zero, 0x1		#set lower j back to 1
+add $s1, $s1, 0x1		#lower i++
+add $a2, $zero, 0x0		#reset address offset to front
+j OUTERLOOP			#loop back to outer loop
+
