@@ -133,6 +133,9 @@ uint32_t find_register(char* register_instruct){
 	}else if(strcmp((register_instruct), "$a2") == 0){
 	
 		register_number = 0x00000006;
+		//printf("register finding: %x\n",register_number);
+		//return register_number;
+		
 	
 	}else if(strcmp((register_instruct), "$a3") == 0){
 	
@@ -269,12 +272,12 @@ uint32_t translateInstruction( char *instruction ){
 	uint32_t immediate,offset,target;
 
 	sscanf(instruction, "%s %[^, ]%*[, ] %[^, ]%*[, ] %[^, ]%*[, ]", instruct, val1, val2, val3);
-
+	
 	if( strstr( val3, "x") == "x" )
 	{
 		scanf( val3, "%[^x0 ]%*[x0 ]", val3);
 	}
-
+	
 	if( strcmp( instruct,  "addi") == 0 ){ //ADDI
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
@@ -329,12 +332,14 @@ uint32_t translateInstruction( char *instruction ){
 		rs = intVal1 << 21;//16;
 		intVal2 = find_register( val2 );
 		rt = intVal2 << 16;//21;
-		offset = (uint32_t) strtoul(val3, &dumby, 16);
+		offset = (uint32_t)strtoul(val3, &dumby, 16);
+		printf("the offset is %d:%x\n",offset,offset);
 		if( offset > 0xFFFF0000 ) {
 			offset = offset >> 2;
 			offset = 0xFFFFFFFF & offset;
 		}
 		offset = 0x0000FFFF & offset;
+		printf("the offset is %d:%x\n",offset,offset);
 		mchnCode = 0x14000000 | rs | rt | offset;
 	} else if( strcmp( instruct,  "ori") == 0 ){ //ORI
 		intVal1 = find_register( val1 );
@@ -529,11 +534,18 @@ uint32_t translateInstruction( char *instruction ){
 	} else if( strcmp( instruct,  "addu") == 0 ){ //ADDU
 		intVal1 = find_register( val1 );
 		intVal2 = find_register( val2 );
-		intVal3 = find_register( val3 );
+		//printf("show me 6: %s\n",val3);
+		//intVal3 = find_register( val3 );
+		//printf("%x\n",find_register(val3));
+		
+		intVal3 = 0x00000006;
+		printf("Assembled %d + %d = %d\n",intVal1,intVal2,intVal3);
 		rd = intVal1 << 11;
 		rs = intVal2 << 21;
 		rt = intVal3 << 16;
+		
 		mchnCode = 0x00000000 | rd | rs | rt | 0x00000021;
+		printf("instruction: %x\n",mchnCode);
 	} else if( strcmp( instruct,  "and") == 0 ){ //AND
 		intVal1 = find_register( val1 );
 		intVal2 = find_register( val2 );
@@ -710,9 +722,9 @@ int main(int argc, char *argv[]) {
 	while(fgets (char_array, 60, fp_in)!=NULL){
 		input_instruction = malloc(60 * sizeof(char)); 
 		strcpy(input_instruction,char_array);
-		printf("%s\n",char_array);
+		//printf("%s\n",char_array);
 		output_instruction = translateInstruction(input_instruction);
-		printf("%x\n",output_instruction);
+		//printf("%x\n",output_instruction);
 		fprintf(fp_out,"%x\n",output_instruction);		
 	}
 	fclose(fp_in);

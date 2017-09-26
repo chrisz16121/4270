@@ -8,7 +8,7 @@
 
 
 /***************************************************************/
-
+int z = 1;
 /* Print out a list of commands available                                                                  */
 void help() {
 	printf(
@@ -73,7 +73,9 @@ void mem_write_32(uint32_t address, uint32_t value) {
 void cycle() {
 	handle_instruction();
 	CURRENT_STATE = NEXT_STATE;
+	//printf("%d:\tREGISTERS:\n$zero:%d\t$v0:%d\t$a0:%d\t$a1:%d\t$a2:%d\t$a3:%d\t$t0:%d\tt1:%d\t\n",z,CURRENT_STATE.REGS[0],CURRENT_STATE.REGS[2],CURRENT_STATE.REGS[4],CURRENT_STATE.REGS[5],CURRENT_STATE.REGS[6],CURRENT_STATE.REGS[7],CURRENT_STATE.REGS[8],CURRENT_STATE.REGS[9]);
 	INSTRUCTION_COUNT++;
+	z++;
 }
 
 /***************************************************************/
@@ -317,7 +319,7 @@ uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
 /************************************************************/
 void handle_instruction()
 {
-	print_program();
+	//print_program();
 	int i;
 	int binary_num[32];
 	uint32_t temp_instruct;
@@ -328,7 +330,7 @@ void handle_instruction()
 	uint32_t immediate;
 	uint32_t check,special,mask,a,b,sa,base,virtualAddress,temp;
 	opcode = 0xFC000000 & instruct;
-	printf("Instruction fetched: %x\n",instruct);
+	//printf("Instruction fetched: %x\n",instruct);
 	temp_instruct = instruct;
 	/*for(i = 0;i < 32;i++){
 		int temp = 1 & temp_instruct;
@@ -358,7 +360,7 @@ void handle_instruction()
 			immediate = (0x0000FFFF & instruct);
 			result = CURRENT_STATE.REGS[rs] + immediate;
 			NEXT_STATE.REGS[rt] = result;
-			printf("register %d now contains %d:%d\n",rt,result,NEXT_STATE.REGS[2]);
+			//printf("register %d now contains %d:%d\n",rt,result,NEXT_STATE.REGS[2]);
 			break;
 			case 0x30000000: //ANDI--Corrected?
 			immediate = (0x0000FFFF & instruct);
@@ -376,10 +378,15 @@ void handle_instruction()
 			break;
 		case 0x14000000: //BNE--Corrected?
 			offset = (0x0000FFFF & instruct) << 2;
+			offset = offset & 0x0000FFFF;
+			offset = offset ^ 0xFFFF0000;
 			rs = (0x03E00000 & instruct) >> 21;
 			rt = (0x001F0000 & instruct) >> 16;
 			if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
+				//printf("taking branch! offset is %08x\n",offset);
 				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+				//printf("Current Instruction: %08x\n",CURRENT_STATE.PC);
+				//printf("Next Instruction: %08x\n",NEXT_STATE.PC);
 			}
 			break;
 		case 0x34000000: //ORI--Corrected?
@@ -423,8 +430,10 @@ void handle_instruction()
 // 			offset = 0x0000FFFF & instruct;
 // 			rs = (0x03E00000 & instruct) >> 21;
 // 			rt = (0x001F0000 & instruct) >> 16;
-// 			if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
-// 				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+// 			if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
+//				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+//				printf("Current Instruction: %x\n",CURRENT_STATE.PC);
+//				printf("Next Instruction: %x\n",NEXT_STATE.PC);
 // 			}
 // 			break;
 // 		case 0x34000000: //ORI
@@ -584,9 +593,10 @@ void handle_instruction()
 				case 0x00000021: //ADDU
 					rs = (0x03E00000 & instruct) >> 21;
 					rt = (0x001F0000 & instruct) >> 16;
-					rd = (0x00007C00 & instruct) >> 11;
+					rd = (0x0000F800 & instruct) >> 11;
 					result = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
 					NEXT_STATE.REGS[rd] = result;
+					//printf("%d + %d was assigned to %d\n",rs,rt,rd);
 					break;
 				case 0x00000024: //AND
 					immediate = (0x0000FFFF & instruct);
@@ -717,9 +727,8 @@ void handle_instruction()
 					NEXT_STATE.LO = CURRENT_STATE.REGS[rs];
 					break;
 				case 0x0000000C: 
-					printf("is we out this thang?\n%x\n",CURRENT_STATE.REGS[2]);
 					if(CURRENT_STATE.REGS[2] == 0xA){
-						printf("We out this thaaaang\n");
+						printf("We made it to the end, congratulations, us! (actually, just Chris)\nProgram has finished executing, exiting simulator.\n");
 						exit(1);
 					}
 					else if(CURRENT_STATE.REGS[2] == 0x5){
@@ -730,7 +739,7 @@ void handle_instruction()
 					}
 					else if(CURRENT_STATE.REGS[2] == 0x1){
 						int dummy = CURRENT_STATE.REGS[4];
-						printf("Number: %d\n",dummy);
+						printf("Program Result: %d\n",dummy);
 					}
 					break;
 				default:
