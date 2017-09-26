@@ -350,7 +350,15 @@ void EX()
 /************************************************************/
 void ID()
 {
-	/*IMPLEMENT THIS*/
+	uint32_t rs, rt, immediate; 
+	ID_EX.IR = IF_ID.IR;
+	rs = 0x03E00000 & IF_ID.IR;
+	rt = 0x001F0000 & IF_ID.IR;
+	immediate = 0x0000FFFF & IF_ID.IR;
+	immediate = 0xFFFFFFFF ^ immediate;
+	ID_EX.A = CURRENT_STATE.REGS[rs];
+	ID_EX.B = CURRENT_STATE.REGS[rt];
+	ID_EX.imm = immediate;
 }
 
 /************************************************************/
@@ -358,7 +366,8 @@ void ID()
 /************************************************************/
 void IF()
 {
-	/*IMPLEMENT THIS*/
+	IF_ID.IR = CURRENT_STATE.PC;
+	CURRENT_STATE.PC = CURRENT_STATE.PC + 4;
 }
 
 
