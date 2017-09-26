@@ -1,0 +1,53 @@
+[0x04000000] lui $gp,1001		
+[0x04000004] addiu $a0, $zero, 0x5
+[0x04000008] sw $a0, 0($gp)
+[0x0400000C] addiu $a0, $zero, 0x3
+[0x04000010] sw $a0, 4($gp)
+[0x04000014] addiu $a0, $zero, 0x6
+[0x04000018] sw $a0, 8($gp)
+[0x0400001C] addiu $a0, $zero, 0x8
+[0x04000020] sw $a0, 12($gp)
+[0x04000024] addiu $a0, $zero, 0x9
+[0x04000028] sw $a0, 16($gp)
+[0x0400002C] addiu $a0, $zero, 0x1
+[0x04000030] sw $a0, 20($gp)
+[0x04000034] addiu $a0, $zero, 0x4
+[0x04000038] sw $a0, 24($gp)
+[0x0400003C] addiu $a0, $zero, 0x7
+[0x04000040] sw $a0, 28($gp)
+[0x04000044] addiu $a0, $zero, 0x2
+[0x04000048] sw $a0, 32($gp)
+[0x0400004C] addiu $a0, $zero, 0xa
+[0x04000050] sw $a0, 36($gp)
+[0x04000054] addiu $t0,$zero,0		//load 0 into i
+[0x04000058] addiu $t1,$zero,A		//load 10 into n
+[0x0400005C] addiu $t3,$gp,0		//load base of data memory into t3  
+[0x04000060] andi $a0,$a0,0		//clear a0
+[0x04000064] bne $t0,$zero,4 		//go to compare
+[0x04000068] addiu $t0,$zero,1		//add to index if we are at start of array
+[0x0400006C] andi $a0,$a0,0		//clear the registers (this is where compare starts)
+[0x04000070] andi $a1,$a1,0
+[0x04000074] andi $a2,$a2,0
+[0x04000078] addiu $t2,$t0,-1		//i-1 into t2
+[0x0400007C] andi $t4,$t4,0		//clear t4
+[0x04000080] addiu $t4,$t2,0		//load i-1 into t4
+[0x04000084] sll $t4,$t4,2		//multiply t4 by 4
+[0x04000088] addu $t4,$t3,$t4		//add offset to get effective address
+[0x0400008C] lw $a1,0(t4)		//load memory at effective address, a1 contains arry[i-1]
+[0x04000090] andi $t5,$t5,0 		//clear t4
+[0x04000094] addiu $t5,$t0,0		//load i into t5
+[0x04000098] sll $t5,$t5,2		//multiply t5 by 4
+[0x0400009C] addu $t5,$t3,$t5		//effective address
+[0x040000A0] lw $a0,0(t5)		//load memory, a0 contains arry[i]
+[0x040000A4] subu $a3,$a0,$a1		//check to see which is bigger
+[0x040000A8] bgtz $a3,14		//jump to increase index, elements in the right order
+[0x040000AC] sw $a0,0(t4)		//swap!
+[0x040000B0] sw $a1,0(t5)		//swap!
+[0x040000B4] subu $t0,$t0,1		//decrement index
+[0x040000B8] j -54			//back to check for zero index (jumps back up to 27)
+[0x040000BC] addiu $t0,$t0,1		//increment index (this is where bgtz branches to)
+[0x040000C0] bne $t0,$t1,-5C	//checks to see if at the end of the array
+[0x040000C4] andi $v0,$v0,0		//exits the program
+[0x040000C8] addiu $v0,$v0,A
+[0x040000CC] syscall
+

@@ -1,0 +1,53 @@
+lui $gp,1001
+addiu $a0, $zero, 0x5
+sw $a0, 0($gp)
+addiu $a0, $zero, 0x3
+sw $a0, 4($gp)
+addiu $a0, $zero, 0x6
+sw $a0, 8($gp)
+addiu $a0, $zero, 0x8
+sw $a0, 12($gp)
+addiu $a0, $zero, 0x9
+sw $a0, 16($gp)
+addiu $a0, $zero, 0x1
+sw $a0, 20($gp)
+addiu $a0, $zero, 0x4
+sw $a0, 24($gp)
+addiu $a0, $zero, 0x7
+sw $a0, 28($gp)
+addiu $a0, $zero, 0x2
+sw $a0, 32($gp)
+addiu $a0, $zero, 0xa
+sw $a0, 36($gp)
+addiu $t0,$zero,0
+addiu $t1,$zero,A
+addiu $t3,$gp,0		
+andi $a0,$a0,0
+bne $t0,$zero,4
+addiu $t0,$zero,1
+andi $a0,$a0,0
+andi $a1,$a1,0
+andi $a2,$a2,0
+addiu $t2,$t0,-1
+andi $t4,$t4,0
+addiu $t4,$t2,0
+sll $t4,$t4,2
+addu $t4,$t3,$t4
+lw $a1,0(t4)
+andi $t5,$t5,0
+addiu $t5,$t0,0
+sll $t5,$t5,2
+addu $t5,$t3,$t5
+lw $a0,0(t5)
+subu $a3,$a0,$a1
+bgtz $a3,14
+sw $a0,0(t4)
+sw $a1,0(t5)
+subu $t0,$t0,1
+j -54
+addiu $t0,$t0,1
+bne $t0,$t1,-5C
+andi $v0,$v0,0
+addiu $v0,$v0,A
+syscall
+
