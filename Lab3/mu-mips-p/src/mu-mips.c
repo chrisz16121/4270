@@ -334,7 +334,22 @@ void WB()
 /************************************************************/
 void MEM()
 {
-	/*IMPLEMENT THIS*/
+	//This is essentually pseudocode, it will not work!!!
+	uint32_t temp;
+	if( 1 ){ /*ALU*/ 
+		MEM_WB.IR = EX_MEM.IR;
+		MEM_WB.ALUOutput = EX_MEM.ALUOutput;
+	} else { /*Load/Store*/
+		MEM_WB.IR = EX_MEM.IR;
+		if( 1 ){ //Load
+			MEM_WB.LMD = mem_read_32( EX_MEM.ALUOutput );
+		} else { //Store
+			temp = mem_read_32( EX_MEM.ALUOutput );
+			mem_write_32( temp, EX_MEM.B );
+		}
+		EX_MEM.ALUOutput = ID_EX.A + ID_EX.imm;
+		EX_MEM.B = ID_EX.B;
+	}
 }
 
 /************************************************************/
@@ -342,7 +357,19 @@ void MEM()
 /************************************************************/
 void EX()
 {
-	/*IMPLEMENT THIS*/
+	//This is essentually pseudocode, it will not work!!!
+	if( 1 ){ /*ALU*/ 
+		EX_MEM.IR = ID_EX.IR;
+		if( 1 ){ //register-immediate
+			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.imm, operation); 
+		} else { //register-register
+			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.B, operation); 
+		}
+	} else { /*Load/Store*/
+		EX_MEM.IR = ID_EX.IR;
+		EX_MEM.ALUOutput = ID_EX.A + ID_EX.imm;
+		EX_MEM.B = ID_EX.B;
+	}
 }
 
 /************************************************************/
