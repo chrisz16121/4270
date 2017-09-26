@@ -1,0 +1,63 @@
+addiu $gp, $zero, 0x9
+sll $gp, $gp, 4		#10010000 address
+
+addiu $a0, $zero, 0x5
+sw $a0, 0($gp)
+
+addiu $a0, $zero, 0x3
+sw $a0, 4($gp)
+
+addiu $a0, $zero, 0x6
+sw $a0, 8($gp)
+
+addiu $a0, $zero, 0x8
+sw $a0, C($gp)
+
+addiu $a0, $zero, 0x9
+sw $a0, 10($gp)
+
+addiu $a0, $zero, 0x1
+sw $a0, 14($gp)
+
+addiu $a0, $zero, 0x4
+sw $a0, 18($gp)
+
+addiu $a0, $zero, 0x7
+sw $a0, 1C($gp)
+
+addiu $a0, $zero, 0x2
+sw $a0, 20($gp)
+
+addiu $a0, $zero, 0xa
+sw $a0, 24($gp)
+
+addiu $s0, $zero, 0xa	#upper bound i
+addiu $s1, $zero, 0x1   #lower bound i
+
+addiu $a0, $zero, 0x9	#upper bound j
+addiu $a1, $zero, 0x1   #lower bound j
+
+addiu $a2, $zero, 0x0	#address pointer
+
+
+OUTERLOOP:
+beq $s1, $s0, END
+
+INNERLOOP:
+beq $a1, $a0, OUTERLOOP
+lw $t0, $a2($gp)
+add $a2, 0x4
+lw $t1, $a2($gp)
+
+slt $s0,$t1,$t0      # checks if $t0 > $t1
+beq $s0,1, SWAP     # if $t0 > $t1, goes to SWAP 
+add $s1, 0x1
+add $a1, 0x1
+bne 
+
+SWAP:
+ 
+j INNERLOOP
+
+END:
+syscall
