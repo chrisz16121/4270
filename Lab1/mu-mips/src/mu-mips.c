@@ -358,6 +358,7 @@ void handle_instruction()
 			immediate = (0x0000FFFF & instruct);
 			result = CURRENT_STATE.REGS[rs] + immediate;
 			NEXT_STATE.REGS[rt] = result;
+			printf("register %d now contains %d:%d\n",rt,result,NEXT_STATE.REGS[2]);
 			break;
 			case 0x30000000: //ANDI--Corrected?
 			immediate = (0x0000FFFF & instruct);
@@ -523,7 +524,7 @@ void handle_instruction()
 			rt = (0x001F0000 & instruct) >> 16;
 			virtualAddress = offset + base;
 			//NEXT_STATE.REGS[virtualAddress] = CURRENT_STATE.REGS[rt] & 0x000000FF;
-			mem_write_32(virtualAddress,(CURRENT_STATE.REGS[RT] & 0x000000FF));
+			mem_write_32(virtualAddress,(CURRENT_STATE.REGS[rt] & 0x000000FF));
 			break;
 		case 0xA4000000: //SH*
 			//another one with bit masking
@@ -535,7 +536,7 @@ void handle_instruction()
 				printf("This instruction doesn't work");
 			} else {
 				//NEXT_STATE.REGS[virtualAddress] = CURRENT_STATE.REGS[rt] & 0x0000FFFF;
-				mem_write_32(virtualAddress,(CURRENT_STATE.REGS[RT] & 0x0000FFFF));
+				mem_write_32(virtualAddress,(CURRENT_STATE.REGS[rt] & 0x0000FFFF));
 			}
 			break;
 		case 0xAC000000: //SW
@@ -547,7 +548,7 @@ void handle_instruction()
 			} else {
 				virtualAddress = offset + base;
 				//NEXT_STATE.REGS[virtualAddress] = CURRENT_STATE.REGS[rt];
-				mem_write_32(virtualAddress,CURRENT_STATE.REGS[RT]);
+				mem_write_32(virtualAddress,CURRENT_STATE.REGS[rt]);
 			}
 			break;
 		case 0x04000000: //BLTZ, BGEZ CHECK THIS
@@ -716,12 +717,21 @@ void handle_instruction()
 					NEXT_STATE.LO = CURRENT_STATE.REGS[rs];
 					break;
 				case 0x0000000C: 
-					if(CURRENT_STATE.REGS[2] = 0xA){
+					printf("is we out this thang?\n%x\n",CURRENT_STATE.REGS[2]);
+					if(CURRENT_STATE.REGS[2] == 0xA){
 						printf("We out this thaaaang\n");
 						exit(1);
 					}
-					//printf("We out this thaaaang\n");
-					//NEXT_STATE.REGS[2] = 0xA;
+					else if(CURRENT_STATE.REGS[2] == 0x5){
+						int dummy;
+						printf("Please enter an integer\n");
+						scanf("%d",&dummy);
+						NEXT_STATE.REGS[2] = dummy;
+					}
+					else if(CURRENT_STATE.REGS[2] == 0x1){
+						int dummy = CURRENT_STATE.REGS[4];
+						printf("Number: %d\n",dummy);
+					}
 					break;
 				default:
 					printf("\n\nInstruction Not Found\n\n");
@@ -1015,7 +1025,7 @@ void print_program(){
 				printf("MTHI %d\n", rs);
 				break;
 			case 0x0000000C: 
-				if(CURRENT_STATE.REGS[2] = 0xA){
+				if(CURRENT_STATE.REGS[2] == 0xA){
 					printf("SYSCALL instruction, exiting program\n");
 				}
 				//printf("We out this thaaaang\n");
@@ -1037,18 +1047,21 @@ int main(int argc, char *argv[]) {
 	printf("\n**************************\n");
 	printf("Welcome to MU-MIPS SIM...\n");
 	printf("**************************\n\n");
-
+	printf("Test_5");
 	if (argc < 2) {
 		printf(
 				"Error: You should provide input file.\nUsage: %s <input program> \n\n",
 				argv[0]);
 		exit(1);
 	}
-
+	printf("Test_1");
 	strcpy(prog_file, argv[1]);
 	initialize();
+	printf("Test_2");
 	load_program();
+	printf("Test_3");
 	help();
+	printf("Test_4");
 	while (1) {
 		handle_command();
 	}

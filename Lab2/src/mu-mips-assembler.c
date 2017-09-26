@@ -277,9 +277,9 @@ uint32_t translateInstruction( char *instruction ){
 
 	if( strcmp( instruct,  "addi") == 0 ){ //ADDI
 		intVal1 = find_register( val1 );
-		rs = intVal1 << 16;
+		rt = intVal1 << 16;
 		intVal2 = find_register( val2 );
-		rt = intVal2 << 21;
+		rs = intVal2 << 21;
 		immediate = (uint32_t) strtoul(val3, &dumby, 16);
 		if( immediate > 0xFFFF0000 ) {
 			immediate = immediate >> 2;
@@ -290,9 +290,9 @@ uint32_t translateInstruction( char *instruction ){
 	} else if( strcmp( instruct,  "addiu") == 0 ){ //ADDIU
 		//printf("PLEASE\n");
 		intVal1 = find_register( val1 );
-		rs = intVal1 << 16;
+		rt = intVal1 << 16;
 		intVal2 = find_register( val2 );
-		rt = intVal2 << 21;
+		rs = intVal2 << 21;
 		immediate = (uint32_t)strtoul(val3, &dumby, 16);
 		if( immediate > 0xFFFF0000 ) {
 			immediate = immediate >> 2;
@@ -300,7 +300,6 @@ uint32_t translateInstruction( char *instruction ){
 		}
 		immediate = 0x0000FFFF & immediate;
 		mchnCode = 0x24000000 | rs | rt | immediate;
-
 	} else if( strcmp( instruct,  "andi") == 0 ){ //ANDI
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
@@ -695,9 +694,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	strcpy(prog_file, argv[1]);
-	//printf("is this even real?");
 	FILE* fp_in = fopen(prog_file,"r");
-	FILE* fp_out = fopen("AssemblerOutput.txt","w");
+	FILE* fp_out = fopen("AssemblerOutput.in","w");
 	char char_array[100];
 	char* input_instruction;
 	uint32_t output_instruction;
