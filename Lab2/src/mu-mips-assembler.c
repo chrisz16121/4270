@@ -329,12 +329,14 @@ uint32_t translateInstruction( char *instruction ){
 		rs = intVal1 << 21;//16;
 		intVal2 = find_register( val2 );
 		rt = intVal2 << 16;//21;
-		offset = (uint32_t) strtoul(val3, &dumby, 16);
+		offset = (uint32_t)strtoul(val3, &dumby, 16);
+		printf("the offset is %d:%x\n",offset,offset);
 		if( offset > 0xFFFF0000 ) {
 			offset = offset >> 2;
 			offset = 0xFFFFFFFF & offset;
 		}
 		offset = 0x0000FFFF & offset;
+		printf("the offset is %d:%x\n",offset,offset);
 		mchnCode = 0x14000000 | rs | rt | offset;
 	} else if( strcmp( instruct,  "ori") == 0 ){ //ORI
 		intVal1 = find_register( val1 );
@@ -710,9 +712,9 @@ int main(int argc, char *argv[]) {
 	while(fgets (char_array, 60, fp_in)!=NULL){
 		input_instruction = malloc(60 * sizeof(char)); 
 		strcpy(input_instruction,char_array);
-		printf("%s\n",char_array);
+		//printf("%s\n",char_array);
 		output_instruction = translateInstruction(input_instruction);
-		printf("%x\n",output_instruction);
+		//printf("%x\n",output_instruction);
 		fprintf(fp_out,"%x\n",output_instruction);		
 	}
 	fclose(fp_in);

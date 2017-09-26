@@ -2,14 +2,15 @@ addiu $a0,$zero,1
 addiu $v0,$zero,5
 syscall
 addiu $a1,$v0,0
+andi $v0,$v0,0
 addiu $a2,$zero,0
 addiu $a3,$zero,0
 andi $t0,$t0,0
 addiu $t0,$a0,0
-addu $a0,$a0,a2
+addu $a0,$a0,$a2
 andi $a2,$a2,0
 addiu $a2,$t0,0
-addiu $a3,$zero,1
+addiu $a3,$a3,1
 bne $a3,$a1,-18
 andi $v0,$v0,0
 addiu $v0,$zero,1

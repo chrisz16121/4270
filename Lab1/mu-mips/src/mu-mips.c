@@ -317,7 +317,7 @@ uint32_t createMask(uint32_t a, uint32_t b) { //a needs to be smaller than b
 /************************************************************/
 void handle_instruction()
 {
-	print_program();
+	//print_program();
 	int i;
 	int binary_num[32];
 	uint32_t temp_instruct;
@@ -343,7 +343,7 @@ void handle_instruction()
 	//printf("\n");
 	//printf("\n");
 	//begin else ifs 
-	
+	printf("REGISTERS:\n$zero:%d\t$v0:%d\t$a0:%d\t$a1:%d\t$a2:%d\t$a3:%d\t$t0:%d\tt1:%d\t\n",CURRENT_STATE.REGS[0],CURRENT_STATE.REGS[2],CURRENT_STATE.REGS[4],CURRENT_STATE.REGS[5],CURRENT_STATE.REGS[6],CURRENT_STATE.REGS[7],CURRENT_STATE.REGS[8],CURRENT_STATE.REGS[9]);
 	switch(opcode){
 		case 0x20000000: //ADDI
 			rs = (0x03E00000 & instruct) >> 21;
@@ -358,7 +358,7 @@ void handle_instruction()
 			immediate = (0x0000FFFF & instruct);
 			result = CURRENT_STATE.REGS[rs] + immediate;
 			NEXT_STATE.REGS[rt] = result;
-			printf("register %d now contains %d:%d\n",rt,result,NEXT_STATE.REGS[2]);
+			//printf("register %d now contains %d:%d\n",rt,result,NEXT_STATE.REGS[2]);
 			break;
 			case 0x30000000: //ANDI--Corrected?
 			immediate = (0x0000FFFF & instruct);
@@ -375,11 +375,17 @@ void handle_instruction()
 			}
 			break;
 		case 0x14000000: //BNE--Corrected?
+			printf("branch!\n");
 			offset = (0x0000FFFF & instruct) << 2;
+			offset = offset & 0x0000FFFF;
+			offset = offset ^ 0xFFFF0000;
 			rs = (0x03E00000 & instruct) >> 21;
 			rt = (0x001F0000 & instruct) >> 16;
 			if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
+				printf("taking branch! offset is %08x\n",offset);
 				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+				printf("Current Instruction: %08x\n",CURRENT_STATE.PC);
+				printf("Next Instruction: %08x\n",NEXT_STATE.PC);
 			}
 			break;
 		case 0x34000000: //ORI--Corrected?
@@ -423,8 +429,10 @@ void handle_instruction()
 // 			offset = 0x0000FFFF & instruct;
 // 			rs = (0x03E00000 & instruct) >> 21;
 // 			rt = (0x001F0000 & instruct) >> 16;
-// 			if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
-// 				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+// 			if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
+//				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+//				printf("Current Instruction: %x\n",CURRENT_STATE.PC);
+//				printf("Next Instruction: %x\n",NEXT_STATE.PC);
 // 			}
 // 			break;
 // 		case 0x34000000: //ORI
