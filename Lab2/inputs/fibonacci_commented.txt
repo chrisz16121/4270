@@ -2,18 +2,19 @@
 [0x04000004]	addiu $v0,$zero,5	//get ready to read integer
 [0x04000008]	syscall			//read integer
 [0x0400000C]	addiu $a1,$v0,0		//load value into a1 (this will be the stopping index, fibbonacci(a1))
-[0x04000010]	addiu $a2,$zero,0	//set n-1 to zero
-[0x04000014]	addiu $a3,$zero,0	//set index at zero
-[0x04000018]	andi $t0,$t0,0		//clear the temp register
-[0x0400001C]	addiu $t0,$a0,0		//load the current value into temp
-[0x04000020]	addu $a0,$a0,$a2	//ADD (get the next number in the sequence)
-[0x04000024]	andi $a2,$a2,0		//clear the old n-1
-[0x04000028]	addiu $a2,t0,0		//load temp into n-1
-[0x0400002C]	addiu $a3,$a3,1		//increment the counter
-[0x04000030]	bne $a3,$a1,-24		//check to see if index reached, if not, jump back to 0x04000018
-[0x04000034]	andi $v0,$v0,0		//clear the v0 register
-[0x04000038]	addiu $v0,$zero,1	//setting up syscall to print an integer
-[0x0400003C]	syscall			//print the result!
-[0x04000040]	andi $v0,$v0,0		//clear the register again
-[0x04000044]	addiu $v0,$v0,A		//setting up syscall to exit program execution
-[0x04000048]	syscall			//end
+[0x04000010]	andi $v0,$v0,0		//clear v0 after we get the return value
+[0x04000014]	addiu $a2,$zero,0	//set n-1 to zero
+[0x04000018]	addiu $a3,$zero,0	//set index at zero
+[0x0400001C]	andi $t0,$t0,0		//clear the temp register
+[0x04000020]	addiu $t0,$a0,0		//load the current value into temp
+[0x04000024]	addu $a0,$a0,$a2	//ADD (get the next number in the sequence)
+[0x04000028]	andi $a2,$a2,0		//clear the old n-1
+[0x0400002C]	addiu $a2,t0,0		//load temp into n-1
+[0x04000030]	addiu $a3,$a3,1		//increment the counter
+[0x04000034]	bne $a3,$a1,-24		//check to see if index reached, if not, jump back to 0x04000018
+[0x04000038]	andi $v0,$v0,0		//clear the v0 register
+[0x0400003C]	addiu $v0,$zero,1	//setting up syscall to print an integer
+[0x04000040]	syscall			//print the result!
+[0x04000044]	andi $v0,$v0,0		//clear the register again
+[0x04000048]	addiu $v0,$v0,A		//setting up syscall to exit program execution
+[0x0400004C]	syscall			//end
