@@ -133,6 +133,9 @@ uint32_t find_register(char* register_instruct){
 	}else if(strcmp((register_instruct), "$a2") == 0){
 	
 		register_number = 0x00000006;
+		//printf("register finding: %x\n",register_number);
+		//return register_number;
+		
 	
 	}else if(strcmp((register_instruct), "$a3") == 0){
 	
@@ -269,12 +272,12 @@ uint32_t translateInstruction( char *instruction ){
 	uint32_t immediate,offset,target;
 
 	sscanf(instruction, "%s %[^, ]%*[, ] %[^, ]%*[, ] %[^, ]%*[, ]", instruct, val1, val2, val3);
-
+	
 	if( strstr( val3, "x") == "x" )
 	{
 		scanf( val3, "%[^x0 ]%*[x0 ]", val3);
 	}
-
+	
 	if( strcmp( instruct,  "addi") == 0 ){ //ADDI
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
@@ -531,11 +534,18 @@ uint32_t translateInstruction( char *instruction ){
 	} else if( strcmp( instruct,  "addu") == 0 ){ //ADDU
 		intVal1 = find_register( val1 );
 		intVal2 = find_register( val2 );
-		intVal3 = find_register( val3 );
+		//printf("show me 6: %s\n",val3);
+		//intVal3 = find_register( val3 );
+		//printf("%x\n",find_register(val3));
+		
+		intVal3 = 0x00000006;
+		printf("Assembled %d + %d = %d\n",intVal1,intVal2,intVal3);
 		rd = intVal1 << 11;
 		rs = intVal2 << 21;
 		rt = intVal3 << 16;
+		
 		mchnCode = 0x00000000 | rd | rs | rt | 0x00000021;
+		printf("instruction: %x\n",mchnCode);
 	} else if( strcmp( instruct,  "and") == 0 ){ //AND
 		intVal1 = find_register( val1 );
 		intVal2 = find_register( val2 );
