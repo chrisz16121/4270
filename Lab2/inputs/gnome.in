@@ -33,17 +33,17 @@ andi $t4,$t4,0
 addiu $t4,$t2,0
 sll $t4,$t4,2
 addu $t4,$t3,$t4
-lw $a1,0(t4)
+lw $a1,0($t4)
 andi $t5,$t5,0
 addiu $t5,$t0,0
 sll $t5,$t5,2
 addu $t5,$t3,$t5
-lw $a0,0(t5)
-subu $a3,$a0,$a1
+lw $a0,0($t5)
+sub $a3, $a0, $a1
 bgtz $a3,14
-sw $a0,0(t4)
-sw $a1,0(t5)
-subu $t0,$t0,1
+sw $a0,0($t4)
+sw $a1,0($t5)
+addi $t0,$t0,-1
 j -54
 addiu $t0,$t0,1
 bne $t0,$t1,-5C

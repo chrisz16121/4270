@@ -271,7 +271,7 @@ uint32_t translateInstruction( char *instruction ){
 	uint32_t special,check;
 	uint32_t immediate,offset,target;
 	printf("Instruct: %s\n",instruction);
-	sscanf(instruction, "%s %[^, ]%*[, ] %[^, ]%*[, ] %s"/*%[^, ]%*[, ]*/, instruct, val1, val2, val3);
+	sscanf(instruction, "%s %[^, ]%*[, ] %[^, ]%*[, ]%[^, ]%*[, ]", instruct, val1, val2, val3);
 	
 	if( strstr( val3, "x") == "x" )
 	{
