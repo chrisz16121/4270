@@ -269,7 +269,6 @@ uint32_t translateInstruction( char *instruction ){
 	uint32_t rs,rt,rd,base,sa;	
 	uint32_t special,check;
 	uint32_t immediate,offset,target;
-	printf("Instruct: %s\n",instruction);
 	sscanf(instruction, "%s %[^, ]%*[, ] %[^, ]%*[, ] %s", instruct, val1, val2, val3);
 	
 	if( strstr( val3, "x") == "x" )
@@ -704,6 +703,7 @@ uint32_t translateInstruction( char *instruction ){
 	} else{ 
 		printf("Instruction Not Found\n");
 	}
+	printf("Instruct: %swas translated to %08x\n",instruction,mchnCode);
 	return mchnCode;
 	
 }
@@ -721,9 +721,9 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	strcpy(prog_file, argv[1]);
+	strcpy(prog_file, argv[1]);						//open input file
 	FILE* fp_in = fopen(prog_file,"r");
-	FILE* fp_out = fopen("AssemblerOutput.in","w");
+	FILE* fp_out = fopen("AssemblerOutput.in","w");				//open output file
 	char char_array[100];
 	char* input_instruction;
 	uint32_t output_instruction;
@@ -735,13 +735,13 @@ int main(int argc, char *argv[]) {
 		printf("could not open file\n");
 		return 1;
 	}
-	while(fgets (char_array, 60, fp_in)!=NULL){
+	while(fgets (char_array, 60, fp_in)!=NULL){				//read instructions line by line
 		input_instruction = malloc(60 * sizeof(char)); 
 		strcpy(input_instruction,char_array);
 		//printf("%s\n",char_array);
-		output_instruction = translateInstruction(input_instruction);
+		output_instruction = translateInstruction(input_instruction);	//translate
 		//printf("%x\n",output_instruction);
-		fprintf(fp_out,"%x\n",output_instruction);		
+		fprintf(fp_out,"%x\n",output_instruction);			//write to output file
 	}
 	fclose(fp_in);
 	fclose(fp_out);
