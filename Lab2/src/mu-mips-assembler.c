@@ -504,7 +504,6 @@ uint32_t translateInstruction( char *instruction ){
 		base = intVal3 << 21;
 		mchnCode = 0xA4000000 | base | rt | offset;
 	} else if( strcmp( instruct,  "sw") == 0 ){ //SW
-		printf("IN SW\n");
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
 		strcpy(dumby, val2);
@@ -583,6 +582,7 @@ uint32_t translateInstruction( char *instruction ){
 		intVal1 = find_register( val1 );
 		intVal2 = find_register( val2 );
 		intVal3 = find_register( val3 );
+		printf("val3: %s val2: %s val1: %s", val3, val2, val1	);
 		rd = intVal1 << 11;
 		rs = intVal2 << 21;
 		rt = intVal3 << 16;
@@ -646,15 +646,16 @@ uint32_t translateInstruction( char *instruction ){
 	} else if( strcmp( instruct,  "sll") == 0 ){ //SLL !!!It is supposed to be all zeroes!!! Logical means add 0's
 		intVal1 = find_register( val1 );
 		intVal2 = find_register( val2 );
-		intVal3 = find_register( val3 );
+		sa = (uint32_t) strtoul(val3, &dumby, 16);
 		rd = intVal1 << 11;
 		rt = intVal2 << 16;
 		sa = intVal3 << 6;
+		printf("val1: %s, val2: %s, val3: %s",val1, val2, val3);
 		mchnCode = 0x00000000 | rd | rt | sa | 0x00000000;
 	} else if( strcmp( instruct,  "sra") == 0 ){ //SRA Arithmetic means 
 		intVal1 = find_register( val1 );
 		intVal2 = find_register( val2 );
-		intVal3 = find_register( val3 );
+		sa = (uint32_t) strtoul(val3, &dumby, 16);
 		rd = intVal1 << 11;
 		rt = intVal2 << 16;
 		sa = intVal3 << 6;
@@ -662,7 +663,7 @@ uint32_t translateInstruction( char *instruction ){
 	} else if( strcmp( instruct,  "srl") == 0 ){ //SRL DOUBLE CHECK RESULT BC IT MAY INSERT 1's INSTEAD OF 0's
 		intVal1 = find_register( val1 );
 		intVal2 = find_register( val2 );
-		intVal3 = find_register( val3 );
+		sa = (uint32_t) strtoul(val3, &dumby, 16);
 		rd = intVal1 << 11;
 		rt = intVal2 << 16;
 		sa = intVal3 << 6;
