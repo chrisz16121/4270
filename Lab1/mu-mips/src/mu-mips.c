@@ -385,8 +385,8 @@ void handle_instruction()
 			if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
 				//printf("taking branch! offset is %08x\n",offset);
 				NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-				//printf("Current Instruction: %08x\n",CURRENT_STATE.PC);
-				//printf("Next Instruction: %08x\n",NEXT_STATE.PC);
+				printf("Current Instruction: %08x\n",CURRENT_STATE.PC);
+				printf("Next Instruction: %08x\n",NEXT_STATE.PC);
 			}
 			break;
 		case 0x34000000: //ORI--Corrected?
