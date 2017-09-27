@@ -39,8 +39,8 @@ addiu $t5,$t0,0
 sll $t5,$t5,2
 addu $t5,$t3,$t5
 lw $a0,0($t5)
-sub $a3, $a0, $a1
-bgtz $a3,14
+slt $a3,$a1,$a0
+beq $a3,1,14
 sw $a0,0($t4)
 sw $a1,0($t5)
 addi $t0,$t0,-1
