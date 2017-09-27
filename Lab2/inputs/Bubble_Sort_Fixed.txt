@@ -1,3 +1,4 @@
+lui $gp, 1001
 addiu $a0, $zero, 0x5
 sw $a0, 0($gp)
 addiu $a0, $zero, 0x3
@@ -20,31 +21,30 @@ addiu $a0, $zero, 0xa
 sw $a0, 36($gp)
 addiu $s0, $zero, 0xa	
 addiu $s1, $zero, 0x1   
-addiu $a0, $zero, 0xa	
+addiu $a0, $zero, 0x9	
 addiu $a1, $zero, 0x1   
 addiu $a2, $zero, 0x0	
 beq $s1, $s0, 76		
-beq $a1, $a0, 76		
+beq $a1, $a0, 76	
 add $s5, $a2, $gp		
 lw $t0, 0($s5)			
 add $a2, $a2, 4			
 add $s5, $a2, $gp		
 lw $t1, 0($s5)			
-slt $s0,$t1,$t0       	
-beq $s0,0x1, 12      	
+slt $s0,$t1,$t0       		
+beq $s0,0x1, 12  	   		 
 add $a1, $a1, 0x1		
-j -36 			
-sub $a2, $a2, 0x4		
+j -36 						
+sub $a2, $a2, 0x4	
 add $s5, $a2, $gp		
-sw $t1, 0($s5)			
+sw $t1, 0($s5)				
 add $a2, $a2, 0x4		
 add $s5, $a2, $gp		
 sw $t0, 0($s5)			
 add $a1, $a1, 0x1		
-j -68			
-syscall				
+j -68		
+syscall					
 addiu $a1, $zero, 0x1		
 add $s1, $s1, 0x1		
 add $a2, $zero, 0x0		
 j -92			
-
