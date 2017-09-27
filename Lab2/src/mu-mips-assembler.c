@@ -123,7 +123,6 @@ uint32_t find_register(char* register_instruct){
 		register_number = 0x00000003;
 	
 	}else if(strcmp((register_instruct), "$a0") == 0){
-	
 		register_number = 0x00000004;
 	
 	}else if(strcmp((register_instruct), "$a1") == 0){
@@ -271,7 +270,7 @@ uint32_t translateInstruction( char *instruction ){
 	uint32_t special,check;
 	uint32_t immediate,offset,target;
 	printf("Instruct: %s\n",instruction);
-	sscanf(instruction, "%s %[^, ]%*[, ] %[^, ]%*[, ]%[^, ]%*[, ]", instruct, val1, val2, val3);
+	sscanf(instruction, "%s %[^, ]%*[, ] %[^, ]%*[, ] %s", instruct, val1, val2, val3);
 	
 	if( strstr( val3, "x") == "x" )
 	{
@@ -650,7 +649,6 @@ uint32_t translateInstruction( char *instruction ){
 		rd = intVal1 << 11;
 		rt = intVal2 << 16;
 		sa = intVal3 << 6;
-		printf("val1: %s, val2: %s, val3: %s",val1, val2, val3);
 		mchnCode = 0x00000000 | rd | rt | sa | 0x00000000;
 	} else if( strcmp( instruct,  "sra") == 0 ){ //SRA Arithmetic means 
 		intVal1 = find_register( val1 );
