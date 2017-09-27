@@ -28,25 +28,25 @@
 [0x0400006C] andi $a0,$a0,0		//clear the registers (this is where compare starts)
 [0x04000070] andi $a1,$a1,0
 [0x04000074] andi $a2,$a2,0
-[0x04000078] addiu $t2,$t0,-1		//i-1 into t2
+[0x04000078] addi $t2,$t0,-1		//i-1 into t2
 [0x0400007C] andi $t4,$t4,0		//clear t4
 [0x04000080] addiu $t4,$t2,0		//load i-1 into t4
 [0x04000084] sll $t4,$t4,2		//multiply t4 by 4
 [0x04000088] addu $t4,$t3,$t4		//add offset to get effective address
 [0x0400008C] lw $a1,0(t4)		//load memory at effective address, a1 contains arry[i-1]
-[0x04000090] andi $t5,$t5,0 		//clear t4
+[0x04000090] andi $t5,$t5,0 		//clear t5
 [0x04000094] addiu $t5,$t0,0		//load i into t5
 [0x04000098] sll $t5,$t5,2		//multiply t5 by 4
 [0x0400009C] addu $t5,$t3,$t5		//effective address
 [0x040000A0] lw $a0,0(t5)		//load memory, a0 contains arry[i]
-[0x040000A4] subu $a3,$a0,$a1		//check to see which is bigger
+[0x040000A4] sub $a3,$a0,$a1		//check to see which is bigger
 [0x040000A8] bgtz $a3,14		//jump to increase index, elements in the right order
 [0x040000AC] sw $a0,0(t4)		//swap!
 [0x040000B0] sw $a1,0(t5)		//swap!
-[0x040000B4] subu $t0,$t0,1		//decrement index
+[0x040000B4] sub $t0,$t0,1		//decrement index
 [0x040000B8] j -54			//back to check for zero index (jumps back up to 27)
 [0x040000BC] addiu $t0,$t0,1		//increment index (this is where bgtz branches to)
-[0x040000C0] bne $t0,$t1,-5C	//checks to see if at the end of the array
+[0x040000C0] bne $t0,$t1,-5C		//checks to see if at the end of the array
 [0x040000C4] andi $v0,$v0,0		//exits the program
 [0x040000C8] addiu $v0,$v0,A
 [0x040000CC] syscall
