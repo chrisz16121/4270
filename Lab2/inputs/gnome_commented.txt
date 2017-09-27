@@ -1,5 +1,5 @@
-[0x04000000] lui $gp,1001		
-[0x04000004] addiu $a0, $zero, 0x5
+[0x04000000] lui $gp,1001	       //begin at data segment
+[0x04000004] addiu $a0, $zero, 0x5     //begin loading array into program memory	
 [0x04000008] sw $a0, 0($gp)
 [0x0400000C] addiu $a0, $zero, 0x3
 [0x04000010] sw $a0, 4($gp)
@@ -39,7 +39,7 @@
 [0x04000098] sll $t5,$t5,2		//multiply t5 by 4
 [0x0400009C] addu $t5,$t3,$t5		//effective address
 [0x040000A0] lw $a0,0(t5)		//load memory, a0 contains arry[i]
-[0x040000A4] sub $a3,$a0,$a1		//check to see which is bigger
+[0x040000A4] slt $a3,$a1,$a0		//check to see which is bigger
 [0x040000A8] bgtz $a3,14		//jump to increase index, elements in the right order
 [0x040000AC] sw $a0,0(t4)		//swap!
 [0x040000B0] sw $a1,0(t5)		//swap!
