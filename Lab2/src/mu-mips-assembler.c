@@ -271,7 +271,7 @@ uint32_t translateInstruction( char *instruction ){
 	uint32_t special,check;
 	uint32_t immediate,offset,target;
 	printf("Instruct: %s\n",instruction);
-	sscanf(instruction, "%s %[^, ]%*[, ] %[^, ]%*[, ] %[^, ]%*[, ]", instruct, val1, val2, val3);
+	sscanf(instruction, "%s %[^, ]%*[, ] %[^, ]%*[, ] %s"/*%[^, ]%*[, ]*/, instruct, val1, val2, val3);
 	
 	if( strstr( val3, "x") == "x" )
 	{
@@ -416,7 +416,10 @@ uint32_t translateInstruction( char *instruction ){
 	} else if( strcmp( instruct,  "lb") == 0 ){ //LB
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
-		sscanf(val2, "%s(%s)", val2, val3 );
+		strcpy(dumby, val2);
+		sscanf(val2, "%[^(](%[^)])", val2, val3 );
+		strtok_r(dumby,"()",&dumby);
+		sscanf(dumby,"%[^)]", val3);
 		offset = (uint32_t) strtoul(val2, &dumby, 16);
 		if( offset > 0xFFFF0000 ) {
 			offset = offset >> 2;
@@ -429,7 +432,10 @@ uint32_t translateInstruction( char *instruction ){
 	} else if( strcmp( instruct,  "lh") == 0 ){ //LH
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
-		sscanf(val2, "%s(%s)", val2, val3 );
+		strcpy(dumby, val2);
+		sscanf(val2, "%[^(](%[^)])", val2, val3 );
+		strtok_r(dumby,"()",&dumby);
+		sscanf(dumby,"%[^)]", val3);
 		offset = (uint32_t) strtoul(val2, &dumby, 16);
 		if( offset > 0xFFFF0000 ) {
 			offset = offset >> 2;
@@ -452,7 +458,10 @@ uint32_t translateInstruction( char *instruction ){
 	} else if( strcmp( instruct,  "lw") == 0 ){ //LW
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
-		sscanf(val2, "%s(%s)", val2, val3 );
+		strcpy(dumby, val2);
+		sscanf(val2, "%[^(](%[^)])", val2, val3 );
+		strtok_r(dumby,"()",&dumby);
+		sscanf(dumby,"%[^)]", val3);
 		offset = (uint32_t) strtoul(val2, &dumby, 16);
 		if( offset > 0xFFFF0000 ) {
 			offset = offset >> 2;
@@ -465,7 +474,10 @@ uint32_t translateInstruction( char *instruction ){
 	} else if( strcmp( instruct,  "sb") == 0 ){ //SB
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
-		sscanf(val2, "%s(%s)", val2, val3 );
+		strcpy(dumby, val2);
+		sscanf(val2, "%[^(](%[^)])", val2, val3 );
+		strtok_r(dumby,"()",&dumby);
+		sscanf(dumby,"%[^)]", val3);
 		offset = (uint32_t) strtoul(val2, &dumby, 16);
 		if( offset > 0xFFFF0000 ) {
 			offset = offset >> 2;
@@ -478,7 +490,10 @@ uint32_t translateInstruction( char *instruction ){
 	} else if( strcmp( instruct,  "sh") == 0 ){ //SH
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
-		sscanf(val2, "%s(%s)", val2, val3 );
+		strcpy(dumby, val2);
+		sscanf(val2, "%[^(](%[^)])", val2, val3 );
+		strtok_r(dumby,"()",&dumby);
+		sscanf(dumby,"%[^)]", val3);
 		offset = (uint32_t) strtoul(val2, &dumby, 16);
 		if( offset > 0xFFFF0000 ) {
 			offset = offset >> 2;
@@ -492,7 +507,10 @@ uint32_t translateInstruction( char *instruction ){
 		printf("IN SW\n");
 		intVal1 = find_register( val1 );
 		rt = intVal1 << 16;
-		sscanf(val2, "%s(%s)", val2, val3 );
+		strcpy(dumby, val2);
+		sscanf(val2, "%[^(](%[^)])", val2, val3 );
+		strtok_r(dumby,"()",&dumby);
+		sscanf(dumby,"%[^)]", val3);
 		offset = (uint32_t) strtoul(val2, &dumby, 16);
 		if( offset > 0xFFFF0000 ) {
 			offset = offset >> 2;
