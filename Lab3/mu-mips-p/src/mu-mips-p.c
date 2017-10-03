@@ -6,6 +6,8 @@
 
 #include "mu-mips.h"
 
+uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t opcode);
+
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
 /***************************************************************/
@@ -373,9 +375,9 @@ void EX()
 	if( 1 ){ /*ALU*/ 
 		EX_MEM.IR = ID_EX.IR;
 		if( 1 ){ //register-immediate
-			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.imm, operation); 
+			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.imm, opcode); 
 		} else { //register-register
-			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.B, operation); 
+			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.B, opcode); 
 		}
 	} else { /*Load/Store*/
 		EX_MEM.IR = ID_EX.IR;
@@ -420,6 +422,12 @@ void initialize() {
 	RUN_FLAG = TRUE;
 }
 
+
+uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t opcode){
+	//This is where we will have a large case statement 
+	//to determine what operation to do on X and Y
+
+}
 /************************************************************/
 /* Print the program loaded into memory (in MIPS assembly format)    */ 
 /************************************************************/
@@ -432,6 +440,23 @@ void print_program(){
 /************************************************************/
 void show_pipeline(){
 	/*IMPLEMENT THIS*/
+	printf("Current PC: %x\n", CURRENT_STATE.PC);
+	printf("IF/ID.IR: %x\n", instruct);
+	printf("IF/ID.PC: %x\n", IF_ID.PC);
+
+	printf("ID/EX.IR: %x\n", ID_EX.IR);
+	printf("ID/EX.A: %x\n", ID_EX.A);
+	printf("ID/EX.B: %x\n", ID_EX.B);
+	printf("ID/EX.imm: %x\n", ID_EX.imm);
+
+	printf("EX/MEM.IR: %x\n", EX_MEM.IR);
+	printf("EX/MEM.A: %x\n", EX_MEM.A);
+	printf("EX/MEM.B: %x\n", EX_MEM.B);
+	printf("EX/MEM.ALUOutput: %x\n", EX_MEM.ALUOutput);
+
+	printf("MEM/WB.IR: %x\n", MEM_WB.IR);
+	printf("MEM/WB.ALUOutout: %x\n", MEM_WB.ALUOutput);
+	printf("MEM/WB.LMD: %x\n", MEM_WB.LMD);
 }
 
 /***************************************************************/
