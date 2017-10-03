@@ -6,6 +6,8 @@
 
 #include "mu-mips.h"
 
+uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t opcode);
+
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
 /***************************************************************/
@@ -326,7 +328,19 @@ void handle_pipeline()
 /************************************************************/
 void WB()
 {
-	/*IMPLEMENT THIS*/
+	INSTRUCTION_COUNT++;
+	//This is essentually pseudocode, if will not work!!
+	if( 1 ){ /*ALU*/
+		if( 1 ) {/*register-immediate*/
+			NEXT_STATE.REGS[ MEM_WB.IR[rt] ] = MEM_WB.ALUOutput;//!!!Might be wrong!!!
+		} else {/*register-register*/
+			NEXT_STATE.REGS[ MEM_WB.IR[rd] ] = MEM_WB.ALUOutput;//!!!Might be wrong!!!
+		}	
+	}else { /*Load/Store*/
+		if( 1 ){ /*Load*/
+			NEXT_STATE.REGS[ MEM_WB.IR[rt] ] = MEM_WB.LMD;//!!!Might be wrong!!!
+		}
+	}
 }
 
 /************************************************************/
@@ -361,9 +375,9 @@ void EX()
 	if( 1 ){ /*ALU*/ 
 		EX_MEM.IR = ID_EX.IR;
 		if( 1 ){ //register-immediate
-			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.imm, operation); 
+			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.imm, opcode); 
 		} else { //register-register
-			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.B, operation); 
+			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.B, opcode); 
 		}
 	} else { /*Load/Store*/
 		EX_MEM.IR = ID_EX.IR;
@@ -384,8 +398,8 @@ void ID()
 	rt = 0x001F0000 & IF_ID.IR;
 	immediate = 0x0000FFFF & IF_ID.IR;
 	immediate = 0xFFFFFFFF ^ immediate;
-	ID_EX.A = CURRENT_STATE.REGS[rs];
-	ID_EX.B = CURRENT_STATE.REGS[rt];
+	ID_EX.A = CURRENT_STATE.REGS[ IF_ID.IR[rs] ]; //!!!Might be wrong!!!
+	ID_EX.B = CURRENT_STATE.REGS[ IF_ID.IR[rt] ]; //!!!Might be wrong!!!
 	ID_EX.imm = immediate;
 }
 
@@ -647,6 +661,12 @@ void initialize() {
 	RUN_FLAG = TRUE;
 }
 
+
+uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t opcode){
+	//This is where we will have a large case statement 
+	//to determine what operation to do on X and Y
+
+}
 /************************************************************/
 /* Print the program loaded into memory (in MIPS assembly format)    */ 
 /************************************************************/
@@ -659,6 +679,23 @@ void print_program(){
 /************************************************************/
 void show_pipeline(){
 	/*IMPLEMENT THIS*/
+	printf("Current PC: %x\n", CURRENT_STATE.PC);
+	printf("IF/ID.IR: %x\n", instruct);
+	printf("IF/ID.PC: %x\n", IF_ID.PC);
+
+	printf("ID/EX.IR: %x\n", ID_EX.IR);
+	printf("ID/EX.A: %x\n", ID_EX.A);
+	printf("ID/EX.B: %x\n", ID_EX.B);
+	printf("ID/EX.imm: %x\n", ID_EX.imm);
+
+	printf("EX/MEM.IR: %x\n", EX_MEM.IR);
+	printf("EX/MEM.A: %x\n", EX_MEM.A);
+	printf("EX/MEM.B: %x\n", EX_MEM.B);
+	printf("EX/MEM.ALUOutput: %x\n", EX_MEM.ALUOutput);
+
+	printf("MEM/WB.IR: %x\n", MEM_WB.IR);
+	printf("MEM/WB.ALUOutout: %x\n", MEM_WB.ALUOutput);
+	printf("MEM/WB.LMD: %x\n", MEM_WB.LMD);
 }
 
 /***************************************************************/
