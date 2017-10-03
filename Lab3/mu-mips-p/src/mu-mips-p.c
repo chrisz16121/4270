@@ -397,6 +397,305 @@ void IF()
 	CURRENT_STATE.PC = CURRENT_STATE.PC + 4;
 }
 
+/************************************************************/
+/* parse instruction. This is from working simulator from Akturk, but modified         */ 
+/************************************************************/
+void parse_instruction()
+{
+	/*IMPLEMENT THIS*/
+	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
+	
+	
+	uint32_t instruction, opcode, function, rs, rt, rd, sa, immediate, target;
+	uint64_t product, p1, p2;
+	
+	uint32_t addr, data;
+	
+	int branch_jump = FALSE;
+	
+	printf("[0x%x]\t", CURRENT_STATE.PC);
+	
+	instruction = mem_read_32(IF_ID.IR);
+	
+	opcode = (instruction & 0xFC000000) >> 26;
+	function = instruction & 0x0000003F;
+	rs = (instruction & 0x03E00000) >> 21;
+	rt = (instruction & 0x001F0000) >> 16;
+	rd = (instruction & 0x0000F800) >> 11;
+	sa = (instruction & 0x000007C0) >> 6;
+	immediate = instruction & 0x0000FFFF;
+	target = instruction & 0x03FFFFFF;
+	
+	if(opcode == 0x00){
+		switch(function){
+			case 0x00: //SLL
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] << sa;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x02: //SRL
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> sa;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x03: //SRA 
+				if ((CURRENT_STATE.REGS[rt] & 0x80000000) == 1)
+				{
+					NEXT_STATE.REGS[rd] =  ~(~CURRENT_STATE.REGS[rt] >> sa );
+				}
+				else{
+					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> sa;
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x08: //JR
+				NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+				branch_jump = TRUE;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x09: //JALR
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.PC + 4;
+				NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+				branch_jump = TRUE;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x0C: //SYSCALL
+				if(CURRENT_STATE.REGS[2] == 0xa){
+					RUN_FLAG = FALSE;
+					print_instruction(CURRENT_STATE.PC);
+				}
+				break;
+			case 0x10: //MFHI
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.HI;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x11: //MTHI
+				NEXT_STATE.HI = CURRENT_STATE.REGS[rs];
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x12: //MFLO
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.LO;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x13: //MTLO
+				NEXT_STATE.LO = CURRENT_STATE.REGS[rs];
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x18: //MULT
+				if ((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x80000000){
+					p1 = 0xFFFFFFFF00000000 | CURRENT_STATE.REGS[rs];
+				}else{
+					p1 = 0x00000000FFFFFFFF & CURRENT_STATE.REGS[rs];
+				}
+				if ((CURRENT_STATE.REGS[rt] & 0x80000000) == 0x80000000){
+					p2 = 0xFFFFFFFF00000000 | CURRENT_STATE.REGS[rt];
+				}else{
+					p2 = 0x00000000FFFFFFFF & CURRENT_STATE.REGS[rt];
+				}
+				product = p1 * p2;
+				NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
+				NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x19: //MULTU
+				product = (uint64_t)CURRENT_STATE.REGS[rs] * (uint64_t)CURRENT_STATE.REGS[rt];
+				NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
+				NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x1A: //DIV 
+				if(CURRENT_STATE.REGS[rt] != 0)
+				{
+					NEXT_STATE.LO = (int32_t)CURRENT_STATE.REGS[rs] / (int32_t)CURRENT_STATE.REGS[rt];
+					NEXT_STATE.HI = (int32_t)CURRENT_STATE.REGS[rs] % (int32_t)CURRENT_STATE.REGS[rt];
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x1B: //DIVU
+				if(CURRENT_STATE.REGS[rt] != 0)
+				{
+					NEXT_STATE.LO = CURRENT_STATE.REGS[rs] / CURRENT_STATE.REGS[rt];
+					NEXT_STATE.HI = CURRENT_STATE.REGS[rs] % CURRENT_STATE.REGS[rt];
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x20: //ADD
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x21: //ADDU 
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] + CURRENT_STATE.REGS[rs];
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x22: //SUB
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x23: //SUBU
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x24: //AND
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x25: //OR
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt];
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x26: //XOR
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] ^ CURRENT_STATE.REGS[rt];
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x27: //NOR
+				NEXT_STATE.REGS[rd] = ~(CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt]);
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x2A: //SLT
+				if(CURRENT_STATE.REGS[rs] < CURRENT_STATE.REGS[rt]){
+					NEXT_STATE.REGS[rd] = 0x1;
+				}
+				else{
+					NEXT_STATE.REGS[rd] = 0x0;
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			default:
+				printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+				break;
+		}
+	}
+	else{
+		switch(opcode){
+			case 0x01:
+				if(rt == 0x00000){ //BLTZ
+					if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0){
+						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+						branch_jump = TRUE;
+					}
+					print_instruction(CURRENT_STATE.PC);
+				}
+				else if(rt == 0x00001){ //BGEZ
+					if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
+						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+						branch_jump = TRUE;
+					}
+					print_instruction(CURRENT_STATE.PC);
+				}
+				break;
+			case 0x02: //J
+				NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
+				branch_jump = TRUE;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x03: //JAL
+				NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
+				NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
+				branch_jump = TRUE;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x04: //BEQ
+				if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
+					NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+					branch_jump = TRUE;
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x05: //BNE
+				if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
+					NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+					branch_jump = TRUE;
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x06: //BLEZ
+				if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0 || CURRENT_STATE.REGS[rs] == 0){
+					NEXT_STATE.PC = CURRENT_STATE.PC +  ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+					branch_jump = TRUE;
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x07: //BGTZ
+				if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0 || CURRENT_STATE.REGS[rs] != 0){
+					NEXT_STATE.PC = CURRENT_STATE.PC +  ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+					branch_jump = TRUE;
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x08: //ADDI
+				NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x09: //ADDIU
+				NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x0A: //SLTI
+				if ( (  (int32_t)CURRENT_STATE.REGS[rs] - (int32_t)( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF))) < 0){
+					NEXT_STATE.REGS[rt] = 0x1;
+				}else{
+					NEXT_STATE.REGS[rt] = 0x0;
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x0C: //ANDI
+				NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] & (immediate & 0x0000FFFF);
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x0D: //ORI
+				NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] | (immediate & 0x0000FFFF);
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x0E: //XORI
+				NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] ^ (immediate & 0x0000FFFF);
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x0F: //LUI
+				NEXT_STATE.REGS[rt] = immediate << 16;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x20: //LB
+				data = mem_read_32( CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF)) );
+				NEXT_STATE.REGS[rt] = ((data & 0x000000FF) & 0x80) > 0 ? (data | 0xFFFFFF00) : (data & 0x000000FF);
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x21: //LH
+				data = mem_read_32( CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF)) );
+				NEXT_STATE.REGS[rt] = ((data & 0x0000FFFF) & 0x8000) > 0 ? (data | 0xFFFF0000) : (data & 0x0000FFFF);
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x23: //LW
+				NEXT_STATE.REGS[rt] = mem_read_32( CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF)) );
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x28: //SB
+				addr = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				data = mem_read_32( addr);
+				data = (data & 0xFFFFFF00) | (CURRENT_STATE.REGS[rt] & 0x000000FF);
+				mem_write_32(addr, data);
+				print_instruction(CURRENT_STATE.PC);				
+				break;
+			case 0x29: //SH
+				addr = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				data = mem_read_32( addr);
+				data = (data & 0xFFFF0000) | (CURRENT_STATE.REGS[rt] & 0x0000FFFF);
+				mem_write_32(addr, data);
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x2B: //SW
+				addr = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				mem_write_32(addr, CURRENT_STATE.REGS[rt]);
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			default:
+				// put more things here
+				printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+				break;
+		}
+	}
+	
+	if(!branch_jump){
+		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+	}
+}
 
 /************************************************************/
 /* Initialize Memory                                                                                                    */ 
