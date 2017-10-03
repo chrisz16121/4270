@@ -326,7 +326,19 @@ void handle_pipeline()
 /************************************************************/
 void WB()
 {
-	/*IMPLEMENT THIS*/
+	INSTRUCTION_COUNT++;
+	//This is essentually pseudocode, if will not work!!
+	if( 1 ){ /*ALU*/
+		if( 1 ) {/*register-immediate*/
+			NEXT_STATE.REGS[ MEM_WB.IR[rt] ] = MEM_WB.ALUOutput;//!!!Might be wrong!!!
+		} else {/*register-register*/
+			NEXT_STATE.REGS[ MEM_WB.IR[rd] ] = MEM_WB.ALUOutput;//!!!Might be wrong!!!
+		}	
+	}else { /*Load/Store*/
+		if( 1 ){ /*Load*/
+			NEXT_STATE.REGS[ MEM_WB.IR[rt] ] = MEM_WB.LMD;//!!!Might be wrong!!!
+		}
+	}
 }
 
 /************************************************************/
@@ -383,8 +395,8 @@ void ID()
 	rt = 0x001F0000 & IF_ID.IR;
 	immediate = 0x0000FFFF & IF_ID.IR;
 	immediate = 0xFFFFFFFF ^ immediate;
-	ID_EX.A = CURRENT_STATE.REGS[rs];
-	ID_EX.B = CURRENT_STATE.REGS[rt];
+	ID_EX.A = CURRENT_STATE.REGS[ IF_ID.IR[rs] ]; //!!!Might be wrong!!!
+	ID_EX.B = CURRENT_STATE.REGS[ IF_ID.IR[rt] ]; //!!!Might be wrong!!!
 	ID_EX.imm = immediate;
 }
 
