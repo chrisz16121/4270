@@ -415,7 +415,7 @@ void IF()
 /************************************************************/
 /* parse instruction. This is from working simulator from Akturk, but modified         */ 
 /************************************************************/
-void find_ID_EX.type()
+void find_instruct_type()
 {
 	/*IMPLEMENT THIS*/
 	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
