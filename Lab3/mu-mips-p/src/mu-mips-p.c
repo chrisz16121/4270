@@ -455,94 +455,72 @@ void find_instruct_type()
 		switch(function){
 			case 0x00: //SLL --ALU
 				ID_EX.type = 0;	
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x02: //SRL --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x03: //SRA --ALU
 				ID_EX.type = 0;		
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x08: //JR
 				
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x09: //JALR
 				
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0C: //SYSCALL
 			
 				break;
 			case 0x10: //MFHI --Load/Store........Reg to Reg?
 
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x11: //MTHI --Load/Store........Reg to Reg?
 
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x12: //MFLO --Load/Store........Reg to Reg?
 
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x13: //MTLO --Load/Store........Reg to Reg?
 
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x18: //MULT --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x19: //MULTU --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x1A: //DIV --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x1B: //DIVU --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x20: //ADD --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x21: //ADDU --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x22: //SUB --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x23: //SUBU --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x24: //AND --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x25: //OR --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x26: //XOR --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x27: //NOR --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x2A: //SLT --ALU
 				ID_EX.type = 0;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			default:
 				printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
@@ -557,91 +535,72 @@ void find_instruct_type()
 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
 						branch_jump = TRUE;
 					}
-					print_instruction(CURRENT_STATE.PC);
+					
 				}
 				else if(rt == 0x00001){ //BGEZ
 					if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
 						branch_jump = TRUE;
 					}
-					print_instruction(CURRENT_STATE.PC);
+					
 				}
 				break;
 			case 0x02: //J
 				
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x03: //JAL
 				
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x04: //BEQ
 				
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x05: //BNE
 				
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x06: //BLEZ
 			
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x07: //BGTZ
 			
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x08: //ADDI --ALU
 				ID_EX.type = 1;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x09: //ADDIU --ALU
 				ID_EX.type = 1;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0A: //SLTI --ALU
 				ID_EX.type = 1;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0C: //ANDI --ALU
 				ID_EX.type = 1;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0D: //ORI --ALU
 				ID_EX.type = 1;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0E: //XORI --ALU
 				ID_EX.type = 1;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0F: //LUI --Load/Store
 				ID_EX.type = 2;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x20: //LB --Load/Store
 				ID_EX.type = 2;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x21: //LH --Load/Store
 				ID_EX.type = 2;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x23: //LW --Load/Store
 				ID_EX.type = 2;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x28: //SB --Load/Store
 				ID_EX.type = 3;
-				print_instruction(CURRENT_STATE.PC);				
 				break;
 			case 0x29: //SH --Load/Store
 				ID_EX.type = 3;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x2B: //SW --Load/Store
 				ID_EX.type = 3;
-				print_instruction(CURRENT_STATE.PC);
 				break;
 			default:
 				// put more things here
