@@ -103,4 +103,5 @@ void show_pipeline();/*IMPLEMENT THIS*/
 void initialize();
 void print_program(); /*IMPLEMENT THIS*/
 void find_instruct_type();
+uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t intstruct);
 

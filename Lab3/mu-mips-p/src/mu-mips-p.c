@@ -6,7 +6,7 @@
 
 #include "mu-mips.h"
 
-uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t opcode);
+
 int cycle_count = 1;
 
 /***************************************************************/
@@ -665,10 +665,15 @@ void initialize() {
 	RUN_FLAG = TRUE;
 }
 
-uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t opcode, uint32_t function){
+uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 	//This is where we will have a large case statement 
 	//to determine what operation to do on X and Y
+
+	/*CHRIS ADDED THIS AND CHANGED THE PROTOYPE (SEE EX() FUNCTION)*/
+	uint32_t opcode = (instruct & 0xFC000000) >> 26;
+	uint32_t function = (instruct & 0x0000003F);
 	uint32_t answer;
+	uint64_t p1,p2,product;
 	if(opcode == 0x00){
 			switch(function){
 				case 0x00: //SLL
@@ -687,7 +692,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t opcode, uint32_t funct
 					}
 					break;
 				case 0x18: //MULT
-					if (X & 0x80000000) == 0x80000000){
+					if ((X & 0x80000000) == 0x80000000){
 						p1 = 0xFFFFFFFF00000000 | X;
 					}else{
 						p1 = 0x00000000FFFFFFFF & X;
