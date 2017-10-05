@@ -415,11 +415,15 @@ void IF()
 /************************************************************/
 /* parse instruction. This is from working simulator from Akturk, but modified         */ 
 /************************************************************/
-void parse_instruction()
+void find_instruct_type(int instruct_type)
 {
 	/*IMPLEMENT THIS*/
 	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
 	
+	//0->ALU: Reg to Reg
+	//1->ALU: Reg to Mem
+	//2->Load
+	//3->Store
 	
 	uint32_t instruction, opcode, function, rs, rt, rd, sa, immediate, target;
 	uint64_t product, p1, p2;
@@ -450,15 +454,15 @@ void parse_instruction()
 	if(opcode == 0x00){
 		switch(function){
 			case 0x00: //SLL --ALU
-
+				instruct_type = 0;	
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x02: //SRL --ALU
-
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x03: //SRA --ALU
-				
+				instruct_type = 0;		
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x08: //JR
@@ -472,72 +476,72 @@ void parse_instruction()
 			case 0x0C: //SYSCALL
 			
 				break;
-			case 0x10: //MFHI --Load/Store
+			case 0x10: //MFHI --Load/Store........Reg to Reg?
 
 				print_instruction(CURRENT_STATE.PC);
 				break;
-			case 0x11: //MTHI --Load/Store
+			case 0x11: //MTHI --Load/Store........Reg to Reg?
 
 				print_instruction(CURRENT_STATE.PC);
 				break;
-			case 0x12: //MFLO --Load/Store
+			case 0x12: //MFLO --Load/Store........Reg to Reg?
 
 				print_instruction(CURRENT_STATE.PC);
 				break;
-			case 0x13: //MTLO --Load/Store
+			case 0x13: //MTLO --Load/Store........Reg to Reg?
 
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x18: //MULT --ALU
-			
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x19: //MULTU --ALU
-				
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x1A: //DIV --ALU
-				
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x1B: //DIVU --ALU
-			
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x20: //ADD --ALU
-				
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x21: //ADDU --ALU
-
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x22: //SUB --ALU
-
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x23: //SUBU --ALU
-
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x24: //AND --ALU
-
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x25: //OR --ALU
-
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x26: //XOR --ALU
-
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x27: //NOR --ALU
-
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x2A: //SLT --ALU
-			
+				instruct_type = 0;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			default:
@@ -588,55 +592,55 @@ void parse_instruction()
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x08: //ADDI --ALU
-
+				instruct_type = 1;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x09: //ADDIU --ALU
-
+				instruct_type = 1;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0A: //SLTI --ALU
-				
+				instruct_type = 1;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0C: //ANDI --ALU
-
+				instruct_type = 1;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0D: //ORI --ALU
-
+				instruct_type = 1;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0E: //XORI --ALU
-
+				instruct_type = 1;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0F: //LUI --Load/Store
-
+				instruct_type = 2;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x20: //LB --Load/Store
-				
+				instruct_type = 2;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x21: //LH --Load/Store
-		
+				instruction_type = 2;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x23: //LW --Load/Store
-
+				instruction_type = 2;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x28: //SB --Load/Store
-			
+				instruction_type = 3;
 				print_instruction(CURRENT_STATE.PC);				
 				break;
 			case 0x29: //SH --Load/Store
-				
+				instruction_type = 3;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x2B: //SW --Load/Store
-		
+				instruction_type = 3;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			default:
