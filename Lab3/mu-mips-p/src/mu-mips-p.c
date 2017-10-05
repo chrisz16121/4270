@@ -7,6 +7,7 @@
 #include "mu-mips.h"
 
 uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t opcode);
+int cycle_count = 1;
 
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
@@ -315,7 +316,6 @@ void handle_pipeline()
 {
 	/*INSTRUCTION_COUNT should be incremented when instruction is done*/
 	/*Since we do not have branch/jump instructions, INSTRUCTION_COUNT should be incremented in WB stage */
-	
 	WB();
 	MEM();
 	EX();
@@ -328,17 +328,22 @@ void handle_pipeline()
 /************************************************************/
 void WB()
 {
-	INSTRUCTION_COUNT++;
-	//This is essentually pseudocode, if will not work!!
-	if( 1 ){ /*ALU*/
-		if( 1 ) {/*register-immediate*/
-			NEXT_STATE.REGS[ MEM_WB.IR[rt] ] = MEM_WB.ALUOutput;//!!!Might be wrong!!!
-		} else {/*register-register*/
-			NEXT_STATE.REGS[ MEM_WB.IR[rd] ] = MEM_WB.ALUOutput;//!!!Might be wrong!!!
+	uint32_t rd;
+	if(INSTRUCTION_COUNT <4){		//DO nothing
+		printf("WB is NULL, cycle %d\n",cycle_count);
+	}
+	else{
+		INSTRUCTION_COUNT++;
+		//need a clever way to check for instruction types...
+		if( MEM_WB.type = 1){/*register-immediate*/
+			NEXT_STATE.REGS[MEM_WB.B] = MEM_WB.ALUOutput;
+		} 
+		else if( MEM_WB.type = 0) {/*register-register*/
+				rd = (MEM_WB.IR & 0x0000F800) >> 11;
+				NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
 		}	
-	}else { /*Load/Store*/
-		if( 1 ){ /*Load*/
-			NEXT_STATE.REGS[ MEM_WB.IR[rt] ] = MEM_WB.LMD;//!!!Might be wrong!!!
+		else if( MEM_WB.type = 2){ /*Load*/
+				NEXT_STATE.REGS[MEM_WB.B] = MEM_WB.LMD;
 		}
 	}
 }
@@ -348,22 +353,34 @@ void WB()
 /************************************************************/
 void MEM()
 {
-	//This is essentually pseudocode, it will not work!!!
-	uint32_t temp;
-	if( 1 ){ /*ALU*/ 
-		MEM_WB.IR = EX_MEM.IR;
-		MEM_WB.ALUOutput = EX_MEM.ALUOutput;
-	} else { /*Load/Store*/
-		MEM_WB.IR = EX_MEM.IR;
-		if( 1 ){ //Load
-			MEM_WB.LMD = mem_read_32( EX_MEM.ALUOutput );
-		} else { //Store
-			temp = mem_read_32( EX_MEM.ALUOutput );
-			mem_write_32( temp, EX_MEM.B );
-		}
-		EX_MEM.ALUOutput = ID_EX.A + ID_EX.imm;
-		EX_MEM.B = ID_EX.B;
+	if(INSTRUCTION_COUNT <3){		//DO nothing
+		printf("MEM is NULL, cycle %d\n",cycle_count);
 	}
+	else{
+		uint32_t temp;
+		if(EX.MEM.type == 0 || EX_MEM.type == 1){
+			MEM_WB.IR = EX_MEM.IR;
+			MEM_WB.ALUOutput = EX_MEM.ALUOutput;
+		}
+		else{ /*Load/Store*/
+			MEM_WB.IR = EX_MEM.IR;
+			if(EX_MEM.type == 2){ //Load
+				MEM_WB.LMD = mem_read_32( EX_MEM.ALUOutput );
+			} 
+			else if(EX_MEM.type == 3) { //Store
+				//temp = mem_read_32(EX_MEM.ALUOutput);
+				mem_write_32(ALUOutput,EX_MEM.B);
+			}
+		}
+	}
+	//MEM_WB.PC = EX_MEM.PC;
+	//MEM_WB.IR = EX_MEM.IR;
+	//MEM_WB.A = EX_MEM.A;
+	//MEM_WB.B = EX_MEM.B;
+	//MEM_WB.IMM = EX_MEM.IMM;
+	//MEM_WB.ALUOutput = EX_MEM.ALUOutput;
+	//MEM_WB.LMD = EX_MEM.LMD;
+	//MEM_WB.type = EX_MEM.type;
 }
 
 /************************************************************/
@@ -371,19 +388,32 @@ void MEM()
 /************************************************************/
 void EX()
 {
-	//This is essentually pseudocode, it will not work!!!
-	if( 1 ){ /*ALU*/ 
-		EX_MEM.IR = ID_EX.IR;
-		if( 1 ){ //register-immediate
-			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.imm, opcode); 
-		} else { //register-register
-			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.B, opcode); 
-		}
-	} else { /*Load/Store*/
-		EX_MEM.IR = ID_EX.IR;
-		EX_MEM.ALUOutput = ID_EX.A + ID_EX.imm;
-		EX_MEM.B = ID_EX.B;
+	if(INSTRUCTION_COUNT <2){		//DO nothing
+		printf("EX is NULL, cycle %d\n",cycle_count);
 	}
+	else{
+		if(ID_EX.type == 1){ /*ALU*/ 
+			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.B,opcode); 
+		}
+		else if(ID_EX.type == 0 ){ //register-immediate
+			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.imm,opcode); 	
+		}
+		else if(ID_EX.TYPE == 2 || ID_EX.type == 3) { /*Load/Store*/
+			EX_MEM.IR = ID_EX.IR;
+			EX_MEM.ALUOutput = ID_EX.A + ID_EX.imm;
+			EX_MEM.B = ID_EX.B;
+		}
+		EX_MEM.type = ID_EX.type;
+		EX_MEM.IR = ID_EX.IR;
+	}
+	//EX_MEM.PC = ID_EX.PC;
+	//EX_MEM.IR = ID_EX.IR;
+	//EX_MEM.A = ID_EX.A;
+	//EX_MEM.B = ID_EX.B;
+	//EX_MEM.IMM = ID_EX.IMM;
+	//EX_MEM.ALUOutput = ID_EX.ALUOutput;
+	//EX_MEM.LMD = ID_EX.LMD;
+	//EX_MEM.type = ID_EX.type;
 }
 
 /************************************************************/
@@ -391,16 +421,30 @@ void EX()
 /************************************************************/
 void ID()
 {
-	parse_instruction();	//Parse the IF_ID.IR
-	uint32_t rs, rt, immediate; 
-	ID_EX.IR = IF_ID.IR;
-	rs = 0x03E00000 & IF_ID.IR;
-	rt = 0x001F0000 & IF_ID.IR;
-	immediate = 0x0000FFFF & IF_ID.IR;
-	immediate = 0xFFFFFFFF ^ immediate;
-	ID_EX.A = CURRENT_STATE.REGS[ IF_ID.IR[rs] ]; //!!!Might be wrong!!!
-	ID_EX.B = CURRENT_STATE.REGS[ IF_ID.IR[rt] ]; //!!!Might be wrong!!!
-	ID_EX.imm = immediate;
+	if(INSTRUCTION_COUNT <1){		//DO nothing
+		printf("ID is NULL, cycle %d\n",cycle_count);
+	}
+	else{
+		parse_instruction();	//Parse the IF_ID.IR
+		uint32_t rs, rt, immediate; 
+		rs = (0x03E00000 & IF_ID.IR) >> 21;
+		rt = (0x001F0000 & IF_ID.IR) >> 16;
+		immediate = 0x0000FFFF & IF_ID.IR;
+		//immediate = 0xFFFFFFFF ^ immediate;
+		ID_EX.A = CURRENT_STATE.REGS[rs]; //!!!Might be wrong!!!
+		ID_EX.B = CURRENT_STATE.REGS[rt]; //!!!Might be wrong!!!
+		ID_EX.imm = immediate;
+		ID_EX.type = IF_ID.type;
+		ID_EX.IR = IF_ID.IR;
+	}
+	//ID_EX.PC = IF_ID.PC;
+	//ID_EX.IR = IF_ID.IR;
+	//ID_EX.A = IF_ID.A;
+	//ID_EX.B = IF_ID.B;
+	//ID_EX.IMM = IF_ID.IMM;
+	//ID_EX.ALUOutput = IF_ID.ALUOutput;
+	//ID_EX.LMD = IF_ID.LMD;
+	//ID_EX.type = IF_ID.type;
 }
 
 /************************************************************/
@@ -409,7 +453,8 @@ void ID()
 void IF()
 {
 	IF_ID.IR = CURRENT_STATE.PC;
-	CURRENT_STATE.PC = CURRENT_STATE.PC + 4;
+	IF_ID.PC = mem_read_32(CURRENT_STATE.PC);
+	NEXT_STATE.PC = CURRENT_STATE.PC + 4; 
 }
 
 /************************************************************/
