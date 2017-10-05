@@ -669,11 +669,133 @@ void initialize() {
 	RUN_FLAG = TRUE;
 }
 
-
-uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t opcode){
+uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t opcode, uint32_t function){
 	//This is where we will have a large case statement 
 	//to determine what operation to do on X and Y
-
+	uint32_t answer;
+	if(opcode == 0x00){
+			switch(function){
+				case 0x00: //SLL
+					answer = X << Y;
+					break;
+				case 0x02: //SRL
+					answer = X >> Y;
+					break;
+				case 0x03: //SRA 
+					if ((X & 0x80000000) == 1)
+					{
+						answer =  ~(~X >> Y );
+					}
+					else{
+						answer = X >> Y;
+					}
+					break;
+				case 0x18: //MULT
+					if (X & 0x80000000) == 0x80000000){
+						p1 = 0xFFFFFFFF00000000 | X;
+					}else{
+						p1 = 0x00000000FFFFFFFF & X;
+					}
+					if ((Y & 0x80000000) == 0x80000000){
+						p2 = 0xFFFFFFFF00000000 | Y;
+					}else{
+						p2 = 0x00000000FFFFFFFF & Y;
+					}
+					product = p1 * p2;
+					NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
+					NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
+					answer = 0x1;
+					break;
+				case 0x19: //MULTU
+					product = (uint64_t)X * (uint64_t)Y;
+					NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
+					NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
+					answer = 0x1;
+					break;
+				case 0x1A: //DIV 
+					if(Y != 0)
+					{
+						NEXT_STATE.LO = (int32_t)X / (int32_t)Y;
+						NEXT_STATE.HI = (int32_t)X % (int32_t)Y;
+					}
+					answer = 0x1;
+					break;
+				case 0x1B: //DIVU
+					if(Y != 0)
+					{
+						NEXT_STATE.LO = X / Y;
+						NEXT_STATE.HI = X % Y;
+					}
+					answer = 0x1;
+					break;
+				case 0x20: //ADD
+					answer = X + Y;
+					break;
+				case 0x21: //ADDU 
+					answer = X + Y;
+					break;
+				case 0x22: //SUB
+					answer = X - Y;
+					break;
+				case 0x23: //SUBU
+					answer = X - Y;
+					break;
+				case 0x24: //AND
+					answer = X & Y;
+					break;
+				case 0x25: //OR
+					answer = X | Y;
+					break;
+				case 0x26: //XOR
+					answer = X ^ Y;
+					break;
+				case 0x27: //NOR
+					answer = ~(X | Y);
+					break;
+				case 0x2A: //SLT
+					if(X < Y){
+						answer = 0x1;
+					}
+					else{
+						answer = 0x0;
+					} 
+					break;
+				default:
+					printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+					break;
+			}
+		}
+		else{
+			switch(opcode){
+				case 0x08: //ADDI
+					answer = X + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000) : (Y & 0x0000FFFF));
+					break;
+				case 0x09: //ADDIU
+					answer = X + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000) : (Y & 0x0000FFFF));
+					break;
+				case 0x0A: //SLTI
+					if ( (  (int32_t)X - (int32_t)( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000) : (Y & 0x0000FFFF))) < 0){
+						answer = 0x1;
+					}else{
+						answer = 0x0;
+					}
+					break;
+				case 0x0C: //ANDI
+					answer = X & (Y & 0x0000FFFF);
+					break;
+				case 0x0D: //ORI
+					answer = X | (Y & 0x0000FFFF);
+					break;
+				case 0x0E: //XORI
+					answer = X ^ (Y & 0x0000FFFF);
+					break;
+				default:
+					// put more things here
+					printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+					break;
+			}
+		}
+	return answer;
 }
 /************************************************************/
 /* Print the program loaded into memory (in MIPS assembly format)    */ 
