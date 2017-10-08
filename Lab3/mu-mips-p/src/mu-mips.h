@@ -51,7 +51,7 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	uint32_t A;
 	uint32_t B;
 	uint32_t imm;
-	uint32_t ALUOutput;
+	uint64_t ALUOutput;
 	uint32_t LMD;
 	int type;
 } CPU_Pipeline_Reg;
@@ -102,6 +102,8 @@ void IF();/*IMPLEMENT THIS*/
 void show_pipeline();/*IMPLEMENT THIS*/
 void initialize();
 void print_program(); /*IMPLEMENT THIS*/
+void print_instruction(uint32_t addr);
 void find_instruct_type();
 uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t intstruct);
+
 
