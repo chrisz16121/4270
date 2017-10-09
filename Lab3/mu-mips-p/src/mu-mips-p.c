@@ -448,9 +448,11 @@ void ID()
 /************************************************************/
 void IF()
 {
-	IF_ID.PC = CURRENT_STATE.PC;
-	IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
-	NEXT_STATE.PC = CURRENT_STATE.PC + 4; 
+	if(fetch_flag == 0){
+		IF_ID.PC = CURRENT_STATE.PC;
+		IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
+		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+	} 
 }
 
 /************************************************************/
