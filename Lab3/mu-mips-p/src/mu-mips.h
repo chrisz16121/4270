@@ -27,7 +27,8 @@ typedef struct {
 	uint8_t *mem;
 } mem_region_t;
 
-bool fetch_flag;
+int fetch_flag;
+int count;
 
 /* memory will be dynamically allocated at initialization */
 mem_region_t MEM_REGIONS[] = {
