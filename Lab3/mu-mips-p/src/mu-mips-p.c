@@ -332,6 +332,9 @@ void WB()
 	if(INSTRUCTION_COUNT <4){		//DO nothing
 		printf("WB is NULL, cycle %d\n",cycle_count);
 	}
+	else if( MEm_WB.type == 4 ){
+		exit(NULL);
+	}
 	else{
 		INSTRUCTION_COUNT++;
 		if(MEM_WB.type == 1){/*register-immediate*/
@@ -346,6 +349,7 @@ void WB()
 				NEXT_STATE.REGS[MEM_WB.B] = MEM_WB.LMD;
 		}
 	}
+	INSTRUCTION_COUNT++;
 }
 
 /************************************************************/
@@ -423,6 +427,9 @@ void ID()
 	else{
 		find_instruct_type();	//Parse the IF_ID.IR
 		//ID_EX.type gets set in the find_instruct_type function!
+		if( ID_EX.type == 4 ){
+			fetch_flag = 1;//this kills the program
+		}
 		uint32_t rs, rt, immediate; 
 		rs = (0x03E00000 & IF_ID.IR) >> 21;
 		rt = (0x001F0000 & IF_ID.IR) >> 16;
@@ -467,6 +474,7 @@ void find_instruct_type()
 	//1->ALU: Reg to Mem
 	//2->Load
 	//3->Store
+	//4->SYSCALL - kill it
 	
 	uint32_t instruction, opcode, function, rs, rt, rd, sa, immediate, target;
 	uint64_t product, p1, p2;
@@ -512,7 +520,7 @@ void find_instruct_type()
 				
 				break;
 			case 0x0C: //SYSCALL
-			
+				ID_EX.type = 4;
 				break;
 			case 0x10: //MFHI --Load/Store........Reg to Reg?
 
@@ -707,7 +715,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					product = p1 * p2;
 					//NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
 					//NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
-					answer = pro
+					answer = product;
 					break;
 				case 0x19: //MULTU
 					//NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
