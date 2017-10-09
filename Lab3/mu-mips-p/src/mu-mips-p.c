@@ -332,10 +332,17 @@ void WB()
 	if(INSTRUCTION_COUNT <4){		//DO nothing
 		printf("WB is NULL, cycle %d\n",cycle_count);
 	}
-	else if( MEm_WB.type == 4 ){
+	else if( fetch_flag == 1 && count == 3 ){
+		printf("I want to die...\n");
 		exit(NULL);
 	}
 	else{
+		
+		/*if( MEM_WB.type == 4 ){
+		printf("I want to die...\n");
+		exit(NULL);
+		}*/
+
 		INSTRUCTION_COUNT++;
 		if(MEM_WB.type == 1){/*register-immediate*/
 			rt = (MEM_WB.IR & 0x001F0000) >> 16;
@@ -374,14 +381,14 @@ void MEM()
 		}
 		MEM_WB.IR = EX_MEM.IR;
 	}
-	//MEM_WB.PC = EX_MEM.PC;
-	//MEM_WB.IR = EX_MEM.IR;
-	//MEM_WB.A = EX_MEM.A;
-	//MEM_WB.B = EX_MEM.B;
-	//MEM_WB.IMM = EX_MEM.IMM;
-	//MEM_WB.ALUOutput = EX_MEM.ALUOutput;
-	//MEM_WB.LMD = EX_MEM.LMD;
-	//MEM_WB.type = EX_MEM.type;
+	MEM_WB.PC = EX_MEM.PC;
+	MEM_WB.IR = EX_MEM.IR;
+	MEM_WB.A = EX_MEM.A;
+	MEM_WB.B = EX_MEM.B;
+	MEM_WB.imm = EX_MEM.imm;
+	MEM_WB.ALUOutput = EX_MEM.ALUOutput;
+	MEM_WB.LMD = EX_MEM.LMD;
+	MEM_WB.type = EX_MEM.type;
 }
 
 /************************************************************/
@@ -406,14 +413,14 @@ void EX()
 		EX_MEM.type = ID_EX.type;
 		EX_MEM.IR = ID_EX.IR;
 	}
-	//EX_MEM.PC = ID_EX.PC;
-	//EX_MEM.IR = ID_EX.IR;
-	//EX_MEM.A = ID_EX.A;
-	//EX_MEM.B = ID_EX.B;
-	//EX_MEM.IMM = ID_EX.IMM;
-	//EX_MEM.ALUOutput = ID_EX.ALUOutput;
-	//EX_MEM.LMD = ID_EX.LMD;
-	//EX_MEM.type = ID_EX.type;
+	EX_MEM.PC = ID_EX.PC;
+	EX_MEM.IR = ID_EX.IR;
+	EX_MEM.A = ID_EX.A;
+	EX_MEM.B = ID_EX.B;
+	EX_MEM.imm = ID_EX.imm;
+	EX_MEM.ALUOutput = ID_EX.ALUOutput;
+	EX_MEM.LMD = ID_EX.LMD;
+	EX_MEM.type = ID_EX.type;
 }
 
 /************************************************************/
@@ -428,8 +435,11 @@ void ID()
 		find_instruct_type();	//Parse the IF_ID.IR
 		//ID_EX.type gets set in the find_instruct_type function!
 		if( ID_EX.type == 4 ){
-			fetch_flag = 1;//this kills the program
+			fetch_flag = 1; //this kills the program
+			count++;
+			printf("Flag set\n");
 		}
+		else{
 		uint32_t rs, rt, immediate; 
 		rs = (0x03E00000 & IF_ID.IR) >> 21;
 		rt = (0x001F0000 & IF_ID.IR) >> 16;
@@ -439,15 +449,16 @@ void ID()
 		ID_EX.B = CURRENT_STATE.REGS[rt]; 
 		ID_EX.imm = immediate;
 		ID_EX.IR = IF_ID.IR;
+		}
 	}
-	//ID_EX.PC = IF_ID.PC;
-	//ID_EX.IR = IF_ID.IR;
-	//ID_EX.A = IF_ID.A;
-	//ID_EX.B = IF_ID.B;
-	//ID_EX.IMM = IF_ID.IMM;
-	//ID_EX.ALUOutput = IF_ID.ALUOutput;
-	//ID_EX.LMD = IF_ID.LMD;
-	//ID_EX.type = IF_ID.type;
+	ID_EX.PC = IF_ID.PC;
+	ID_EX.IR = IF_ID.IR;
+	ID_EX.A = IF_ID.A;
+	ID_EX.B = IF_ID.B;
+	ID_EX.imm = IF_ID.imm;
+	ID_EX.ALUOutput = IF_ID.ALUOutput;
+	ID_EX.LMD = IF_ID.LMD;
+	ID_EX.type = IF_ID.type;
 }
 
 /************************************************************/
@@ -483,9 +494,9 @@ void find_instruct_type()
 	
 	int branch_jump = FALSE;
 	
-	printf("[0x%x]\t", CURRENT_STATE.PC);
+	printf("[0x%x]\t ", CURRENT_STATE.PC);
 	
-	instruction = mem_read_32(IF_ID.IR);
+	instruction = IF_ID.IR;
 	
 	opcode = (instruction & 0xFC000000) >> 26;
 	function = instruction & 0x0000003F;
@@ -521,6 +532,7 @@ void find_instruct_type()
 				break;
 			case 0x0C: //SYSCALL
 				ID_EX.type = 4;
+				printf("syscall type set\n");
 				break;
 			case 0x10: //MFHI --Load/Store........Reg to Reg?
 
@@ -574,7 +586,7 @@ void find_instruct_type()
 				ID_EX.type = 0;
 				break;
 			default:
-				printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+				printf("Instruction at 0x%x is not implemented! find_type()\n", CURRENT_STATE.PC);
 				break;
 		}
 	}
@@ -655,7 +667,7 @@ void find_instruct_type()
 				break;
 			default:
 				// put more things here
-				printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+				printf("Instruction at 0x%x is not implemented! find_type()\n", CURRENT_STATE.PC);
 				break;
 		}
 	}
@@ -670,6 +682,7 @@ void find_instruct_type()
 /************************************************************/
 void initialize() { 
 	init_memory();
+	count = 0;
 	CURRENT_STATE.PC = MEM_TEXT_BEGIN;
 	NEXT_STATE = CURRENT_STATE;
 	RUN_FLAG = TRUE;
@@ -774,7 +787,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					} 
 					break;
 				default:
-					printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+					printf("Instruction at 0x%x is not implemented! do_instruction()\n", CURRENT_STATE.PC);
 					break;
 			}
 		}
@@ -804,7 +817,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					break;
 				default:
 					// put more things here
-					printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+					printf("Instruction at 0x%x is not implemented! do_instruction\n", CURRENT_STATE.PC);
 					break;
 			}
 		}
@@ -920,7 +933,7 @@ void print_instruction(uint32_t addr){
 				printf("SLT $r%u, $r%u, $r%u\n", rd, rs, rt);
 				break;
 			default:
-				printf("Instruction is not implemented!\n");
+				printf("Instruction is not implemented! print()\n");
 				break;
 		}
 	}
@@ -992,7 +1005,7 @@ void print_instruction(uint32_t addr){
 				printf("SW $r%u, 0x%x($r%u)\n", rt, immediate, rs);
 				break;
 			default:
-				printf("Instruction is not implemented!\n");
+				printf("Instruction is not implemented! print()\n");
 				break;
 		}
 	}
