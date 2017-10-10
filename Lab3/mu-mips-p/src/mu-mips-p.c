@@ -563,16 +563,16 @@ void find_instruct_type()
 				ID_EX.type = 4;
 				break;
 			case 0x10: //MFHI --Load/Store........Reg to Reg?
-
+				ID_EX.type = 0;
 				break;
 			case 0x11: //MTHI --Load/Store........Reg to Reg?
-
+				ID_EX.type = 0;
 				break;
 			case 0x12: //MFLO --Load/Store........Reg to Reg?
-
+				ID_EX.type = 0;
 				break;
 			case 0x13: //MTLO --Load/Store........Reg to Reg?
-
+				ID_EX.type = 0;
 				break;
 			case 0x18: //MULT --ALU
 				ID_EX.type = 0;
