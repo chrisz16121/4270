@@ -851,8 +851,8 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 				case 0x0E: //XORI
 					answer = X ^ (Y & 0x0000FFFF);
 					break;
-				case 0x0F: //LUI --Load/Store
-					ID_EX.type = 1;
+				case 0x0F: //LUI
+					answer = Y << 16;
 					break;
 				case 0x20: //LB --Load/Store
 					ID_EX.type = 2;
