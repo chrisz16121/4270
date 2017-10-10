@@ -107,6 +107,6 @@ void initialize();
 void print_program(); /*IMPLEMENT THIS*/
 void print_instruction(uint32_t addr);
 void find_instruct_type();
-uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t intstruct);
+uint64_t do_instruction( uint32_t X, uint32_t Y, uint32_t intstruct);
 
 
