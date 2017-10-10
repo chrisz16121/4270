@@ -364,6 +364,7 @@ void WB()
 /************************************************************/
 void MEM()
 {
+	
 	if(INSTRUCTION_COUNT <3){		//DO nothing
 		printf("MEM is NULL, cycle %d\n",cycle_count);
 	}
@@ -396,11 +397,24 @@ void MEM()
 /************************************************************/
 void EX()
 {
+	if(ID_EX.type == 0 || ID_EX.TYPE == 1){
+		instruction = ID_EX.IR;
+		rs = (instruction & 0x03E00000) >> 21;
+		rt = (instruction & 0x001F0000) >> 16;
+		rd = (instruction & 0x0000F800) >> 11;
+	}
 	if(INSTRUCTION_COUNT <2){		//DO nothing
 		printf("EX is NULL, cycle %d\n",cycle_count);
 	}
+	else if(ID_EX.regWrite == 1 && ID_EX.rd != 0 && rd == rt){
+		//stall the pipeline for n cycles
+		//involves clearing every control signal? dont want to mess with this yet
+	}
+	else if(ID_EX.regWrite == 1 && ID_EX.rd != 0 && rd == rs){
+		//stall the pipeline for n cycles
+	}
 	else{
-		printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
+		//printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
 		if(ID_EX.type == 0){ /*ALU, register-register*/
 			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.B,ID_EX.IR); 
 		}
