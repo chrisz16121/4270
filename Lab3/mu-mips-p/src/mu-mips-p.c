@@ -7,7 +7,7 @@
 #include "mu-mips.h"
 
 
-int cycle_count = 1;
+int cycle_count = 0;
 
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
@@ -329,15 +329,15 @@ void handle_pipeline()
 void WB()
 {
 	uint32_t rd,rt;
-	if(INSTRUCTION_COUNT <4){		//DO nothing
-		printf("WB is NULL, cycle %d\n",cycle_count);
+	if(CYCLE_COUNT <=4){		//DO nothing
+		//printf("WB is NULL, cycle %d\n",CYCLE_COUNT);
 	}
 	else if( fetch_flag == 1 && count == 3 ){
 		printf("killing...\n");
 		exit(NULL);
 	}
 	else{
-		
+		//printf("WB_STAGE: cycle %d\n",CYCLE_COUNT);
 		/*if( MEM_WB.type == 4 ){
 		printf("I want to die...\n");
 		exit(NULL);
@@ -347,13 +347,22 @@ void WB()
 		if(MEM_WB.type == 1){/*register-immediate*/
 			rt = (MEM_WB.IR & 0x001F0000) >> 16;
 			NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+			printf("\nIntstruction: ");
+			print_instruction(MEM_WB.PC);
+			printf("%x was written to register %d\n",MEM_WB.ALUOutput,rt);
 		} 
 		else if(MEM_WB.type == 0) {/*register-register*/
-				rd = (MEM_WB.IR & 0x0000F800) >> 11;
-				NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			rd = (MEM_WB.IR & 0x0000F800) >> 11;
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			printf("\nIntstruction: ");
+			print_instruction(MEM_WB.PC);
+			printf("%x was written to register %d\n",MEM_WB.ALUOutput,rd);
 		}	
 		else if(MEM_WB.type == 2){ /*Load*/
-				NEXT_STATE.REGS[MEM_WB.B] = MEM_WB.LMD;
+			NEXT_STATE.REGS[MEM_WB.B] = MEM_WB.LMD;
+			printf("\nIntstruction: ");
+			print_instruction(MEM_WB.PC);
+			printf("%x was loaded into register %d\n",MEM_WB.LMD,MEM_WB.B);
 		}
 	}
 	INSTRUCTION_COUNT++;
@@ -364,10 +373,11 @@ void WB()
 /************************************************************/
 void MEM()
 {
-	if(INSTRUCTION_COUNT <3){		//DO nothing
-		printf("MEM is NULL, cycle %d\n",cycle_count);
+	if(CYCLE_COUNT <=3){		//DO nothing
+		//printf("MEM is NULL, cycle %d\n",CYCLE_COUNT);
 	}
 	else{
+		//printf("MEM_STAGE: cycle %d\n",CYCLE_COUNT);
 		if(EX_MEM.type == 0 || EX_MEM.type == 1){
 			MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 		}
@@ -377,6 +387,9 @@ void MEM()
 			} 
 			else if(EX_MEM.type == 3) { //Store
 				mem_write_32(EX_MEM.ALUOutput,EX_MEM.B);
+				printf("\nIntstruction: ");
+				print_instruction(EX_MEM.PC);
+				printf("%x was stored at location %08x\n",EX_MEM.B,EX_MEM.ALUOutput);
 			}
 		}
 		MEM_WB.IR = EX_MEM.IR;
@@ -396,11 +409,12 @@ void MEM()
 /************************************************************/
 void EX()
 {
-	if(INSTRUCTION_COUNT <2){		//DO nothing
-		printf("EX is NULL, cycle %d\n",cycle_count);
+	if(CYCLE_COUNT <=2){		//DO nothing
+		//printf("EX is NULL, cycle %d\n",CYCLE_COUNT);
 	}
 	else{
-		printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
+		//printf("EX_STAGE: cycle %d\n",CYCLE_COUNT);		
+		//printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
 		if(ID_EX.type == 0){ /*ALU, register-register*/
 			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.B,ID_EX.IR); 
 		}
@@ -437,10 +451,11 @@ void EX()
 /************************************************************/
 void ID()
 {
-	if(INSTRUCTION_COUNT <1){		//DO nothing
-		printf("ID is NULL, cycle %d\n",cycle_count);
+	if(CYCLE_COUNT <=1){		//DO nothing
+		//printf("ID is NULL, cycle %d\n",CYCLE_COUNT);
 	}
 	else{
+		//printf("ID_STAGE: cycle %d\n",CYCLE_COUNT);
 		find_instruct_type();	//Parse the IF_ID.IR
 		//ID_EX.type gets set in the find_instruct_type function!
 		if( ID_EX.type == 4 ){
@@ -458,6 +473,8 @@ void ID()
 		ID_EX.imm = immediate;
 		ID_EX.IR = IF_ID.IR;	
 		ID_EX.PC = IF_ID.PC;
+		//printf("Intstruction: ");
+		//print_instruction(IF_ID.PC);
 		//printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
 		}
 	}
@@ -476,10 +493,12 @@ void ID()
 /************************************************************/
 void IF()
 {
+	//printf("IF_STAGE: cycle %d\n",CYCLE_COUNT);
 	if(fetch_flag == 0){
 		IF_ID.PC = CURRENT_STATE.PC;
 		IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
 		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+		//printf("%08x was fetched from instruction memory\n",IF_ID.IR);
 	} 
 }
 
@@ -504,7 +523,7 @@ void find_instruct_type()
 	
 	int branch_jump = FALSE;
 	
-	printf("[0x%x]\t ", CURRENT_STATE.PC);
+	//printf("[0x%x]\t\n", CURRENT_STATE.PC);
 	
 	instruction = IF_ID.IR;
 	
