@@ -622,17 +622,17 @@ void find_instruct_type()
 		switch(opcode){
 			case 0x01:
 				if(rt == 0x00000){ //BLTZ
-					if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0){
-						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-						branch_jump = TRUE;
-					}
+				// 	if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0){
+// 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+// 						branch_jump = TRUE;
+// 					}
 					
 				}
 				else if(rt == 0x00001){ //BGEZ
-					if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
-						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-						branch_jump = TRUE;
-					}
+			// 		if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
+// 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+// 						branch_jump = TRUE;
+// 					}
 					
 				}
 				break;
@@ -673,7 +673,7 @@ void find_instruct_type()
 				ID_EX.type = 1;
 				break;
 			case 0x0F: //LUI --Load/Store
-				ID_EX.type = 2;
+				ID_EX.type = 1;
 				break;
 			case 0x20: //LB --Load/Store
 				ID_EX.type = 2;
@@ -698,10 +698,6 @@ void find_instruct_type()
 				printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
 				break;
 		}
-	}
-	
-	if(!branch_jump){
-		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
 	}
 }
 
@@ -741,6 +737,18 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					else{
 						answer = X >> Y;
 					}
+					break;
+				case 0x10: //MFHI --Load/Store........Reg to Reg?
+					ID_EX.type = 0;
+					break;
+				case 0x11: //MTHI --Load/Store........Reg to Reg?
+					ID_EX.type = 0;
+					break;
+				case 0x12: //MFLO --Load/Store........Reg to Reg?
+					ID_EX.type = 0;
+					break;
+				case 0x13: //MTLO --Load/Store........Reg to Reg?
+					ID_EX.type = 0;
 					break;
 				case 0x18: //MULT
 					if ((X & 0x80000000) == 0x80000000){
@@ -842,6 +850,27 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					break;
 				case 0x0E: //XORI
 					answer = X ^ (Y & 0x0000FFFF);
+					break;
+				case 0x0F: //LUI --Load/Store
+					ID_EX.type = 1;
+					break;
+				case 0x20: //LB --Load/Store
+					ID_EX.type = 2;
+				break;
+				case 0x21: //LH --Load/Store
+					ID_EX.type = 2;
+					break;
+				case 0x23: //LW --Load/Store
+					ID_EX.type = 2;
+					break;
+				case 0x28: //SB --Load/Store
+					ID_EX.type = 3;
+					break;
+				case 0x29: //SH --Load/Store
+					ID_EX.type = 3;
+					break;
+				case 0x2B: //SW --Load/Store
+					ID_EX.type = 3;
 					break;
 				default:
 					// put more things here
