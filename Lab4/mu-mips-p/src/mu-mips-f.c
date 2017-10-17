@@ -7,8 +7,8 @@
 #include "mu-mips.h"
 
 
-int cycle_count = 1;
-
+int cycle_count = 0;
+int FF = 0;
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
 /***************************************************************/
@@ -329,7 +329,7 @@ void handle_pipeline()
 void WB()
 {
 	uint32_t rd,rt;
-	if(INSTRUCTION_COUNT <4){		//DO nothing
+	if(cycle_count <4){		//DO nothing
 		printf("WB is NULL, cycle %d\n",cycle_count);
 	}
 	else if( fetch_flag == 1 && count == 3 ){
@@ -347,16 +347,24 @@ void WB()
 		if(MEM_WB.type == 1){/*register-immediate*/
 			rt = (MEM_WB.IR & 0x001F0000) >> 16;
 			NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+			if(FF == 1 && rt == ID_EX.dest){
+				printf("Hazard eliminated\n");
+				FF = 0;
+			}
 		} 
 		else if(MEM_WB.type == 0) {/*register-register*/
-				rd = (MEM_WB.IR & 0x0000F800) >> 11;
-				NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			rd = (MEM_WB.IR & 0x0000F800) >> 11;
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			if(FF == 1 && rd == ID_EX.dest){
+				printf("Hazard eliminated\n");
+				FF = 0;
+			}
 		}	
 		else if(MEM_WB.type == 2){ /*Load*/
 				NEXT_STATE.REGS[MEM_WB.B] = MEM_WB.LMD;
 		}
 	}
-	INSTRUCTION_COUNT++;
+	
 }
 
 /************************************************************/
@@ -365,7 +373,7 @@ void WB()
 void MEM()
 {
 	
-	if(INSTRUCTION_COUNT <3){		//DO nothing
+	if(cycle_count <3){		//DO nothing
 		printf("MEM is NULL, cycle %d\n",cycle_count);
 	}
 	else{
@@ -383,12 +391,9 @@ void MEM()
 		MEM_WB.IR = EX_MEM.IR;
 	}
 	MEM_WB.PC = EX_MEM.PC;
-	//MEM_WB.IR = EX_MEM.IR;
 	MEM_WB.A = EX_MEM.A;
 	MEM_WB.B = EX_MEM.B;
 	MEM_WB.imm = EX_MEM.imm;
-	//MEM_WB.ALUOutput = EX_MEM.ALUOutput;
-	//MEM_WB.LMD = EX_MEM.LMD;
 	MEM_WB.type = EX_MEM.type;
 }
 
@@ -397,28 +402,33 @@ void MEM()
 /************************************************************/
 void EX()
 {
-	if(ID_EX.type == 0 || ID_EX.TYPE == 1){
+	uint32_t instruction,rs,rt,rd;
+	if(ID_EX.type == 0 || ID_EX.type == 1){
 		instruction = ID_EX.IR;
 		rs = (instruction & 0x03E00000) >> 21;
 		rt = (instruction & 0x001F0000) >> 16;
 		rd = (instruction & 0x0000F800) >> 11;
 	}
-	if(INSTRUCTION_COUNT <2){		//DO nothing
+	if(cycle_count <2){		//DO nothing
 		printf("EX is NULL, cycle %d\n",cycle_count);
 	}
-	else if(ID_EX.regWrite == 1 && ID_EX.rd != 0 && rd == rt){
+	//else if(ID_EX.regWrite == 1 && ID_EX.rd != 0 && rd == rt){
 		//stall the pipeline for n cycles
 		//involves clearing every control signal? dont want to mess with this yet
-	}
-	else if(ID_EX.regWrite == 1 && ID_EX.rd != 0 && rd == rs){
-		//stall the pipeline for n cycles
-	}
+	//}
+	//else if(ID_EX.regWrite == 1 && ID_EX.rd != 0 && rd == rs){
+	//	//stall the pipeline for n cycles
+	//}
 	else{
 		//printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
 		if(ID_EX.type == 0){ /*ALU, register-register*/
+			EX_MEM.regWrite = 1;
+			printf("EX (reg-reg) destination reg: %d\n",rd);
 			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.B,ID_EX.IR); 
 		}
 		else if(ID_EX.type == 1){ //register-immediate
+			EX_MEM.regWrite = 1;
+			printf("EX  (reg-Imm) destination reg: %d\n",rt);
 			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.imm,ID_EX.IR); 	
 		}
 		else if(ID_EX.type == 2 || ID_EX.type == 3) { /*Load/Store*/
@@ -428,22 +438,11 @@ void EX()
 		EX_MEM.type = ID_EX.type;
 		EX_MEM.IR = ID_EX.IR;
 		EX_MEM.PC = ID_EX.PC;
-		//EX_MEM.IR = ID_EX.IR;
 		EX_MEM.A = ID_EX.A;
 		EX_MEM.B = ID_EX.B;
 		EX_MEM.imm = ID_EX.imm;
-		//EX_MEM.ALUOutput = ID_EX.ALUOutput;
 		EX_MEM.LMD = ID_EX.LMD;
-		//EX_MEM.type = ID_EX.type;
 	}
-/*	EX_MEM.PC = ID_EX.PC;
-	//EX_MEM.IR = ID_EX.IR;
-	EX_MEM.A = ID_EX.A;
-	EX_MEM.B = ID_EX.B;
-	EX_MEM.imm = ID_EX.imm;
-	//EX_MEM.ALUOutput = ID_EX.ALUOutput;
-	EX_MEM.LMD = ID_EX.LMD;
-	//EX_MEM.type = ID_EX.type;*/
 }
 
 /************************************************************/
@@ -451,7 +450,7 @@ void EX()
 /************************************************************/
 void ID()
 {
-	if(INSTRUCTION_COUNT <1){		//DO nothing
+	if(cycle_count <1 || FF == 1){		//DO nothing
 		printf("ID is NULL, cycle %d\n",cycle_count);
 	}
 	else{
@@ -463,26 +462,53 @@ void ID()
 		}
 		else{
 		uint32_t rs, rt, immediate; 
+		uint32_t regDest, instruction;
 		rs = (0x03E00000 & IF_ID.IR) >> 21;
 		rt = (0x001F0000 & IF_ID.IR) >> 16;
 		immediate = 0x0000FFFF & IF_ID.IR;
-		//immediate = 0xFFFFFFFF ^ immediate;
-		ID_EX.A = CURRENT_STATE.REGS[rs];
-		ID_EX.B = CURRENT_STATE.REGS[rt]; 
-		ID_EX.imm = immediate;
-		ID_EX.IR = IF_ID.IR;	
-		ID_EX.PC = IF_ID.PC;
+		instruction = EX_MEM.IR;
+		//printf("Instruction in execution: %08x\n",instruction);
+		if(EX_MEM.type == 0){
+			regDest = (instruction & 0x0000F800) >> 11;
+		}
+		else if(EX_MEM.type == 1){
+			regDest = (instruction & 0x001F0000) >> 16;
+		}	
+		printf("rd in ex: %d\n",regDest);
+		printf("ID source registers: rs: %d rt: %d\nregDest: %d\nregWrite: %d\n\n",rs,rt,regDest,EX_MEM.regWrite);
+		if((EX_MEM.regWrite == 1) && (regDest != 0) && (regDest == rs || rt)){
+			ID_EX.dest = regDest;
+			printf("Data hazard in ID_EX\n");
+			ID_EX.A = 0;
+			ID_EX.B = 0; 
+			ID_EX.imm = 0;
+			ID_EX.IR = 0;	
+			ID_EX.PC = 0;
+			FF = 1;
+			//EX_MEM.type = 5;
+		}
+		else if((MEM_WB.regWrite == 1) && (regDest != 0) && (regDest == rs || rt)){
+			ID_EX.dest = regDest;
+			printf("Data hazard in MEM_WB\n");
+			ID_EX.A = 0;
+			ID_EX.B = 0; 
+			ID_EX.imm = 0;
+			ID_EX.IR = 0;	
+			ID_EX.PC = 0;
+			FF = 1;
+			//EX_MEM.type = 5;
+		}
+		else{
+			printf("Instruction progresses\n");
+			ID_EX.A = CURRENT_STATE.REGS[rs];
+			ID_EX.B = CURRENT_STATE.REGS[rt]; 
+			ID_EX.imm = immediate;
+			ID_EX.IR = IF_ID.IR;	
+			ID_EX.PC = IF_ID.PC;
+		}
 		//printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
 		}
 	}
-	ID_EX.PC = IF_ID.PC;
-	//ID_EX.IR = IF_ID.IR;
-	//ID_EX.A = IF_ID.A;
-	//ID_EX.B = IF_ID.B;
-	//ID_EX.imm = IF_ID.imm;
-	//ID_EX.ALUOutput = IF_ID.ALUOutput;
-	//ID_EX.LMD = IF_ID.LMD;
-	//ID_EX.type = IF_ID.type;
 }
 
 /************************************************************/
@@ -490,12 +516,20 @@ void ID()
 /************************************************************/
 void IF()
 {
-	if(fetch_flag == 0){
+	if(FF == 1){
+		printf("No instruction fetched\n");
+	}
+	if(fetch_flag == 0 && FF == 0){
 		IF_ID.PC = CURRENT_STATE.PC;
 		IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
 		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+		printf("IF stage: ");
+		print_instruction(IF_ID.PC);
+		//print_instruction(CURRENT_STATE.PC);
+		//printf("\n");
 	} 
-}
+	cycle_count++;
+} 
 
 /************************************************************/
 /* parse instruction. This is from working simulator from Akturk, but modified         */ 
@@ -518,7 +552,7 @@ void find_instruct_type()
 	
 	int branch_jump = FALSE;
 	
-	printf("[0x%x]\t ", CURRENT_STATE.PC);
+	//printf("[0x%x]\t ", CURRENT_STATE.PC);
 	
 	instruction = IF_ID.IR;
 	
