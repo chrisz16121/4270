@@ -24,6 +24,7 @@ void help() {
 	printf("high <val>\t-- set the HI register to <val>\n");
 	printf("low <val>\t-- set the LO register to <val>\n");
 	printf("print\t-- print the program loaded into memory\n");
+	printf("forwarding <n>\t-- enable(<n>=1)/disable(<n>=2) forwarding (disabled by default)\n");
 	printf("show\t-- print the current content of the pipeline registers\n");
 	printf("?\t-- display help menu\n");
 	printf("quit\t-- exit the simulator\n\n");
@@ -374,6 +375,16 @@ void MEM()
 		printf("MEM is NULL, cycle %d\n",cycle_count);
 	}
 	else{
+		//psuedocode
+		if( ENABLE_FORWARDING == 1 ){
+			printf("This is were the forwarding check will go\n");
+			/*if(MEM_WB.RegWrite and (MEM_WB.RD != 0) and not (EX_MEM.RegWrite and (EX_MEM.RD != 0)) and (EX_MEM.RD = ID_EX.RS) and (MEM_WB.RD = ID_EX.RS)){
+				ForwardA = 01;
+			}
+			if(MEM_WB.RegWrite and (MEM_WB.RD != 0) and not (EX_MEM.RegWrite and (EX_MEM.RD != 0)) and (EX_MEM.RD = ID_EX.RT) and (MEM_WB.RD = ID_EX.RT)){
+				ForwardB = 01;
+			}*/
+		}
 		if(EX_MEM.type == 0 || EX_MEM.type == 1){
 			MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 		}
@@ -406,6 +417,16 @@ void EX()
 		printf("EX is NULL, cycle %d\n",cycle_count);
 	}
 	else{
+		//psuedocode
+		if( ENABLE_FORWARDING == 1 ){	
+			printf("This is were the forwarding check will go\n");
+			/*if(EX_MEM.RegWrite and (EX_MEM.RD != 0) and (EX_MEM.RD == ID_EX.RS)){
+				ForwardA = 10;
+			}
+			if(EX_MEM.RegWrite and (EX_MEM.RD != 0) and (EX_MEM.RD == ID_EX.RT)){
+				ForwardB = 10;
+			}*/
+		}
 		printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
 		if(ID_EX.type == 0){ /*ALU, register-register*/
 			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.B,ID_EX.IR); 
@@ -697,6 +718,7 @@ void find_instruct_type()
 /************************************************************/
 void initialize() { 
 	init_memory();
+	ENABLE_FORWARDING = 0;
 	count = 0;
 	CURRENT_STATE.PC = MEM_TEXT_BEGIN;
 	NEXT_STATE = CURRENT_STATE;
