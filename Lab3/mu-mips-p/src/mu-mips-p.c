@@ -7,7 +7,7 @@
 #include "mu-mips.h"
 
 
-int cycle_count = 1;
+int cycle_count = 0;
 
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
@@ -328,32 +328,51 @@ void handle_pipeline()
 /************************************************************/
 void WB()
 {
-	uint32_t rd,rt;
-	if(INSTRUCTION_COUNT <4){		//DO nothing
-		printf("WB is NULL, cycle %d\n",cycle_count);
+	uint32_t rd,rt,opcode,function,instruction;
+	if(CYCLE_COUNT <=4){		//DO nothing
+		//printf("WB is NULL, cycle %d\n",CYCLE_COUNT);
 	}
 	else if( fetch_flag == 1 && count == 3 ){
 		printf("killing...\n");
 		exit(NULL);
 	}
 	else{
-		
-		/*if( MEM_WB.type == 4 ){
-		printf("I want to die...\n");
-		exit(NULL);
-		}*/
-
+		//printf("WB_STAGE: cycle %d\n",CYCLE_COUNT);
 		INSTRUCTION_COUNT++;
-		if(MEM_WB.type == 1){/*register-immediate*/
+		if(MEM_WB.type == 1){/*register-immediate*/	
 			rt = (MEM_WB.IR & 0x001F0000) >> 16;
 			NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+			printf("\nIntstruction: ");
+			print_instruction(MEM_WB.PC);
+			printf("%x was written to register %d\n",MEM_WB.ALUOutput,rt);
 		} 
 		else if(MEM_WB.type == 0) {/*register-register*/
+			printf("\nIntstruction: ");
+			print_instruction(MEM_WB.PC);
+			instruction = MEM_WB.IR;
+			function = instruction & 0x0000003F;
+			printf("Function: %x\n",function);
+			//opcode = (instruction & 0xFC000000) >> 26;
+			if( function == 0x18 || function == 0x19 || function == 0x1A || function == 0x1B){
+				//printf("MULT/DIV operation!\n");
+				//printf("The result is %016x\n",MEM_WB.ALUOutput);
+				NEXT_STATE.HI = MEM_WB.ALUOutput & 0xFFFFFFFF00000000;
+				NEXT_STATE.LO = MEM_WB.ALUOutput & 0x00000000FFFFFFFF;
+				printf("%x was written to the HI register\n",NEXT_STATE.HI);
+				printf("%x was written to the LO register\n",NEXT_STATE.LO);						
+			}
+			else{
 				rd = (MEM_WB.IR & 0x0000F800) >> 11;
-				NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+				NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;	
+				printf("%x was written to register %d\n",MEM_WB.ALUOutput,rd);
+			}
 		}	
 		else if(MEM_WB.type == 2){ /*Load*/
-				NEXT_STATE.REGS[MEM_WB.B] = MEM_WB.LMD;
+			rt = (MEM_WB.IR & 0x001F0000) >> 16;
+			NEXT_STATE.REGS[rt] = MEM_WB.LMD;
+			printf("\nIntstruction: ");
+			print_instruction(MEM_WB.PC);
+			printf("%x was loaded into register %d\n",MEM_WB.LMD,rt);
 		}
 	}
 	INSTRUCTION_COUNT++;
@@ -364,10 +383,11 @@ void WB()
 /************************************************************/
 void MEM()
 {
-	if(INSTRUCTION_COUNT <3){		//DO nothing
-		printf("MEM is NULL, cycle %d\n",cycle_count);
+	if(CYCLE_COUNT <=3){		//DO nothing
+		//printf("MEM is NULL, cycle %d\n",CYCLE_COUNT);
 	}
 	else{
+		//printf("MEM_STAGE: cycle %d\n",CYCLE_COUNT);
 		if(EX_MEM.type == 0 || EX_MEM.type == 1){
 			MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 		}
@@ -377,17 +397,17 @@ void MEM()
 			} 
 			else if(EX_MEM.type == 3) { //Store
 				mem_write_32(EX_MEM.ALUOutput,EX_MEM.B);
+				printf("\nIntstruction: ");
+				print_instruction(EX_MEM.PC);
+				printf("%x was stored at location %08x\n",EX_MEM.B,EX_MEM.ALUOutput);
 			}
 		}
 		MEM_WB.IR = EX_MEM.IR;
 	}
 	MEM_WB.PC = EX_MEM.PC;
-	//MEM_WB.IR = EX_MEM.IR;
 	MEM_WB.A = EX_MEM.A;
 	MEM_WB.B = EX_MEM.B;
 	MEM_WB.imm = EX_MEM.imm;
-	//MEM_WB.ALUOutput = EX_MEM.ALUOutput;
-	//MEM_WB.LMD = EX_MEM.LMD;
 	MEM_WB.type = EX_MEM.type;
 }
 
@@ -396,12 +416,14 @@ void MEM()
 /************************************************************/
 void EX()
 {
-	if(INSTRUCTION_COUNT <2){		//DO nothing
-		printf("EX is NULL, cycle %d\n",cycle_count);
+	if(CYCLE_COUNT <=2){		//DO nothing
+		//printf("EX is NULL, cycle %d\n",CYCLE_COUNT);
 	}
 	else{
-		printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
+		//printf("EX_STAGE: cycle %d\n",CYCLE_COUNT);		
+		//printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
 		if(ID_EX.type == 0){ /*ALU, register-register*/
+			//printf("X: %x\tY: %x\n",ID_EX.A,ID_EX.B);
 			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.B,ID_EX.IR); 
 		}
 		else if(ID_EX.type == 1){ //register-immediate
@@ -414,22 +436,11 @@ void EX()
 		EX_MEM.type = ID_EX.type;
 		EX_MEM.IR = ID_EX.IR;
 		EX_MEM.PC = ID_EX.PC;
-		//EX_MEM.IR = ID_EX.IR;
 		EX_MEM.A = ID_EX.A;
 		EX_MEM.B = ID_EX.B;
 		EX_MEM.imm = ID_EX.imm;
-		//EX_MEM.ALUOutput = ID_EX.ALUOutput;
 		EX_MEM.LMD = ID_EX.LMD;
-		//EX_MEM.type = ID_EX.type;
 	}
-/*	EX_MEM.PC = ID_EX.PC;
-	//EX_MEM.IR = ID_EX.IR;
-	EX_MEM.A = ID_EX.A;
-	EX_MEM.B = ID_EX.B;
-	EX_MEM.imm = ID_EX.imm;
-	//EX_MEM.ALUOutput = ID_EX.ALUOutput;
-	EX_MEM.LMD = ID_EX.LMD;
-	//EX_MEM.type = ID_EX.type;*/
 }
 
 /************************************************************/
@@ -437,10 +448,11 @@ void EX()
 /************************************************************/
 void ID()
 {
-	if(INSTRUCTION_COUNT <1){		//DO nothing
-		printf("ID is NULL, cycle %d\n",cycle_count);
+	if(CYCLE_COUNT <=1){		//DO nothing
+		//printf("ID is NULL, cycle %d\n",CYCLE_COUNT);
 	}
 	else{
+		//printf("ID_STAGE: cycle %d\n",CYCLE_COUNT);
 		find_instruct_type();	//Parse the IF_ID.IR
 		//ID_EX.type gets set in the find_instruct_type function!
 		if( ID_EX.type == 4 ){
@@ -455,20 +467,16 @@ void ID()
 		//immediate = 0xFFFFFFFF ^ immediate;
 		ID_EX.A = CURRENT_STATE.REGS[rs];
 		ID_EX.B = CURRENT_STATE.REGS[rt]; 
+		//printf("X: %x\tY: %x\n",ID_EX.A,ID_EX.B);
 		ID_EX.imm = immediate;
 		ID_EX.IR = IF_ID.IR;	
 		ID_EX.PC = IF_ID.PC;
+		//printf("Intstruction: ");
+		//print_instruction(IF_ID.PC);
 		//printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
 		}
 	}
 	ID_EX.PC = IF_ID.PC;
-	//ID_EX.IR = IF_ID.IR;
-	//ID_EX.A = IF_ID.A;
-	//ID_EX.B = IF_ID.B;
-	//ID_EX.imm = IF_ID.imm;
-	//ID_EX.ALUOutput = IF_ID.ALUOutput;
-	//ID_EX.LMD = IF_ID.LMD;
-	//ID_EX.type = IF_ID.type;
 }
 
 /************************************************************/
@@ -476,10 +484,12 @@ void ID()
 /************************************************************/
 void IF()
 {
+	//printf("IF_STAGE: cycle %d\n",CYCLE_COUNT);
 	if(fetch_flag == 0){
 		IF_ID.PC = CURRENT_STATE.PC;
 		IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
 		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+		//printf("%08x was fetched from instruction memory\n",IF_ID.IR);
 	} 
 }
 
@@ -504,7 +514,7 @@ void find_instruct_type()
 	
 	int branch_jump = FALSE;
 	
-	printf("[0x%x]\t ", CURRENT_STATE.PC);
+	//printf("[0x%x]\t\n", CURRENT_STATE.PC);
 	
 	instruction = IF_ID.IR;
 	
@@ -544,16 +554,16 @@ void find_instruct_type()
 				ID_EX.type = 4;
 				break;
 			case 0x10: //MFHI --Load/Store........Reg to Reg?
-
+				ID_EX.type = 0;
 				break;
 			case 0x11: //MTHI --Load/Store........Reg to Reg?
-
+				ID_EX.type = 0;
 				break;
 			case 0x12: //MFLO --Load/Store........Reg to Reg?
-
+				ID_EX.type = 0;
 				break;
 			case 0x13: //MTLO --Load/Store........Reg to Reg?
-
+				ID_EX.type = 0;
 				break;
 			case 0x18: //MULT --ALU
 				ID_EX.type = 0;
@@ -603,17 +613,17 @@ void find_instruct_type()
 		switch(opcode){
 			case 0x01:
 				if(rt == 0x00000){ //BLTZ
-					if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0){
-						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-						branch_jump = TRUE;
-					}
+				// 	if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0){
+// 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+// 						branch_jump = TRUE;
+// 					}
 					
 				}
 				else if(rt == 0x00001){ //BGEZ
-					if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
-						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-						branch_jump = TRUE;
-					}
+			// 		if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
+// 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+// 						branch_jump = TRUE;
+// 					}
 					
 				}
 				break;
@@ -654,7 +664,7 @@ void find_instruct_type()
 				ID_EX.type = 1;
 				break;
 			case 0x0F: //LUI --Load/Store
-				ID_EX.type = 2;
+				ID_EX.type = 1;
 				break;
 			case 0x20: //LB --Load/Store
 				ID_EX.type = 2;
@@ -680,10 +690,6 @@ void find_instruct_type()
 				break;
 		}
 	}
-	
-	if(!branch_jump){
-		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
-	}
 }
 
 /************************************************************/
@@ -697,14 +703,14 @@ void initialize() {
 	RUN_FLAG = TRUE;
 }
 
-uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
+uint64_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 	//This is where we will have a large case statement 
 	//to determine what operation to do on X and Y
 
 	/*CHRIS ADDED THIS AND CHANGED THE PROTOYPE (SEE EX() FUNCTION)*/
 	uint32_t opcode = (instruct & 0xFC000000) >> 26;
 	uint32_t function = (instruct & 0x0000003F);
-	uint32_t answer;
+	uint64_t answer;
 	uint64_t p1,p2,product,quotient,remainder;
 	if(opcode == 0x00){
 			switch(function){
@@ -723,21 +729,35 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 						answer = X >> Y;
 					}
 					break;
+				case 0x10: //MFHI --Load/Store........Reg to Reg?
+					ID_EX.type = 0;
+					break;
+				case 0x11: //MTHI --Load/Store........Reg to Reg?
+					ID_EX.type = 0;
+					break;
+				case 0x12: //MFLO --Load/Store........Reg to Reg?
+					ID_EX.type = 0;
+					break;
+				case 0x13: //MTLO --Load/Store........Reg to Reg?
+					ID_EX.type = 0;
+					break;
 				case 0x18: //MULT
 					if ((X & 0x80000000) == 0x80000000){
-						p1 = 0xFFFFFFFF00000000 | X;
+						p1 = 0xFFFFFFFF00000000 | (uint64_t)X;
 					}else{
-						p1 = 0x00000000FFFFFFFF & X;
+						p1 = 0x00000000FFFFFFFF & (uint64_t)X;
 					}
 					if ((Y & 0x80000000) == 0x80000000){
-						p2 = 0xFFFFFFFF00000000 | Y;
+						p2 = 0xFFFFFFFF00000000 | (uint64_t)Y;
 					}else{
-						p2 = 0x00000000FFFFFFFF & Y;
+						p2 = 0x00000000FFFFFFFF & (uint64_t)Y;
 					}
+					
 					product = p1 * p2;
 					//NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
 					//NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
 					answer = product;
+					//printf("Mulriply result is %x * %x = %016x\n",p1,p2,answer);
 					break;
 				case 0x19: //MULTU
 					//NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
@@ -752,8 +772,9 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 						remainder = (int32_t)X % (int32_t)Y;
 					}
 					answer = 0;
-					answer = quotient | 0x0000FFFF;
-					answer = remainder | 0xFFFF0000;
+					answer = quotient | 0x00000000FFFFFFFF;
+					remainder = remainder << 32;
+					answer = remainder | 0xFFFFFFFF00000000;
 					break;
 				case 0x1B: //DIVU
 					if(Y != 0)
@@ -823,6 +844,27 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					break;
 				case 0x0E: //XORI
 					answer = X ^ (Y & 0x0000FFFF);
+					break;
+				case 0x0F: //LUI
+					answer = Y << 16;
+					break;
+				case 0x20: //LB --Load/Store
+					ID_EX.type = 2;
+				break;
+				case 0x21: //LH --Load/Store
+					ID_EX.type = 2;
+					break;
+				case 0x23: //LW --Load/Store
+					ID_EX.type = 2;
+					break;
+				case 0x28: //SB --Load/Store
+					ID_EX.type = 3;
+					break;
+				case 0x29: //SH --Load/Store
+					ID_EX.type = 3;
+					break;
+				case 0x2B: //SW --Load/Store
+					ID_EX.type = 3;
 					break;
 				default:
 					// put more things here

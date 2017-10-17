@@ -3,6 +3,8 @@
 #define FALSE 0
 #define TRUE  1
 
+int ENABLE_FORWARDING = 0;
+
 /******************************************************************************/
 /* MIPS memory layout                                                                                                                                      */
 /******************************************************************************/
@@ -57,6 +59,9 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	uint64_t ALUOutput;
 	uint32_t LMD;
 	int type;
+	int regWrite;
+	int memWrite;
+	int stallCount;
 } CPU_Pipeline_Reg;
 
 /***************************************************************/
