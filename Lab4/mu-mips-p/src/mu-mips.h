@@ -68,6 +68,7 @@ int RUN_FLAG;	/* run flag*/
 uint32_t INSTRUCTION_COUNT;
 uint32_t CYCLE_COUNT;
 uint32_t PROGRAM_SIZE; /*in words*/
+int ENABLE_FORWARDING;
 
 
 /***************************************************************/
