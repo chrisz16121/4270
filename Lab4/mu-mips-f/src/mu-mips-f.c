@@ -410,10 +410,10 @@ void MEM()
 
 	if( ENABLE_FORWARDING == 1 && (MEM_WB.type == 2 || MEM_WB.type == 3) ){
 		printf("MEM Forwarding\n");
-		if(MEM_WB.regWrite && (rd != 0) && !((EX_MEM.regWrite && (rd != 0)) && (rd == rs) && (rd == rs))){
+		if(MEM_WB.regWrite && (MEM_WB.dest != 0) && !((EX_MEM.regWrite && (EX_MEM.dest != 0)) && (EX_MEM.dest == ID_EX.rs) && (MEM_WB.dest == ID_EX.rs))){
 			ID_EX.A = MEM_WB.A;
 		}
-		if(MEM_WB.regWrite && (rd != 0) && !((EX_MEM.regWrite && (rd != 0)) && (rd == rt) && (rd == rt))){
+		if(MEM_WB.regWrite && (MEM_WB.dest != 0) && !((EX_MEM.regWrite && (EX_MEM.dest != 0)) && (EX_MEM.dest == ID_EX.rt) && (MEM_WB.dest == ID_EX.rt))){
 			ID_EX.B = MEM_WB.B;
 		}
 	}
@@ -472,10 +472,10 @@ void EX()
 
 		if( ENABLE_FORWARDING == 1 && (EX_MEM.type == 0 || EX_MEM.type == 1)){	
 			printf("EX Forwarding\n");
-			if(EX_MEM.regWrite && (rd != 0) && (rd == rs)){
+			if(EX_MEM.regWrite && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rs)){
 				ID_EX.A = EX_MEM.A;
 			}
-			if(EX_MEM.regWrite && (rd != 0) && (rd == rt)){
+			if(EX_MEM.regWrite && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rt)){
 				ID_EX.B = EX_MEM.B;
 			}
 		}
