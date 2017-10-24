@@ -379,21 +379,11 @@ void WB()
 /************************************************************/
 void MEM()
 {
-	
+	uint32_t instruction,rs,rt,rd;
 	if(cycle_count <3){		//DO nothing
 		printf("MEM is NULL, cycle %d\n",cycle_count);
 	}
 	else{
-		//psuedocode
-		if( ENABLE_FORWARDING == 1 ){
-			printf("This is were the forwarding check will go\n");
-			/*if(MEM_WB.regWrite && (MEM_WB.rd != 0) && !((EX_MEM.regWrite && (EX_MEM.rd != 0)) && (EX_MEM.rd == ID_EX.rs) && (MEM_WB.rd == ID_EX.rs))){
-				ForwardA = 01;
-			}
-			if(MEM_WB.regWrite && (MEM_WB.rd != 0) && !((EX_MEM.regWrite && (EX_MEM.rd != 0)) && (EX_MEM.rd == ID_EX.rt) && (MEM_WB.rd == ID_EX.rt))){
-				ForwardB = 01;
-			}*/
-		}
 		if(EX_MEM.type == 0 || EX_MEM.type == 1){
 			MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 		}
@@ -412,6 +402,21 @@ void MEM()
 	MEM_WB.B = EX_MEM.B;
 	MEM_WB.imm = EX_MEM.imm;
 	MEM_WB.type = EX_MEM.type;
+
+	instruction = MEM_WB.IR;
+	rs = (instruction & 0x03E00000) >> 21;
+	rt = (instruction & 0x001F0000) >> 16;
+	rd = (instruction & 0x0000F800) >> 11;
+
+	if( ENABLE_FORWARDING == 1 && (MEM_WB.type == 2 || MEM_WB.type == 3) ){
+		printf("MEM Forwarding\n");
+		if(MEM_WB.regWrite && (rd != 0) && !((EX_MEM.regWrite && (rd != 0)) && (rd == rs) && (rd == rs))){
+			ID_EX.A = MEM_WB.A;
+		}
+		if(MEM_WB.regWrite && (rd != 0) && !((EX_MEM.regWrite && (rd != 0)) && (rd == rt) && (rd == rt))){
+			ID_EX.B = MEM_WB.B;
+		}
+	}
 }
 
 /************************************************************/
@@ -437,19 +442,7 @@ void EX()
 	//	//stall the pipeline for n cycles
 	//}
 	else{
-
-		//psuedocode
-		if( ENABLE_FORWARDING == 1 ){	
-			printf("This is were the forwarding check will go\n");
-			/*if(EX_MEM.regWrite && (EX_MEM.rd != 0) && (EX_MEM.rd == ID_EX.rs)){
-				ForwardA = 10;
-			}
-			if(EX_MEM.regWrite && (EX_MEM.rd != 0) && (EX_MEM.rd == ID_EX.rt)){
-				ForwardB = 10;
-			}*/
-		}
 		//printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
-
 		if(ID_EX.type == 0){ /*ALU, register-register*/
 			EX_MEM.regWrite = 1;
 			printf("EX (reg-reg) destination reg: %d\n",rd);
@@ -471,6 +464,22 @@ void EX()
 		EX_MEM.B = ID_EX.B;
 		EX_MEM.imm = ID_EX.imm;
 		EX_MEM.LMD = ID_EX.LMD;
+
+		instruction = EX_MEM.IR;
+		rs = (instruction & 0x03E00000) >> 21;
+		rt = (instruction & 0x001F0000) >> 16;
+		rd = (instruction & 0x0000F800) >> 11;
+
+		if( ENABLE_FORWARDING == 1 && (EX_MEM.type == 0 || EX_MEM.type == 1)){	
+			printf("EX Forwarding\n");
+			if(EX_MEM.regWrite && (rd != 0) && (rd == rs)){
+				ID_EX.A = EX_MEM.A;
+			}
+			if(EX_MEM.regWrite && (rd != 0) && (rd == rt)){
+				ID_EX.B = EX_MEM.B;
+			}
+		}
+	
 	}
 }
 
