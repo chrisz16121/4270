@@ -387,10 +387,10 @@ void MEM()
 		//psuedocode
 		if( ENABLE_FORWARDING == 1 ){
 			printf("This is were the forwarding check will go\n");
-			/*if(MEM_WB.RegWrite and (MEM_WB.RD != 0) and not (EX_MEM.RegWrite and (EX_MEM.RD != 0)) and (EX_MEM.RD = ID_EX.RS) and (MEM_WB.RD = ID_EX.RS)){
+			/*if(MEM_WB.regWrite && (MEM_WB.rd != 0) && !((EX_MEM.regWrite && (EX_MEM.rd != 0)) && (EX_MEM.rd == ID_EX.rs) && (MEM_WB.rd == ID_EX.rs))){
 				ForwardA = 01;
 			}
-			if(MEM_WB.RegWrite and (MEM_WB.RD != 0) and not (EX_MEM.RegWrite and (EX_MEM.RD != 0)) and (EX_MEM.RD = ID_EX.RT) and (MEM_WB.RD = ID_EX.RT)){
+			if(MEM_WB.regWrite && (MEM_WB.rd != 0) && !((EX_MEM.regWrite && (EX_MEM.rd != 0)) && (EX_MEM.rd == ID_EX.rt) && (MEM_WB.rd == ID_EX.rt))){
 				ForwardB = 01;
 			}*/
 		}
@@ -441,10 +441,10 @@ void EX()
 		//psuedocode
 		if( ENABLE_FORWARDING == 1 ){	
 			printf("This is were the forwarding check will go\n");
-			/*if(EX_MEM.RegWrite and (EX_MEM.RD != 0) and (EX_MEM.RD == ID_EX.RS)){
+			/*if(EX_MEM.regWrite && (EX_MEM.rd != 0) && (EX_MEM.rd == ID_EX.rs)){
 				ForwardA = 10;
 			}
-			if(EX_MEM.RegWrite and (EX_MEM.RD != 0) and (EX_MEM.RD == ID_EX.RT)){
+			if(EX_MEM.regWrite && (EX_MEM.rd != 0) && (EX_MEM.rd == ID_EX.rt)){
 				ForwardB = 10;
 			}*/
 		}
