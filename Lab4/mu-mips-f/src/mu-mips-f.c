@@ -9,6 +9,7 @@
 
 int cycle_count = 0;
 int FF = 0;
+int instruction_fetch_flag = 0;
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
 /***************************************************************/
@@ -72,6 +73,9 @@ void mem_write_32(uint32_t address, uint32_t value)
 /***************************************************************/
 void cycle() {                                                
 	handle_pipeline();
+	//if(FF == 0){
+	//	CURRENT_STATE = NEXT_STATE;
+	//}
 	CURRENT_STATE = NEXT_STATE;
 	CYCLE_COUNT++;
 }
@@ -341,7 +345,7 @@ void WB()
 		if(MEM_WB.type == 1){/*register-immediate*/
 			rt = (MEM_WB.IR & 0x001F0000) >> 16;
 			NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
-			if(FF == 1 && rt == ID_EX.dest){
+			if(FF == 1){
 				printf("Hazard eliminated\n");
 				FF = 0;
 			}
@@ -349,13 +353,17 @@ void WB()
 		else if(MEM_WB.type == 0) {/*register-register*/
 			rd = (MEM_WB.IR & 0x0000F800) >> 11;
 			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
-			if(FF == 1 && rd == ID_EX.dest){
+			if(FF == 1){
 				printf("Hazard eliminated\n");
 				FF = 0;
 			}
 		}	
 		else if(MEM_WB.type == 2){ /*Load*/
-				NEXT_STATE.REGS[MEM_WB.B] = MEM_WB.LMD;
+			NEXT_STATE.REGS[MEM_WB.B] = MEM_WB.LMD;
+			if(FF == 1){
+				printf("Hazard eliminated\n");
+				FF = 0;
+			}
 		}
 	}
 	
@@ -373,8 +381,7 @@ void MEM()
 	else{
 		MEM_WB = EX_MEM;
 		printf("MEM: ");
-		print_instruction(MEM_WB.PC);
-		printf("\n");	
+		print_instruction(MEM_WB.PC);	
 		//psuedocode
 		if( ENABLE_FORWARDING == 1 ){
 			printf("This is were the forwarding check will go\n");
@@ -397,13 +404,6 @@ void MEM()
 			}
 		}
 	}
-<<<<<<< HEAD:Lab4/mu-mips-f/src/mu-mips-f.c
-	MEM_WB.PC = EX_MEM.PC;
-	MEM_WB.A = EX_MEM.A;
-	MEM_WB.B = EX_MEM.B;
-	MEM_WB.imm = EX_MEM.imm;
-	MEM_WB.type = EX_MEM.type;
-
 	instruction = MEM_WB.IR;
 	rs = (instruction & 0x03E00000) >> 21;
 	rt = (instruction & 0x001F0000) >> 16;
@@ -418,8 +418,6 @@ void MEM()
 			ID_EX.B = MEM_WB.B;
 		}
 	}
-=======
->>>>>>> b0f61ad28960c27a107405e08232a14d37eaa021:Lab4/mu-mips-p/src/mu-mips-f.c
 }
 
 /************************************************************/
@@ -446,6 +444,12 @@ void EX()
 	//}
 	else{
 		EX_MEM = ID_EX;
+		if(EX_MEM.type == 0){
+			EX_MEM.dest = rd;
+		}
+		else if(EX_MEM.type == 1){
+			EX_MEM.dest = rt;
+		}
 		printf("EX: ");
 		print_instruction(EX_MEM.PC);	
 		//psuedocode
@@ -462,27 +466,18 @@ void EX()
 
 		if(EX_MEM.type == 0){ /*ALU, register-register*/
 			EX_MEM.regWrite = 1;
-			printf("EX (reg-reg) destination reg: %d\n",rd);
-			EX_MEM.ALUOutput = do_instruction(ID_EX.A,ID_EX.B,ID_EX.IR); 
+			printf("EX (reg-reg) destination reg: %d\n",EX_MEM.dest);
+			EX_MEM.ALUOutput = do_instruction(EX_MEM.A,EX_MEM.B,EX_MEM.IR); 
 		}
 		else if(EX_MEM.type == 1){ //register-immediate
 			EX_MEM.regWrite = 1;
-			printf("EX  (reg-Imm) destination reg: %d\n",rt);
+			printf("EX  (reg-Imm) destination reg: %d\n",EX_MEM.dest);
 			EX_MEM.ALUOutput = do_instruction(EX_MEM.A,EX_MEM.imm,EX_MEM.IR); 	
 		}
 		else if(EX_MEM.type == 2 || EX_MEM.type == 3) { /*Load/Store*/
 			EX_MEM.ALUOutput = EX_MEM.A + EX_MEM.imm;
-			EX_MEM.B = ID_EX.B;
+			//EX_MEM.B = ID_EX.B;
 		}
-<<<<<<< HEAD:Lab4/mu-mips-f/src/mu-mips-f.c
-		EX_MEM.type = ID_EX.type;
-		EX_MEM.IR = ID_EX.IR;
-		EX_MEM.PC = ID_EX.PC;
-		EX_MEM.A = ID_EX.A;
-		EX_MEM.B = ID_EX.B;
-		EX_MEM.imm = ID_EX.imm;
-		EX_MEM.LMD = ID_EX.LMD;
-
 		instruction = EX_MEM.IR;
 		rs = (instruction & 0x03E00000) >> 21;
 		rt = (instruction & 0x001F0000) >> 16;
@@ -497,9 +492,6 @@ void EX()
 				ID_EX.B = EX_MEM.B;
 			}
 		}
-	
-=======
->>>>>>> b0f61ad28960c27a107405e08232a14d37eaa021:Lab4/mu-mips-p/src/mu-mips-f.c
 	}
 }
 
@@ -513,6 +505,8 @@ void ID()
 	}
 	else{
 		ID_EX = IF_ID;
+		//printf("Sent to find_type: ");
+		//print_instruction(ID_EX.PC);
 		find_instruct_type();	//Parse the IF_ID.IR
 		//ID_EX.type gets set in the find_instruct_type function!
 		if( ID_EX.type == 4 ){
@@ -520,30 +514,16 @@ void ID()
 			count++;
 		}
 		else{
-		uint32_t rs, rt, immediate; 
-		uint32_t regDest_ex,regDest_mem, instruction_ex,instruction_mem;
-		rs = (0x03E00000 & ID_EX.IR) >> 21;
-		rt = (0x001F0000 & ID_EX.IR) >> 16;
-		immediate = 0x0000FFFF & ID_EX.IR;
-		instruction_ex = EX_MEM.IR;
-		instruction_mem = MEM_WB.IR;
-		//printf("Instruction in execution: %08x\n",instruction);
-		if(EX_MEM.type == 0){
-			regDest_ex = (instruction_ex & 0x0000F800) >> 11;
-		}
-		else if(EX_MEM.type == 1){
-			regDest_ex = (instruction_ex & 0x001F0000) >> 16;
-		}
-		if(MEM_WB.type == 2){
-			regDest_mem = (instruction_ex & 0x001F0000) >> 16;
-		}	
+		ID_EX.rs = (0x03E00000 & ID_EX.IR) >> 21;
+		ID_EX.rt = (0x001F0000 & ID_EX.IR) >> 16;
+		ID_EX.imm = 0x0000FFFF & ID_EX.IR;	
 		printf("ID: ");
 		print_instruction(IF_ID.PC);
 		//printf("rd in ex: %d\n",regDest);
 		//printf("ID source registers: rs: %d rt: %d\nregDest: %d\nregWrite: %d\n\n",rs,rt,regDest_ex,EX_MEM.regWrite);
 		if(ID_EX.type == 0){
 			printf("REG-REG in ID\n");
-			if((EX_MEM.regWrite == 1) && (regDest_ex != 0) && (regDest_ex == rs || rt)){
+			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rs || ID_EX.rt)){
 				//ID_EX.dest = regDest_ex;
 				printf("Data hazard in ID_EX (REG-REG)\n");
 				ID_EX.A = 0;
@@ -557,7 +537,8 @@ void ID()
 		}
 		else if(ID_EX.type == 1){
 			printf("REG-IMM in ID\n");
-			if((EX_MEM.regWrite == 1) && (regDest_ex != 0) && (regDest_ex == rs || rt)){
+			printf("EX_MEM.dest: %d ID_EX.rt: %d\n",EX_MEM.dest,ID_EX.rs);
+			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rs)){
 				//ID_EX.dest = regDest;
 				printf("Data hazard in ID_EX\n");
 				ID_EX.A = 0;
@@ -570,7 +551,7 @@ void ID()
 			}
 		}
 		else if(ID_EX.type == 2){ 
-			if((MEM_WB.regWrite == 1) && (regDest_mem != 0) && (regDest_mem == rs || rt)){	
+			if((MEM_WB.regWrite == 1) && (MEM_WB.dest != 0) && (MEM_WB.dest == ID_EX.rs || ID_EX.rt)){	
 				//ID_EX.dest = regDest;
 				printf("Data hazard in MEM_WB\n");
 				ID_EX.A = 0;
@@ -584,11 +565,8 @@ void ID()
 		}
 		if(FF == 0){
 			printf("Instruction progresses\n");
-			ID_EX.A = CURRENT_STATE.REGS[rs];
-			ID_EX.B = CURRENT_STATE.REGS[rt]; 
-			ID_EX.imm = immediate;
-			ID_EX.IR = IF_ID.IR;	
-			ID_EX.PC = IF_ID.PC;
+			ID_EX.A = CURRENT_STATE.REGS[ID_EX.rs];
+			ID_EX.B = CURRENT_STATE.REGS[ID_EX.rt]; 
 		}
 		//printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
 		}
@@ -600,10 +578,16 @@ void ID()
 /************************************************************/
 void IF()
 {
-	if(FF == 1){
+	//if(FF == 1){
+	if(instruction_fetch_flag == 1){
 		printf("No instruction fetched\n");
+		//NEXT_STATE.PC = 
 		print_instruction(IF_ID.PC);
-		printf(" remains in IF stage\n");
+		printf("remains in IF stage\n");
+		if(FF == 0){
+			instruction_fetch_flag = 0;
+		}
+		printf("\n");
 	}
 	if(fetch_flag == 0 && FF == 0){
 		IF_ID.PC = CURRENT_STATE.PC;
@@ -613,6 +597,9 @@ void IF()
 		print_instruction(IF_ID.PC);
 		//print_instruction(CURRENT_STATE.PC);
 		printf("\n");
+		if(FF == 1){
+			instruction_fetch_flag = 1;
+		}
 	} 
 	cycle_count++;
 } 
@@ -640,7 +627,7 @@ void find_instruct_type()
 	
 	//printf("[0x%x]\t ", CURRENT_STATE.PC);
 	
-	instruction = IF_ID.IR;
+	instruction = ID_EX.IR;
 	
 	opcode = (instruction & 0xFC000000) >> 26;
 	function = instruction & 0x0000003F;
@@ -810,7 +797,7 @@ void find_instruct_type()
 				break;
 			default:
 				// put more things here
-				printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+				printf("find_type: Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
 				break;
 		}
 	}
@@ -833,10 +820,6 @@ void initialize() {
 }
 
 uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
-	//This is where we will have a large case statement 
-	//to determine what operation to do on X and Y
-
-	/*CHRIS ADDED THIS AND CHANGED THE PROTOYPE (SEE EX() FUNCTION)*/
 	uint32_t opcode = (instruct & 0xFC000000) >> 26;
 	uint32_t function = (instruct & 0x0000003F);
 	uint32_t answer;
@@ -931,7 +914,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					} 
 					break;
 				default:
-					printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+					printf("do_instruction: Instruction at 0x%x is not implemented!\n",EX_MEM.PC);
 					break;
 			}
 		}
@@ -961,7 +944,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					break;
 				default:
 					// put more things here
-					printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+					printf("do_instruction: Instruction at 0x%x is not implemented!\n",EX_MEM.PC);
 					break;
 			}
 		}

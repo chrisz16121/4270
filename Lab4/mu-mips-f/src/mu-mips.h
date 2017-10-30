@@ -87,7 +87,7 @@ CPU_Pipeline_Reg ID_EX;
 CPU_Pipeline_Reg EX_MEM;
 CPU_Pipeline_Reg MEM_WB;
 
-char prog_file[32];
+char prog_file[64];
 
 
 /***************************************************************/
