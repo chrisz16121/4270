@@ -8,7 +8,7 @@
 
 
 int cycle_count = 0;
-int FF = 0;
+int FF;
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
 /***************************************************************/
@@ -72,7 +72,9 @@ void mem_write_32(uint32_t address, uint32_t value)
 /***************************************************************/
 void cycle() {                                                
 	handle_pipeline();
-	CURRENT_STATE = NEXT_STATE;
+	if(FF == 0){
+		CURRENT_STATE = NEXT_STATE;
+	}
 	CYCLE_COUNT++;
 }
 
@@ -397,7 +399,6 @@ void MEM()
 			}
 		}
 	}
-<<<<<<< HEAD:Lab4/mu-mips-f/src/mu-mips-f.c
 	MEM_WB.PC = EX_MEM.PC;
 	MEM_WB.A = EX_MEM.A;
 	MEM_WB.B = EX_MEM.B;
@@ -418,8 +419,6 @@ void MEM()
 			ID_EX.B = MEM_WB.B;
 		}
 	}
-=======
->>>>>>> b0f61ad28960c27a107405e08232a14d37eaa021:Lab4/mu-mips-p/src/mu-mips-f.c
 }
 
 /************************************************************/
@@ -474,7 +473,6 @@ void EX()
 			EX_MEM.ALUOutput = EX_MEM.A + EX_MEM.imm;
 			EX_MEM.B = ID_EX.B;
 		}
-<<<<<<< HEAD:Lab4/mu-mips-f/src/mu-mips-f.c
 		EX_MEM.type = ID_EX.type;
 		EX_MEM.IR = ID_EX.IR;
 		EX_MEM.PC = ID_EX.PC;
@@ -498,8 +496,6 @@ void EX()
 			}
 		}
 	
-=======
->>>>>>> b0f61ad28960c27a107405e08232a14d37eaa021:Lab4/mu-mips-p/src/mu-mips-f.c
 	}
 }
 
@@ -516,6 +512,7 @@ void ID()
 		find_instruct_type();	//Parse the IF_ID.IR
 		//ID_EX.type gets set in the find_instruct_type function!
 		if( ID_EX.type == 4 ){
+			printf("\n\nfetch_flag tripped\n\n");
 			fetch_flag = 1; //this kills the program
 			count++;
 		}
@@ -606,6 +603,8 @@ void IF()
 		printf(" remains in IF stage\n");
 	}
 	if(fetch_flag == 0 && FF == 0){
+		print_instruction(IF_ID.PC);
+		printf(" is in IF stage\n");
 		IF_ID.PC = CURRENT_STATE.PC;
 		IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
 		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
@@ -676,6 +675,7 @@ void find_instruct_type()
 				break;
 			case 0x0C: //SYSCALL
 				ID_EX.type = 4;
+				printf("\n\nIdentified SYSCALL\n\n");
 				break;
 			case 0x10: //MFHI --Load/Store........Reg to Reg?
 
@@ -729,7 +729,7 @@ void find_instruct_type()
 				ID_EX.type = 0;
 				break;
 			default:
-				printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+				printf("find_instruct_type():Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
 				break;
 		}
 	}
@@ -810,7 +810,7 @@ void find_instruct_type()
 				break;
 			default:
 				// put more things here
-				printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+				printf("find_instruct_type():Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
 				break;
 		}
 	}
@@ -841,6 +841,11 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 	uint32_t function = (instruct & 0x0000003F);
 	uint32_t answer;
 	uint64_t p1,p2,product,quotient,remainder;
+	if( FF == 1 ){
+		//answer = 0x00000000;
+		printf("Data Hazard Prevention\n");
+	}
+	else{
 	if(opcode == 0x00){
 			switch(function){
 				case 0x00: //SLL
@@ -931,7 +936,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					} 
 					break;
 				default:
-					printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+					printf("do_instruction():Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
 					break;
 			}
 		}
@@ -961,10 +966,11 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					break;
 				default:
 					// put more things here
-					printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+					printf("do_instruction(): Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
 					break;
 			}
 		}
+	}
 	return answer;
 }
 /************************************************************/
