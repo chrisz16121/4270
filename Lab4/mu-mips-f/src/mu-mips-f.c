@@ -24,6 +24,7 @@ void help() {
 	printf("high <val>\t-- set the HI register to <val>\n");
 	printf("low <val>\t-- set the LO register to <val>\n");
 	printf("print\t-- print the program loaded into memory\n");
+	printf("forwarding <n>\t-- enable(<n>=1)/disable(<n>=2) forwarding (disabled by default)\n");
 	printf("show\t-- print the current content of the pipeline registers\n");
 	printf("?\t-- display help menu\n");
 	printf("quit\t-- exit the simulator\n\n");
@@ -236,6 +237,12 @@ void handle_command() {
 		case 'P':
 		case 'p':
 			print_program(); 
+			break;
+		case 'f':
+			if(scanf("%d",&ENABLE_FORWARDING)!=1){
+				break;
+			}
+			ENABLE_FORWARDING==0?printf("Forwarding OFF\n"):printf("Forwarding ON\n");
 			break;
 		default:
 			printf("Invalid Command.\n");
