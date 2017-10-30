@@ -8,8 +8,10 @@
 
 
 int cycle_count = 0;
+
 int FF = 0;
 int instruction_fetch_flag = 0;
+
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
 /***************************************************************/
@@ -25,6 +27,7 @@ void help() {
 	printf("high <val>\t-- set the HI register to <val>\n");
 	printf("low <val>\t-- set the LO register to <val>\n");
 	printf("print\t-- print the program loaded into memory\n");
+	printf("forwarding <n>\t-- enable(<n>=1)/disable(<n>=2) forwarding (disabled by default)\n");
 	printf("show\t-- print the current content of the pipeline registers\n");
 	printf("?\t-- display help menu\n");
 	printf("quit\t-- exit the simulator\n\n");
@@ -77,6 +80,7 @@ void cycle() {
 	//	CURRENT_STATE = NEXT_STATE;
 	//}
 	CURRENT_STATE = NEXT_STATE;
+
 	CYCLE_COUNT++;
 }
 
@@ -238,6 +242,12 @@ void handle_command() {
 		case 'P':
 		case 'p':
 			print_program(); 
+			break;
+		case 'f':
+			if(scanf("%d",&ENABLE_FORWARDING)!=1){
+				break;
+			}
+			ENABLE_FORWARDING==0?printf("Forwarding OFF\n"):printf("Forwarding ON\n");
 			break;
 		default:
 			printf("Invalid Command.\n");
@@ -404,6 +414,7 @@ void MEM()
 			}
 		}
 	}
+
 	instruction = MEM_WB.IR;
 	rs = (instruction & 0x03E00000) >> 21;
 	rt = (instruction & 0x001F0000) >> 16;
@@ -478,6 +489,7 @@ void EX()
 			EX_MEM.ALUOutput = EX_MEM.A + EX_MEM.imm;
 			//EX_MEM.B = ID_EX.B;
 		}
+
 		instruction = EX_MEM.IR;
 		rs = (instruction & 0x03E00000) >> 21;
 		rt = (instruction & 0x001F0000) >> 16;
@@ -510,6 +522,7 @@ void ID()
 		find_instruct_type();	//Parse the IF_ID.IR
 		//ID_EX.type gets set in the find_instruct_type function!
 		if( ID_EX.type == 4 ){
+			printf("\n\nfetch_flag tripped\n\n");
 			fetch_flag = 1; //this kills the program
 			count++;
 		}
@@ -590,6 +603,8 @@ void IF()
 		printf("\n");
 	}
 	if(fetch_flag == 0 && FF == 0){
+		print_instruction(IF_ID.PC);
+		printf(" is in IF stage\n");
 		IF_ID.PC = CURRENT_STATE.PC;
 		IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
 		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
@@ -663,6 +678,7 @@ void find_instruct_type()
 				break;
 			case 0x0C: //SYSCALL
 				ID_EX.type = 4;
+				printf("\n\nIdentified SYSCALL\n\n");
 				break;
 			case 0x10: //MFHI --Load/Store........Reg to Reg?
 
@@ -716,7 +732,7 @@ void find_instruct_type()
 				ID_EX.type = 0;
 				break;
 			default:
-				printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+				printf("find_instruct_type():Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
 				break;
 		}
 	}
@@ -824,6 +840,11 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 	uint32_t function = (instruct & 0x0000003F);
 	uint32_t answer;
 	uint64_t p1,p2,product,quotient,remainder;
+	if( FF == 1 ){
+		//answer = 0x00000000;
+		printf("Data Hazard Prevention\n");
+	}
+	else{
 	if(opcode == 0x00){
 			switch(function){
 				case 0x00: //SLL
@@ -945,9 +966,11 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 				default:
 					// put more things here
 					printf("do_instruction: Instruction at 0x%x is not implemented!\n",EX_MEM.PC);
+
 					break;
 			}
 		}
+	}
 	return answer;
 }
 /************************************************************/
