@@ -352,25 +352,26 @@ void WB()
 	}
 	else{
 		INSTRUCTION_COUNT++;
+		destination = MEM_WB.dest;
 		if(MEM_WB.type == 1){/*register-immediate*/
 			rt = (MEM_WB.IR & 0x001F0000) >> 16;
-			NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
-			if(FF == 1){
+			NEXT_STATE.REGS[dest] = MEM_WB.ALUOutput;
+			if(FF == 1 && destination == ID_EX.rt){
 				printf("Hazard eliminated\n");
 				FF = 0;
 			}
 		} 
 		else if(MEM_WB.type == 0) {/*register-register*/
 			rd = (MEM_WB.IR & 0x0000F800) >> 11;
-			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
-			if(FF == 1){
+			NEXT_STATE.REGS[dest] = MEM_WB.ALUOutput;
+			if(FF == 1 && destination == ID_EX.rd){
 				printf("Hazard eliminated\n");
 				FF = 0;
 			}
 		}	
 		else if(MEM_WB.type == 2){ /*Load*/
 			NEXT_STATE.REGS[MEM_WB.B] = MEM_WB.LMD;
-			if(FF == 1){
+			if(FF == 1 && destination == ID_EX.rt){
 				printf("Hazard eliminated\n");
 				FF = 0;
 			}
