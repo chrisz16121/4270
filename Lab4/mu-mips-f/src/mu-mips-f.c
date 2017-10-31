@@ -362,7 +362,6 @@ void WB()
 			NEXT_STATE.REGS[MEM_WB.dest] = MEM_WB.ALUOutput;
 			printf("\n\nAlmost there type 1\n\n");
 			if(FF == 1 && destination == ID_EX.rs){
-				printf("\n\n We in dis bich\n\n");
 				printf("Hazard eliminated\n");
 				FF = 0;
 			}
