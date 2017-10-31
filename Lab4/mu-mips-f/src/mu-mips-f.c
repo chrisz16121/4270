@@ -358,26 +358,50 @@ void WB()
 		uint32_t destination = MEM_WB.dest;
 		printf("destination of WB is: %d\n",destination);
 		if(MEM_WB.type == 1){/*register-immediate*/
-			//rt = (MEM_WB.IR & 0x001F0000) >> 16;
 			NEXT_STATE.REGS[MEM_WB.dest] = MEM_WB.ALUOutput;
-			printf("\n\nAlmost there type 1\n\n");
-			if(FF == 1 && destination == ID_EX.rs){
+			/*if(FF == 1 && destination == ID_EX.rs){
+
 				printf("Hazard eliminated\n");
 				FF = 0;
 			}
+			*/
 		} 
 		else if(MEM_WB.type == 0) {/*register-register*/
 			//rd = (MEM_WB.IR & 0x0000F800) >> 11;
 			NEXT_STATE.REGS[MEM_WB.dest] = MEM_WB.ALUOutput;
-			printf("\n\nAlmost there type 2\n\n");
-			if(FF == 1 && destination == (ID_EX.rt || ID_EX.rs)){
+			/*if(FF == 1 && destination == (ID_EX.rt || ID_EX.rs)){
+
 				printf("Hazard eliminated\n");
 				FF = 0;
 			}
+			*/
 		}	
 		else if(MEM_WB.type == 2){ /*Load*/
 			NEXT_STATE.REGS[MEM_WB.B] = MEM_WB.LMD;
-			if(FF == 1 && destination == ID_EX.rs){
+			/*if(FF == 1 && destination == ID_EX.rs){
+				printf("Hazard eliminated\n");
+				FF = 0;
+				fetch_flag = 0;
+			}
+			*/
+		}
+		if(FF == 1){
+			if(ID_EX.type == 0 && ((destination == ID_EX.rt) || (destination == ID_EX.rs))){
+				printf("Hazard eliminated\n");
+				FF = 0;
+				fetch_flag = 0;
+			}
+			else if(ID_EX.type == 1 && destination == ID_EX.rs){
+				printf("Hazard eliminated\n");
+				FF = 0;
+				fetch_flag = 0;
+			}
+			else if(ID_EX.type == 2 && destination == ID_EX.rs){
+				printf("Hazard eliminated\n");
+				FF = 0;
+				fetch_flag = 0;
+			}
+			else if(ID_EX.type == 3 && destination == ID_EX.rt){
 				printf("Hazard eliminated\n");
 				FF = 0;
 			}
@@ -443,12 +467,10 @@ void MEM()
 void EX()
 {
 	uint32_t instruction,rs,rt,rd;
-	if(ID_EX.type == 0 || ID_EX.type == 1){
-		instruction = ID_EX.IR;
-		rs = (instruction & 0x03E00000) >> 21;
-		rt = (instruction & 0x001F0000) >> 16;
-		rd = (instruction & 0x0000F800) >> 11;
-	}
+	instruction = ID_EX.IR;
+	rs = (instruction & 0x03E00000) >> 21;
+	rt = (instruction & 0x001F0000) >> 16;
+	rd = (instruction & 0x0000F800) >> 11;
 	if(cycle_count <2){		//DO nothing
 		printf("EX is NULL, cycle %d\n",cycle_count);
 	}
@@ -473,6 +495,9 @@ void EX()
 		}
 		else if(EX_MEM.type == 1){
 			EX_MEM.dest = rt;
+		}
+		else if(EX_MEM.type == 2){
+			EX_MEM.dest = rt;			
 		}
 		if(EX_MEM.PC == 0){
 			printf("EX: Execution is stalled\n");
@@ -502,11 +527,14 @@ void EX()
 				printf("EX  (reg-Imm) destination reg: %d\n",EX_MEM.dest);
 				EX_MEM.ALUOutput = do_instruction(EX_MEM.A,EX_MEM.imm,EX_MEM.IR); 	
 			}
-			else if(EX_MEM.type == 2 || EX_MEM.type == 3) { /*Load/Store*/
+			else if(EX_MEM.type == 2) { /*Load/Store*/
 				EX_MEM.ALUOutput = EX_MEM.A + EX_MEM.imm;
+				EX_MEM.regWrite = 1;
 				//EX_MEM.B = ID_EX.B;
 			}
-
+			else if(EX_MEM.type == 3) { /*Load/Store*/
+				EX_MEM.ALUOutput = EX_MEM.A + EX_MEM.imm;
+			}
 			instruction = EX_MEM.IR;
 			rs = (instruction & 0x03E00000) >> 21;
 			rt = (instruction & 0x001F0000) >> 16;
@@ -540,6 +568,8 @@ void ID()
 		printf("is stil in decode stage\n");
 	}
 	else{
+	//printf("NOT STALLED\n");
+
 		ID_EX = IF_ID;
 		//printf("Sent to find_type: ");
 		//print_instruction(ID_EX.PC);
@@ -559,32 +589,45 @@ void ID()
 		//printf("rd in ex: %d\n",regDest);
 		//printf("ID source registers: rs: %d rt: %d\nregDest: %d\nregWrite: %d\n\n",rs,rt,regDest_ex,EX_MEM.regWrite);
 		if(ID_EX.type == 0){
-			printf("REG-REG in ID\n");
-			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rs || ID_EX.rt)){
-				//ID_EX.dest = regDest_ex;
-				printf("Data hazard in ID_EX (REG-REG)\n");
+
+			//printf("REG-REG in ID\n");
+			//printf("EX_MEM.dest = %d\tID_EX.RS = %d\tID_EX.RT = %d\n",EX_MEM.dest,ID_EX.rs,ID_EX.rt);
+			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && ((EX_MEM.dest == ID_EX.rs) || (EX_MEM.dest == ID_EX.rt))){
+				int dummy = EX_MEM.dest;
+				printf("***Data hazard on $r%d (register type)***\n",dummy);
+
 				FF = 1;
-				//EX_MEM.type = 5;
 			}
 		}
 		else if(ID_EX.type == 1){
-			printf("REG-IMM in ID\n");
-			printf("EX_MEM.dest: %d ID_EX.rt: %d\n",EX_MEM.dest,ID_EX.rs);
+			//printf("REG-IMM in ID\n");
+			//printf("EX_MEM.dest: %d ID_EX.rt: %d\n",EX_MEM.dest,ID_EX.rs);
 			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rs)){
-				//ID_EX.dest = regDest;
-				printf("Data hazard in ID_EX\n");
+
+				printf("***Data hazard on $r%d (immediate instruction)***\n",ID_EX.rs);
+
 				FF = 1;
-				//EX_MEM.type = 5;
 			}
 		}
-		else if(ID_EX.type == 2){ 
-			if((MEM_WB.regWrite == 1) && (MEM_WB.dest != 0) && (MEM_WB.dest == ID_EX.rs || ID_EX.rt)){	
+		else if(ID_EX.type == 2){
+			//printf("EX_MEM.dest = %d\tID_EX.RS = %d\tID_EX.RT = %d\n",EX_MEM.dest,ID_EX.rs,ID_EX.rt);
+			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && ((EX_MEM.dest == ID_EX.rs) || (EX_MEM.dest == ID_EX.rt))){	
 				//ID_EX.dest = regDest;
-				printf("Data hazard in MEM_WB\n");
+
+				int dummy = EX_MEM.dest;
+				printf("***Data hazard on $r%d (load instruction)***\n",dummy);
+
 				FF = 1;
-				//EX_MEM.type = 5;
 			}
 		}
+
+		else if (ID_EX.type == 3){
+			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rt)){
+				printf("***Data hazard on $r%d (store instruction)***\n",ID_EX.rt);
+				FF = 1;
+			}
+		}
+
 		if(FF == 0){
 			printf("Instruction progresses\n");
 			ID_EX.A = CURRENT_STATE.REGS[ID_EX.rs];

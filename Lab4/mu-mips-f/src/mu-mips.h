@@ -61,10 +61,10 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	int type;
 	int regWrite;
 	int memWrite;
-	int stallCount;
-	int dest;	//could be rd or rt depending on instruction
-	int rt;
-	int rs;
+	uint32_t stallCount;
+	uint32_t dest;	//could be rd or rt depending on instruction
+	uint32_t rt;
+	uint32_t rs;
 } CPU_Pipeline_Reg;
 
 /***************************************************************/
