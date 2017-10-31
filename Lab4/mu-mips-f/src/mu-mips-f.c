@@ -972,6 +972,10 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 				case 0x0E: //XORI
 					answer = X ^ (Y & 0x0000FFFF);
 					break;
+				case 0x0F: //LUI 
+					X = Y << 16;
+					answer = X;
+					break;
 				default:
 					// put more things here
 					printf("do_instruction: Instruction at 0x%x is not implemented!\n",EX_MEM.PC);
