@@ -360,7 +360,9 @@ void WB()
 		if(MEM_WB.type == 1){/*register-immediate*/
 			//rt = (MEM_WB.IR & 0x001F0000) >> 16;
 			NEXT_STATE.REGS[MEM_WB.dest] = MEM_WB.ALUOutput;
+			printf("\n\nAlmost there type 1\n\n");
 			if(FF == 1 && destination == ID_EX.rs){
+				printf("\n\n We in dis bich\n\n");
 				printf("Hazard eliminated\n");
 				FF = 0;
 			}
@@ -368,7 +370,8 @@ void WB()
 		else if(MEM_WB.type == 0) {/*register-register*/
 			//rd = (MEM_WB.IR & 0x0000F800) >> 11;
 			NEXT_STATE.REGS[MEM_WB.dest] = MEM_WB.ALUOutput;
-			if(FF == 1 && destination == (ID_EX.rt || ID_EX.rs){
+			printf("\n\nAlmost there type 2\n\n");
+			if(FF == 1 && destination == (ID_EX.rt || ID_EX.rs)){
 				printf("Hazard eliminated\n");
 				FF = 0;
 			}
@@ -532,6 +535,7 @@ void ID()
 		printf("ID is NULL, cycle %d\n",cycle_count);
 	}
 	else if(FF == 1){
+
 		printf("ID: Instruction decode is stalled\n");
 		print_instruction(ID_EX.PC);
 		printf("is stil in decode stage\n");
