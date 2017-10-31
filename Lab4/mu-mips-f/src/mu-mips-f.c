@@ -76,7 +76,7 @@ void mem_write_32(uint32_t address, uint32_t value)
 /***************************************************************/
 void cycle() {                                                
 	handle_pipeline();
-	//if(FF == 0){
+	//if(KillFlag == 1){
 	//	CURRENT_STATE = NEXT_STATE;
 	//}
 	CURRENT_STATE = NEXT_STATE;
@@ -348,7 +348,7 @@ void WB()
 	}
 	else if( fetch_flag == 1 && count == 3 ){
 		printf("killing...\n");
-		exit(NULL);
+		RUN_FLAG == FALSE;
 	}
 	else{
 		//uint32_t instruction = MEM_WB.IR
