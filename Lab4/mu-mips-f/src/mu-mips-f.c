@@ -348,7 +348,7 @@ void WB()
 	}
 	else if( fetch_flag == 1 && count == 3 ){
 		printf("killing...\n");
-		RUN_FLAG == FALSE;
+		RUN_FLAG = FALSE;
 	}
 	else{
 		//uint32_t instruction = MEM_WB.IR
@@ -423,16 +423,7 @@ void MEM()
 		MEM_WB = EX_MEM;
 		printf("MEM: ");
 		print_instruction(MEM_WB.PC);	
-		//psuedocode
-		if( ENABLE_FORWARDING == 1 ){
-			printf("This is were the forwarding check will go\n");
-			/*if(MEM_WB.RegWrite and (MEM_WB.RD != 0) and not (EX_MEM.RegWrite and (EX_MEM.RD != 0)) and (EX_MEM.RD = ID_EX.RS) and (MEM_WB.RD = ID_EX.RS)){
-				ForwardA = 01;
-			}
-			if(MEM_WB.RegWrite and (MEM_WB.RD != 0) and not (EX_MEM.RegWrite and (EX_MEM.RD != 0)) and (EX_MEM.RD = ID_EX.RT) and (MEM_WB.RD = ID_EX.RT)){
-				ForwardB = 01;
-			}*/
-		}
+
 		if(MEM_WB.type == 0 || MEM_WB.type == 1){
 			MEM_WB.ALUOutput = MEM_WB.ALUOutput;	//redundant
 		}
@@ -451,12 +442,13 @@ void MEM()
 	rd = (instruction & 0x0000F800) >> 11;
 
 	if( ENABLE_FORWARDING == 1 && (MEM_WB.type == 2 || MEM_WB.type == 3) ){
-		printf("MEM Forwarding\n");
 		if(MEM_WB.regWrite && (MEM_WB.dest != 0) && !((EX_MEM.regWrite && (EX_MEM.dest != 0)) && (EX_MEM.dest == ID_EX.rs) && (MEM_WB.dest == ID_EX.rs))){
 			ID_EX.A = MEM_WB.A;
+			printf("MEM Forwarding\n");
 		}
 		if(MEM_WB.regWrite && (MEM_WB.dest != 0) && !((EX_MEM.regWrite && (EX_MEM.dest != 0)) && (EX_MEM.dest == ID_EX.rt) && (MEM_WB.dest == ID_EX.rt))){
 			ID_EX.B = MEM_WB.B;
+			printf("MEM Forwarding\n");
 		}
 	}
 }
@@ -505,18 +497,6 @@ void EX()
 		else{
 			printf("EX: ");
 			print_instruction(EX_MEM.PC);	
-			//psuedocode
-			if( ENABLE_FORWARDING == 1 ){	
-				printf("This is were the forwarding check will go\n");
-				/*if(EX_MEM.RegWrite and (EX_MEM.RD != 0) and (EX_MEM.RD == ID_EX.RS)){
-					ForwardA = 10;
-				}
-				if(EX_MEM.RegWrite and (EX_MEM.RD != 0) and (EX_MEM.RD == ID_EX.RT)){
-				ForwardB = 10;
-				}*/
-			}
-			//printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
-
 			if(EX_MEM.type == 0){ /*ALU, register-register*/
 				EX_MEM.regWrite = 1;
 				printf("EX (reg-reg) destination reg: %d\n",EX_MEM.dest);
@@ -541,12 +521,13 @@ void EX()
 			rd = (instruction & 0x0000F800) >> 11;
 		
 			if( ENABLE_FORWARDING == 1 && (EX_MEM.type == 0 || EX_MEM.type == 1)){	
-				printf("EX Forwarding\n");
 				if(EX_MEM.regWrite && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rs)){
 					ID_EX.A = EX_MEM.A;
+					printf("EX Forwarding\n");
 				}
 				if(EX_MEM.regWrite && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rt)){
 					ID_EX.B = EX_MEM.B;
+					printf("EX Forwarding\n");
 				}
 			}
 		}
@@ -576,7 +557,6 @@ void ID()
 		find_instruct_type();	//Parse the IF_ID.IR
 		//ID_EX.type gets set in the find_instruct_type function!
 		if( ID_EX.type == 4 ){
-			printf("\n\nfetch_flag tripped\n\n");
 			fetch_flag = 1; //this kills the program
 			count++;
 		}
@@ -761,7 +741,6 @@ void find_instruct_type()
 				break;
 			case 0x0C: //SYSCALL
 				ID_EX.type = 4;
-				printf("\n\nIdentified SYSCALL\n\n");
 				break;
 			case 0x10: //MFHI --Load/Store........Reg to Reg?
 
