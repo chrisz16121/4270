@@ -594,12 +594,7 @@ void ID()
 			//printf("EX_MEM.dest = %d\tID_EX.RS = %d\tID_EX.RT = %d\n",EX_MEM.dest,ID_EX.rs,ID_EX.rt);
 			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && ((EX_MEM.dest == ID_EX.rs) || (EX_MEM.dest == ID_EX.rt))){
 				int dummy = EX_MEM.dest;
-<<<<<<< HEAD
 				printf("\n***Data hazard on $r%d in the EX_MEM stage (register type)***\n\n",dummy);
-=======
-				printf("***Data hazard on $r%d (register type)***\n",dummy);
-
->>>>>>> 29c5cd4660cf0d2ba837a15adc130ad6a271e20e
 				FF = 1;
 			}
 			else if((MEM_WB.regWrite == 1) && (MEM_WB.dest != 0) && ((MEM_WB.dest == ID_EX.rs) || (MEM_WB.dest == ID_EX.rt))){
@@ -612,17 +607,11 @@ void ID()
 			//printf("REG-IMM in ID\n");
 			//printf("EX_MEM.dest: %d ID_EX.rt: %d\n",EX_MEM.dest,ID_EX.rs);
 			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rs)){
-<<<<<<< HEAD
 				printf("\n***Data hazard on $r%d in the EX_MEM stage (immediate instruction)***\n\n",ID_EX.rs);
 				FF = 1;
 			}
 			else if((MEM_WB.regWrite == 1) && (MEM_WB.dest != 0) && (MEM_WB.dest == ID_EX.rs)){
 				printf("\n***Data hazard on $r%d in the MEM_WB stage (immediate instruction)***\n\n",ID_EX.rs);
-=======
-
-				printf("***Data hazard on $r%d (immediate instruction)***\n",ID_EX.rs);
-
->>>>>>> 29c5cd4660cf0d2ba837a15adc130ad6a271e20e
 				FF = 1;
 			}
 		}
@@ -630,9 +619,7 @@ void ID()
 			//printf("EX_MEM.dest = %d\tID_EX.RS = %d\tID_EX.RT = %d\n",EX_MEM.dest,ID_EX.rs,ID_EX.rt);
 			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && ((EX_MEM.dest == ID_EX.rs) || (EX_MEM.dest == ID_EX.rt))){	
 				//ID_EX.dest = regDest;
-
 				int dummy = EX_MEM.dest;
-<<<<<<< HEAD
 				printf("\n***Data hazard on $r%d in the EX_MEM stage (load instruction)***\n\n",dummy);
 				FF = 1;
 			}
@@ -640,10 +627,6 @@ void ID()
 				//ID_EX.dest = regDest;
 				int dummy = MEM_WB.dest;
 				printf("\n***Data hazard on $r%d in the MEM_WB stage (load instruction)***\n\n",dummy);
-=======
-				printf("***Data hazard on $r%d (load instruction)***\n",dummy);
-
->>>>>>> 29c5cd4660cf0d2ba837a15adc130ad6a271e20e
 				FF = 1;
 			}
 		}
@@ -658,7 +641,6 @@ void ID()
 				FF = 1;
 			}
 		}
-
 		if(FF == 0){
 			printf("Instruction progresses\n");
 			ID_EX.A = CURRENT_STATE.REGS[ID_EX.rs];
