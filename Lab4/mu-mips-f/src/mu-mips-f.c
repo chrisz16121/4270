@@ -76,7 +76,7 @@ void mem_write_32(uint32_t address, uint32_t value)
 /***************************************************************/
 void cycle() {                                                
 	handle_pipeline();
-	//if(FF == 0){
+	//if(KillFlag == 1){
 	//	CURRENT_STATE = NEXT_STATE;
 	//}
 	CURRENT_STATE = NEXT_STATE;
@@ -348,7 +348,7 @@ void WB()
 	}
 	else if( fetch_flag == 1 && count == 3 ){
 		printf("killing...\n");
-		exit(NULL);
+		RUN_FLAG == FALSE;
 	}
 	else{
 		//uint32_t instruction = MEM_WB.IR
@@ -360,19 +360,19 @@ void WB()
 		if(MEM_WB.type == 1){/*register-immediate*/
 			//rt = (MEM_WB.IR & 0x001F0000) >> 16;
 			NEXT_STATE.REGS[MEM_WB.dest] = MEM_WB.ALUOutput;
+			printf("\n\nAlmost there type 1\n\n");
 			if(FF == 1 && destination == ID_EX.rs){
 				printf("Hazard eliminated\n");
 				FF = 0;
-				fetch_flag = 0;
 			}
 		} 
 		else if(MEM_WB.type == 0) {/*register-register*/
 			//rd = (MEM_WB.IR & 0x0000F800) >> 11;
 			NEXT_STATE.REGS[MEM_WB.dest] = MEM_WB.ALUOutput;
+			printf("\n\nAlmost there type 2\n\n");
 			if(FF == 1 && destination == (ID_EX.rt || ID_EX.rs)){
 				printf("Hazard eliminated\n");
 				FF = 0;
-				fetch_flag = 0;
 			}
 		}	
 		else if(MEM_WB.type == 2){ /*Load*/
@@ -380,7 +380,6 @@ void WB()
 			if(FF == 1 && destination == ID_EX.rs){
 				printf("Hazard eliminated\n");
 				FF = 0;
-				fetch_flag = 0;
 			}
 		}
 	}
@@ -535,12 +534,12 @@ void ID()
 		printf("ID is NULL, cycle %d\n",cycle_count);
 	}
 	else if(FF == 1){
+
 		printf("ID: Instruction decode is stalled\n");
 		print_instruction(ID_EX.PC);
 		printf("is stil in decode stage\n");
 	}
 	else{
-		printf("NOT STALLED\n");
 		ID_EX = IF_ID;
 		//printf("Sent to find_type: ");
 		//print_instruction(ID_EX.PC);
@@ -563,8 +562,7 @@ void ID()
 			printf("REG-REG in ID\n");
 			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rs || ID_EX.rt)){
 				//ID_EX.dest = regDest_ex;
-				int dummy = MEM_WB.dest;
-				printf("Data hazard on $r%d (register type)\n",dummy);
+				printf("Data hazard in ID_EX (REG-REG)\n");
 				FF = 1;
 				//EX_MEM.type = 5;
 			}
@@ -574,7 +572,7 @@ void ID()
 			printf("EX_MEM.dest: %d ID_EX.rt: %d\n",EX_MEM.dest,ID_EX.rs);
 			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rs)){
 				//ID_EX.dest = regDest;
-				printf("Data hazard on $r%d (immediate instruction)\n",rs);
+				printf("Data hazard in ID_EX\n");
 				FF = 1;
 				//EX_MEM.type = 5;
 			}
@@ -582,16 +580,10 @@ void ID()
 		else if(ID_EX.type == 2){ 
 			if((MEM_WB.regWrite == 1) && (MEM_WB.dest != 0) && (MEM_WB.dest == ID_EX.rs || ID_EX.rt)){	
 				//ID_EX.dest = regDest;
-				int dummy = MEM_WB.dest;
-				printf("Data hazard on $r%d (load instruction)\n",dummy);
+				printf("Data hazard in MEM_WB\n");
 				FF = 1;
 				//EX_MEM.type = 5;
 			}
-		}
-		else if (ID_EX.type == 3){
-			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rt)){
-				printf("Data hazard on $r%d (store instruction\n",rt);
-				FF = 1;
 		}
 		if(FF == 0){
 			printf("Instruction progresses\n");
@@ -608,37 +600,31 @@ void ID()
 /************************************************************/
 void IF()
 {
-	//IF_ID.PC = CURRENT_STATE.PC + 4;
-	//IF_ID.IR = mem_read_32(CURRENT_STATE.PC + 4);
 	//if(FF == 1){
-	if(FF == 1){
-		if(fetch_flag == 1){	
-			printf("No instruction fetched\n");
-			print_instruction(IF_ID.PC);
-			printf("remains in IF stage\n");
-			//fetch_flag = 0;
+	if(instruction_fetch_flag == 1){	
+		printf("No instruction fetched\n");
+		//NEXT_STATE.PC = 
+		print_instruction(IF_ID.PC);
+		printf("remains in IF stage\n");
+		if(FF == 0){
+			instruction_fetch_flag = 0;
 		}
-		else{
-			printf("Next instruction fetched after stall\n");
-			IF_ID.PC = CURRENT_STATE.PC;
-			IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
-			NEXT_STATE.PC = CURRENT_STATE.PC + 4;
-			printf("IF: ");
-			print_instruction(IF_ID.PC);
-			fetch_flag = 1;
-		}
+		printf("\n");
 	}
-	else if(fetch_flag == 0 && FF == 0){
+	if(fetch_flag == 0 && FF == 0){
 		IF_ID.PC = CURRENT_STATE.PC;
 		IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
 		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
-		//print_instruction(IF_ID.PC);
-		//printf(" is in IF stage\n");
+		print_instruction(IF_ID.PC);
+		printf(" is in IF stage\n");
 		printf("IF: ");
 		print_instruction(IF_ID.PC);
 		//print_instruction(CURRENT_STATE.PC);
+		printf("\n");
+		if(FF == 1){
+			instruction_fetch_flag = 1;
+		}
 	} 
-	printf("\n");
 	cycle_count++;
 } 
 
