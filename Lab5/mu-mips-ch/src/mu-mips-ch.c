@@ -1051,7 +1051,9 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					}
 					break;
 			case 0x08: //JR --jump
-				ID_EX.type = 6;
+				/*NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+				branch_jump = TRUE;
+				print_instruction(CURRENT_STATE.PC);*/
 				break;
 			case 0x09: //JALR --jump
 				ID_EX.type = 6;
@@ -1152,22 +1154,43 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					}
 					break;
 				case 0x02: //J --jump
-					ID_EX.type = 6;
+					/*NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
+					branch_jump = TRUE;
+					print_instruction(CURRENT_STATE.PC);*/
 					break;
 				case 0x03: //JAL --jump
-					ID_EX.type = 6;
+					/*NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
+					NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
+					branch_jump = TRUE;
+					print_instruction(CURRENT_STATE.PC);*/
 					break;
 				case 0x04: //BEQ --branch
-					ID_EX.type = 5;
+					/*if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
+						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+						branch_jump = TRUE;
+					}
+					print_instruction(CURRENT_STATE.PC);*/
 					break;
 				case 0x05: //BNE --branch
-					ID_EX.type = 5;
+					/*if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
+						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+						branch_jump = TRUE;
+					}
+					print_instruction(CURRENT_STATE.PC);*/
 					break;
 				case 0x06: //BLEZ --branch
-					ID_EX.type = 5;
+					/*if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
+						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+						branch_jump = TRUE;
+					}
+					print_instruction(CURRENT_STATE.PC);*/
 					break;
 				case 0x07: //BGTZ --branch
-					ID_EX.type = 5;
+					/*if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0 || CURRENT_STATE.REGS[rs] != 0){
+						NEXT_STATE.PC = CURRENT_STATE.PC +  ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+						branch_jump = TRUE;
+					}
+					print_instruction(CURRENT_STATE.PC);*/
 					break;
 				case 0x08: //ADDI
 					answer = X + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000) : (Y & 0x0000FFFF));
