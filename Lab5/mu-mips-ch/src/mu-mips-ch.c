@@ -1053,6 +1053,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 						answer = X >> Y;
 					}
 					break;
+
 				case 0x08: //JR
 					NEXT_STATE.PC = CURRENT_STATE.REGS[X];
 					//branch_jump = TRUE;
@@ -1063,6 +1064,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					NEXT_STATE.PC = CURRENT_STATE.REGS[Y];
 					//branch_jump = TRUE;
 					//print_instruction(CURRENT_STATE.PC);
+
 					break;
 				case 0x18: //MULT
 					if ((X & 0x80000000) == 0x80000000){
@@ -1144,6 +1146,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 		else{
 			switch(opcode){
 				case 0x01:
+
 				if(rt == 0x00000){ //BLTZ
 					if((CURRENT_STATE.REGS[X] & 0x80000000) > 0){
 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000)<<2 : (Y & 0x0000FFFF)<<2);
@@ -1197,6 +1200,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 						//branch_jump = TRUE;
 					}
 					//print_instruction(CURRENT_STATE.PC);
+
 					break;
 				case 0x08: //ADDI
 					answer = X + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000) : (Y & 0x0000FFFF));
