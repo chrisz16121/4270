@@ -9,7 +9,8 @@
 
 int cycle_count = 0;
 
-int FF = 0;
+int FF = 0; 
+int flush = 0;
 int instruction_fetch_flag = 0;
 
 /***************************************************************/
@@ -537,6 +538,13 @@ void EX()
 			else if(EX_MEM.type == 3) { /*Load/Store*/
 				EX_MEM.ALUOutput = EX_MEM.A + EX_MEM.imm;
 			}
+			else if(EX_MEM.type == 5) { //branch
+				do_instruction(EX_MEM.A,EX_MEM.B,EX_MEM.IR);
+			}
+			else if(EX_MEM.type == 6) { //jump
+				//I'm not even sure that this would be needed, but just in case
+				do_instruction(EX_MEM.A,EX_MEM.B,EX_MEM.IR);
+			}
 			instruction = EX_MEM.IR;
 			rs = (instruction & 0x03E00000) >> 21;
 			rt = (instruction & 0x001F0000) >> 16;
@@ -743,6 +751,15 @@ void ID()
 				}
 			}
 		}
+		else if(ID_EX.type == 5){
+			//branch
+		}
+		else if(ID_EX.type == 6){
+			//jump
+			flush = 1;
+			//flush the old
+			//load the new
+		}
 		if(FF == 0){
 			printf("Instruction progresses\n");
 			if(forwarded == 0){
@@ -802,6 +819,8 @@ void find_instruct_type()
 	//2->Load
 	//3->Store
 	//4->SYSCALL - kill it
+	//5->branch
+	//6->jump
 	
 	uint32_t instruction, opcode, function, rs, rt, rd, sa, immediate, target;
 	uint64_t product, p1, p2;
@@ -840,11 +859,11 @@ void find_instruct_type()
 			case 0x03: //SRA --ALU
 				ID_EX.type = 0;		
 				break;
-			case 0x08: //JR
-				
+			case 0x08: //JR --jump
+				ID_EX.type = 6;
 				break;
-			case 0x09: //JALR
-				
+			case 0x09: //JALR --jump
+				ID_EX.type = 6;
 				break;
 			case 0x0C: //SYSCALL
 				ID_EX.type = 4;
@@ -908,38 +927,38 @@ void find_instruct_type()
 	else{
 		switch(opcode){
 			case 0x01:
-				if(rt == 0x00000){ //BLTZ
-					if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0){
+				if(rt == 0x00000){ //BLTZ --branch
+					ID_EX.type = 5;
+					/*if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0){
 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
 						branch_jump = TRUE;
-					}
-					
+					} */
 				}
-				else if(rt == 0x00001){ //BGEZ
-					if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
+				else if(rt == 0x00001){ //BGEZ --branch
+					ID_EX.type = 5;
+					/*if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
 						branch_jump = TRUE;
-					}
-					
+					}*/
 				}
 				break;
-			case 0x02: //J
-				
+			case 0x02: //J --jump
+				ID_EX.type = 6;
 				break;
-			case 0x03: //JAL
-				
+			case 0x03: //JAL --jump
+				ID_EX.type = 6;
 				break;
-			case 0x04: //BEQ
-				
+			case 0x04: //BEQ --branch
+					ID_EX.type = 5;
 				break;
-			case 0x05: //BNE
-				
+			case 0x05: //BNE --branch
+					ID_EX.type = 5;
 				break;
-			case 0x06: //BLEZ
-			
+			case 0x06: //BLEZ --branch
+					ID_EX.type = 5;
 				break;
-			case 0x07: //BGTZ
-			
+			case 0x07: //BGTZ --branch
+					ID_EX.type = 5;
 				break;
 			case 0x08: //ADDI --ALU
 				ID_EX.type = 1;
