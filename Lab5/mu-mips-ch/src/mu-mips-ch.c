@@ -329,6 +329,7 @@ void load_program() {
 /************************************************************/
 void handle_pipeline()
 {
+	printf("\nCYCLE: %d\n",cycle_count + 1);
 	/*INSTRUCTION_COUNT should be incremented when instruction is done*/
 	/*Since we do not have branch/jump instructions, INSTRUCTION_COUNT should be incremented in WB stage */
 	WB();
@@ -372,22 +373,22 @@ void WB()
 			if(ID_EX.type == 0 && ((destination == ID_EX.rt) || (destination == ID_EX.rs))){
 				printf("Hazard eliminated\n");
 				FF = 0;
-				fetch_flag = 0;
+				instruction_fetch_flag = 0;
 			}
 			else if(ID_EX.type == 1 && destination == ID_EX.rs){
 				printf("Hazard eliminated\n");
 				FF = 0;
-				fetch_flag = 0;
+				instruction_fetch_flag = 0;
 			}
 			else if(ID_EX.type == 2 && destination == ID_EX.rs){
 				printf("Hazard eliminated\n");
 				FF = 0;
-				fetch_flag = 0;
+				instruction_fetch_flag = 0;
 			}
 			else if(ID_EX.type == 3 && destination == ID_EX.rt){
 				printf("Hazard eliminated\n");
 				FF = 0;
-				fetch_flag = 0;
+				instruction_fetch_flag = 0;
 			}
 		}
 	}
@@ -413,6 +414,7 @@ void MEM()
 		}
 		else{ /*Load/Store*/
 			if(MEM_WB.type == 2){ //Load
+				MEM_WB.regWrite = 1;
 				MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
 				if(FF == 1 && ENABLE_FORWARDING == 1){
 					uint32_t destination = MEM_WB.dest;
@@ -425,25 +427,25 @@ void MEM()
 						}
 						printf("Hazard eliminated in MEM\n");
 						FF = 0;
-						fetch_flag = 0;
+						instruction_fetch_flag = 0;
 					}
 					else if(ID_EX.type == 1 && destination == ID_EX.rs){
 						ID_EX.A = MEM_WB.LMD;
 						printf("Hazard eliminated in MEM\n");
 						FF = 0;
-						fetch_flag = 0;
+						instruction_fetch_flag = 0;
 					}
 					else if(ID_EX.type == 2 && destination == ID_EX.rs){
 						ID_EX.A = MEM_WB.LMD;
 						printf("Hazard eliminated in MEM\n");
 						FF = 0;
-						fetch_flag = 0;
+						instruction_fetch_flag = 0;
 					}
 					else if(ID_EX.type == 3 && destination == ID_EX.rt){
 						ID_EX.B = MEM_WB.LMD;
 						printf("Hazard eliminated in MEM\n");
 						FF = 0;
-						fetch_flag = 0;
+						instruction_fetch_flag = 0;
 					}
 				}
 			} 
@@ -596,19 +598,18 @@ void ID()
 			count++;
 		}
 		else{
-		ID_EX.rs = (0x03E00000 & ID_EX.IR) >> 21;
+		ID_EX.rs = (0x03E00000 & ID_EX.IR) >> 21;	//find the registers for the instruction
 		ID_EX.rt = (0x001F0000 & ID_EX.IR) >> 16;
 		ID_EX.imm = 0x0000FFFF & ID_EX.IR;	
 		printf("ID: ");
-		print_instruction(IF_ID.PC);
+		print_instruction(ID_EX.PC);
 		//printf("rd in ex: %d\n",regDest);
 		//printf("ID source registers: rs: %d rt: %d\nregDest: %d\nregWrite: %d\n\n",rs,rt,regDest_ex,EX_MEM.regWrite);
-		if(ID_EX.type == 0){
+		if(ID_EX.type == 0){	//register to register instruction
 			//printf("REG-REG in ID\n");
 			//printf("EX_MEM.dest = %d\tID_EX.RS = %d\tID_EX.RT = %d\n",EX_MEM.dest,ID_EX.rs,ID_EX.rt);
 			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && ((EX_MEM.dest == ID_EX.rs) || (EX_MEM.dest == ID_EX.rt))){
-				int dummy = EX_MEM.dest;
-				printf("\n***Data hazard on $r%d in the EX_MEM stage (register type)***\n\n",dummy);
+				printf("\n***Data hazard on $r%d in the EX_MEM stage (register type)***\n\n",EX_MEM.dest);
 				if(ENABLE_FORWARDING == 1 && EX_MEM.dest == ID_EX.rs){
 					if(EX_MEM.type != 2){
 						ID_EX.A = EX_MEM.ALUOutput;
@@ -616,7 +617,7 @@ void ID()
 						forwarded = 1;
 					}
 					else{
-						printf("Cannot forward data from EX stage, stalling\n");
+						printf("Cannot forward data to rs from EX stage, instruction is a LOAD, stalling\n");
 						FF = 1;
 					}
 				}
@@ -627,7 +628,7 @@ void ID()
 						forwarded = 1;
 					}
 					else{
-						printf("Cannot forward data from EX stage, stalling\n");
+						printf("Cannot forward data to rt from EX stage, instruction is a LOAD, stalling\n");
 						FF = 1;
 					}
 				}
@@ -657,7 +658,7 @@ void ID()
 			//printf("REG-IMM in ID\n");
 			//printf("EX_MEM.dest: %d ID_EX.rt: %d\n",EX_MEM.dest,ID_EX.rs);
 			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rs)){
-				printf("\n***Data hazard on $r%d in the EX_MEM stage (immediate instruction)***\n\n",ID_EX.rs);
+				printf("\n***Data hazard on $r%d in the EX_MEM stage (immediate instruction)***\n\n",EX_MEM.dest);
 				if(ENABLE_FORWARDING == 1 && EX_MEM.dest == ID_EX.rs){
 					if(EX_MEM.type != 2){
 						ID_EX.A = EX_MEM.ALUOutput;
@@ -665,7 +666,7 @@ void ID()
 						forwarded = 1;
 					}
 					else{
-						printf("Cannot forward data from EX stage, stalling\n");
+						printf("Cannot forward data from EX stage, instruction is a LOAD stalling\n");
 						FF = 1;
 					}
 				}
@@ -789,12 +790,12 @@ void IF()
 		}
 		printf("\n");
 	}
-	if(fetch_flag == 0 && FF == 0){
+	if(fetch_flag == 0 && instruction_fetch_flag == 0){
 		IF_ID.PC = CURRENT_STATE.PC;
 		IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
 		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
-		print_instruction(IF_ID.PC);
-		printf(" is in IF stage\n");
+		//print_instruction(IF_ID.PC);
+		//printf(" is in IF stage\n");
 		printf("IF: ");
 		print_instruction(IF_ID.PC);
 		//print_instruction(CURRENT_STATE.PC);
