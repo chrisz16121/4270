@@ -1050,14 +1050,17 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 						answer = X >> Y;
 					}
 					break;
-			case 0x08: //JR --jump
-				/*NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
-				branch_jump = TRUE;
-				print_instruction(CURRENT_STATE.PC);*/
-				break;
-			case 0x09: //JALR --jump
-				ID_EX.type = 6;
-				break;
+				case 0x08: //JR --jump
+					/*NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+					branch_jump = TRUE;
+					print_instruction(CURRENT_STATE.PC);*/
+					break;
+				case 0x09: //JALR --jump
+					/*NEXT_STATE.REGS[rd] = CURRENT_STATE.PC + 4;
+					NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+					branch_jump = TRUE;
+					print_instruction(CURRENT_STATE.PC);*/
+					break;
 				case 0x18: //MULT
 					if ((X & 0x80000000) == 0x80000000){
 						p1 = 0xFFFFFFFF00000000 | X;
