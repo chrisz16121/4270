@@ -1026,6 +1026,9 @@ void initialize() {
 uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 	uint32_t opcode = (instruct & 0xFC000000) >> 26;
 	uint32_t function = (instruct & 0x0000003F);
+	uint32_t rt = (instruct & 0x001F0000) >> 16;
+	uint32_t offset = (instruct & 0x0000FFFF);
+	uint32_t target = (instruct & 0x03FFFFFF);
 	uint32_t answer;
 	uint64_t p1,p2,product,quotient,remainder;
 	if( FF == 1 ){
@@ -1050,16 +1053,18 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 						answer = X >> Y;
 					}
 					break;
-				case 0x08: //JR --jump
-					/*NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
-					branch_jump = TRUE;
-					print_instruction(CURRENT_STATE.PC);*/
+
+				case 0x08: //JR
+					NEXT_STATE.PC = CURRENT_STATE.REGS[X];
+					//branch_jump = TRUE;
+					//print_instruction(CURRENT_STATE.PC);
 					break;
-				case 0x09: //JALR --jump
-					/*NEXT_STATE.REGS[rd] = CURRENT_STATE.PC + 4;
-					NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
-					branch_jump = TRUE;
-					print_instruction(CURRENT_STATE.PC);*/
+				case 0x09: //JALR
+					NEXT_STATE.REGS[X] = CURRENT_STATE.PC + 4;
+					NEXT_STATE.PC = CURRENT_STATE.REGS[Y];
+					//branch_jump = TRUE;
+					//print_instruction(CURRENT_STATE.PC);
+
 					break;
 				case 0x18: //MULT
 					if ((X & 0x80000000) == 0x80000000){
@@ -1141,59 +1146,61 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 		else{
 			switch(opcode){
 				case 0x01:
-					if(rt == 0x00000){ //BLTZ --branch
-						ID_EX.type = 5;
-						/*if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0){
-							NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-							branch_jump = TRUE;
-						} */
+
+				if(rt == 0x00000){ //BLTZ
+					if((CURRENT_STATE.REGS[X] & 0x80000000) > 0){
+						NEXT_STATE.PC = CURRENT_STATE.PC + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000)<<2 : (Y & 0x0000FFFF)<<2);
+						//branch_jump = TRUE;
 					}
-					else if(rt == 0x00001){ //BGEZ --branch
-						ID_EX.type = 5;
-						/*if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
-							NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-							branch_jump = TRUE;
-						}*/
+					//print_instruction(CURRENT_STATE.PC);
+				}
+				else if(rt == 0x00001){ //BGEZ
+					if((CURRENT_STATE.REGS[X] & 0x80000000) == 0x0){
+						NEXT_STATE.PC = CURRENT_STATE.PC + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000)<<2 : (Y & 0x0000FFFF)<<2);
+						//branch_jump = TRUE;
 					}
+					//print_instruction(CURRENT_STATE.PC);
+				}
+				break;
+				case 0x02: //J
+					NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
+					//branch_jump = TRUE;
+					//print_instruction(CURRENT_STATE.PC);
 					break;
-				case 0x02: //J --jump
-					/*NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
-					branch_jump = TRUE;
-					print_instruction(CURRENT_STATE.PC);*/
-					break;
-				case 0x03: //JAL --jump
-					/*NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
+				case 0x03: //JAL
+					NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
 					NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
-					branch_jump = TRUE;
-					print_instruction(CURRENT_STATE.PC);*/
+					//branch_jump = TRUE;
+					//print_instruction(CURRENT_STATE.PC);
 					break;
-				case 0x04: //BEQ --branch
-					/*if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
-						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-						branch_jump = TRUE;
+				case 0x04: //BEQ
+					if(CURRENT_STATE.REGS[X] == CURRENT_STATE.REGS[Y]){
+						NEXT_STATE.PC = CURRENT_STATE.PC + ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
+						//branch_jump = TRUE;
 					}
-					print_instruction(CURRENT_STATE.PC);*/
+					//print_instruction(CURRENT_STATE.PC);
 					break;
-				case 0x05: //BNE --branch
-					/*if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
-						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-						branch_jump = TRUE;
+				case 0x05: //BNE
+					if(CURRENT_STATE.REGS[X] != CURRENT_STATE.REGS[Y]){
+						NEXT_STATE.PC = CURRENT_STATE.PC + ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
+						//branch_jump = TRUE;
 					}
-					print_instruction(CURRENT_STATE.PC);*/
+					//print_instruction(CURRENT_STATE.PC);
 					break;
-				case 0x06: //BLEZ --branch
-					/*if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
-						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-						branch_jump = TRUE;
+				case 0x06: //BLEZ
+					if((CURRENT_STATE.REGS[X] & 0x80000000) > 0 || CURRENT_STATE.REGS[X] == 0){
+						NEXT_STATE.PC = CURRENT_STATE.PC +  ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
+						//branch_jump = TRUE;
 					}
-					print_instruction(CURRENT_STATE.PC);*/
+					//print_instruction(CURRENT_STATE.PC);
 					break;
-				case 0x07: //BGTZ --branch
-					/*if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0 || CURRENT_STATE.REGS[rs] != 0){
-						NEXT_STATE.PC = CURRENT_STATE.PC +  ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-						branch_jump = TRUE;
+				case 0x07: //BGTZ
+					if((CURRENT_STATE.REGS[X] & 0x80000000) == 0x0 || CURRENT_STATE.REGS[X] != 0){
+						NEXT_STATE.PC = CURRENT_STATE.PC +  ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
+						//branch_jump = TRUE;
 					}
-					print_instruction(CURRENT_STATE.PC);*/
+					//print_instruction(CURRENT_STATE.PC);
+
 					break;
 				case 0x08: //ADDI
 					answer = X + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000) : (Y & 0x0000FFFF));
