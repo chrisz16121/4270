@@ -1050,6 +1050,12 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 						answer = X >> Y;
 					}
 					break;
+			case 0x08: //JR --jump
+				ID_EX.type = 6;
+				break;
+			case 0x09: //JALR --jump
+				ID_EX.type = 6;
+				break;
 				case 0x18: //MULT
 					if ((X & 0x80000000) == 0x80000000){
 						p1 = 0xFFFFFFFF00000000 | X;
@@ -1129,6 +1135,40 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 		}
 		else{
 			switch(opcode){
+				case 0x01:
+					if(rt == 0x00000){ //BLTZ --branch
+						ID_EX.type = 5;
+						/*if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0){
+							NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+							branch_jump = TRUE;
+						} */
+					}
+					else if(rt == 0x00001){ //BGEZ --branch
+						ID_EX.type = 5;
+						/*if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
+							NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+							branch_jump = TRUE;
+						}*/
+					}
+					break;
+				case 0x02: //J --jump
+					ID_EX.type = 6;
+					break;
+				case 0x03: //JAL --jump
+					ID_EX.type = 6;
+					break;
+				case 0x04: //BEQ --branch
+					ID_EX.type = 5;
+					break;
+				case 0x05: //BNE --branch
+					ID_EX.type = 5;
+					break;
+				case 0x06: //BLEZ --branch
+					ID_EX.type = 5;
+					break;
+				case 0x07: //BGTZ --branch
+					ID_EX.type = 5;
+					break;
 				case 0x08: //ADDI
 					answer = X + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000) : (Y & 0x0000FFFF));
 					break;
