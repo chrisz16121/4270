@@ -541,10 +541,17 @@ void EX()
 				EX_MEM.ALUOutput = EX_MEM.A + EX_MEM.imm;
 			}
 			else if(EX_MEM.type == 5) { //branch
+				//Some good ol' pseudocode:
+				//STALL other operations for this cycle (maybe do this in ID)
+				//FF = 1;
+				//^^^might want to use a different way to do this
+				//whether or  not to take the branch is already handled by the do_instruction() function
 				do_instruction(EX_MEM.A,EX_MEM.B,EX_MEM.IR);
 			}
 			else if(EX_MEM.type == 6) { //jump
-				//I'm not even sure that this would be needed, but just in case
+				//Some good ol' pseudocode:
+				//STALL other operations for this cycle (maybe do this in ID)
+				//^^^might want to use a different way to do this
 				do_instruction(EX_MEM.A,EX_MEM.B,EX_MEM.IR);
 			}
 			instruction = EX_MEM.IR;
@@ -586,6 +593,24 @@ void ID()
 		printf("ID: Instruction decode is stalled\n");
 		print_instruction(ID_EX.PC);
 		printf("is stil in decode stage\n");
+	}
+	else if( flush == 1 ){
+		//This is supposed to flush an instruction after a branch/jump
+		ID_EX.PC = 0;
+		ID_EX.IR = 0;
+		ID_EX.A = 0;
+		ID_EX.B = 0;
+		ID_EX.imm = 0;
+		ID_EX.ALUOutput = 0;
+		ID_EX.LMD = 0;
+		ID_EX.type = 0;
+		ID_EX.regWrite = 0;
+		ID_EX.memWrite = 0;
+		ID_EX.stallCount = 0;
+		ID_EX.dest = 0;	
+		ID_EX.rt = 0;
+		ID_EX.rs = 0;
+		flush = 0;
 	}
 	else{
 		ID_EX = IF_ID;
@@ -757,8 +782,8 @@ void ID()
 		}
 		else if(ID_EX.type == 6){
 			//jump
+			//setting the flush flag, could probably just do this in do_instruction()...
 			flush = 1;
-			//flush the old
 			//load the new
 		}
 		if(FF == 0){
@@ -1065,7 +1090,6 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					NEXT_STATE.PC = CURRENT_STATE.REGS[Y];
 					//branch_jump = TRUE;
 					//print_instruction(CURRENT_STATE.PC);
-
 					break;
 				case 0x18: //MULT
 					if ((X & 0x80000000) == 0x80000000){
@@ -1151,6 +1175,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 				if(rt == 0x00000){ //BLTZ
 					if((CURRENT_STATE.REGS[X] & 0x80000000) > 0){
 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000)<<2 : (Y & 0x0000FFFF)<<2);
+						flush = 1;
 						//branch_jump = TRUE;
 					}
 					//print_instruction(CURRENT_STATE.PC);
@@ -1158,6 +1183,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 				else if(rt == 0x00001){ //BGEZ
 					if((CURRENT_STATE.REGS[X] & 0x80000000) == 0x0){
 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000)<<2 : (Y & 0x0000FFFF)<<2);
+						flush = 1;
 						//branch_jump = TRUE;
 					}
 					//print_instruction(CURRENT_STATE.PC);
@@ -1178,12 +1204,14 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					if(CURRENT_STATE.REGS[X] == CURRENT_STATE.REGS[Y]){
 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
 						//branch_jump = TRUE;
+						flush = 1;
 					}
 					//print_instruction(CURRENT_STATE.PC);
 					break;
 				case 0x05: //BNE
 					if(CURRENT_STATE.REGS[X] != CURRENT_STATE.REGS[Y]){
 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
+						flush = 1;
 						//branch_jump = TRUE;
 					}
 					//print_instruction(CURRENT_STATE.PC);
@@ -1191,6 +1219,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 				case 0x06: //BLEZ
 					if((CURRENT_STATE.REGS[X] & 0x80000000) > 0 || CURRENT_STATE.REGS[X] == 0){
 						NEXT_STATE.PC = CURRENT_STATE.PC +  ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
+						flush = 1;
 						//branch_jump = TRUE;
 					}
 					//print_instruction(CURRENT_STATE.PC);
@@ -1198,6 +1227,7 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 				case 0x07: //BGTZ
 					if((CURRENT_STATE.REGS[X] & 0x80000000) == 0x0 || CURRENT_STATE.REGS[X] != 0){
 						NEXT_STATE.PC = CURRENT_STATE.PC +  ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
+						flush = 1;
 						//branch_jump = TRUE;
 					}
 					//print_instruction(CURRENT_STATE.PC);
