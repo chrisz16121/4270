@@ -789,6 +789,7 @@ void ID()
 		}
 		else if(ID_EX.type == 6){
 			//jump
+			//printf("X: %x, Y: %x\n 0x00: %x", ID_EX.dest, ID_EX.rs, 0x00);
 			//setting the flush flag, could probably just do this in do_instruction()...
 			flush = 1;
 			//load the new
@@ -823,7 +824,7 @@ void IF()
 		printf("\n");
 	}
 	else if( BrnchJmpStall ==  1){
-		printf("IF: Stalled waiting for Branch/Jump Result");
+		printf("IF: Stalled waiting for Branch/Jump Result\n");
 		BrnchJmpStall++;
 	}
 	if(fetch_flag == 0 && instruction_fetch_flag == 0){
@@ -1097,7 +1098,12 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					//print_instruction(CURRENT_STATE.PC);
 					break;
 				case 0x09: //JALR
-					NEXT_STATE.REGS[X] = CURRENT_STATE.PC + 4;
+					X = (instruct & 0x000F8000) >> 11;//0x0000F800
+					if( X != 0x00 ){
+						//printf("do_inst: X: %x, 0x00: %x\n", X, 0x00);
+						NEXT_STATE.REGS[X] = CURRENT_STATE.PC + 4;
+					}
+					//NEXT_STATE.REGS[X] = CURRENT_STATE.PC + 4;
 					NEXT_STATE.PC = CURRENT_STATE.REGS[Y];
 					//branch_jump = TRUE;
 					//print_instruction(CURRENT_STATE.PC);
