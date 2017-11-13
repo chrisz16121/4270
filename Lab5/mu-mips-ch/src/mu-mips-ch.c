@@ -10,6 +10,7 @@
 int cycle_count = 0;
 
 int FF = 0; 
+int BrnchJmpStall = 2;
 int flush = 0;
 int instruction_fetch_flag = 0;
 
@@ -543,7 +544,7 @@ void EX()
 			else if(EX_MEM.type == 5) { //branch
 				//Some good ol' pseudocode:
 				//STALL other operations for this cycle (maybe do this in ID)
-				//FF = 1;
+				BrnchJmpStall = 0;
 				//^^^might want to use a different way to do this
 				//whether or  not to take the branch is already handled by the do_instruction() function
 				do_instruction(EX_MEM.A,EX_MEM.B,EX_MEM.IR);
@@ -551,6 +552,7 @@ void EX()
 			else if(EX_MEM.type == 6) { //jump
 				//Some good ol' pseudocode:
 				//STALL other operations for this cycle (maybe do this in ID)
+				BrnchJmpStall = 0;
 				//^^^might want to use a different way to do this
 				do_instruction(EX_MEM.A,EX_MEM.B,EX_MEM.IR);
 			}
@@ -593,6 +595,10 @@ void ID()
 		printf("ID: Instruction decode is stalled\n");
 		print_instruction(ID_EX.PC);
 		printf("is stil in decode stage\n");
+	}
+	else if( BrnchJmpStall == 0 ){
+		printf("ID: Being stalled while waiting for Branch/Jump result\n");
+		BrnchJmpStall++;
 	}
 	else if( flush == 1 ){
 		//This is supposed to flush an instruction after a branch/jump
@@ -814,6 +820,10 @@ void IF()
 			instruction_fetch_flag = 0;
 		}
 		printf("\n");
+	}
+	else if( BrnchJmpStall ==  1){
+		printf("IF: Stalled waiting for Branch/Jump Result");
+		BrnchJmpStall++;
 	}
 	if(fetch_flag == 0 && instruction_fetch_flag == 0){
 		IF_ID.PC = CURRENT_STATE.PC;
