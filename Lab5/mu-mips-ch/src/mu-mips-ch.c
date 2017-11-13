@@ -597,6 +597,7 @@ void ID()
 		printf("is stil in decode stage\n");
 	}
 	else if( BrnchJmpStall == 0 ){
+		ID_EX = IF_ID;
 		printf("ID: Being stalled while waiting for Branch/Jump result\n");
 		BrnchJmpStall++;
 	}
