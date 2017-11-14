@@ -570,10 +570,12 @@ void EX()
 				EX_MEM.ALUOutput = EX_MEM.A + EX_MEM.imm;
 			}
 			else if(EX_MEM.type == 5) { //branch
+				printf("I made it here\n");
 				//Some good ol' pseudocode:
 				//STALL other operations for this cycle (maybe do this in ID)
 				BrnchJmpStall = 0;
 				//^^^might want to use a different way to do this
+				printf("I also made it here\n");
 				//whether or  not to take the branch is already handled by the do_instruction() function
 				do_instruction(EX_MEM.A,EX_MEM.B,EX_MEM.IR);
 			}
@@ -1157,7 +1159,8 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					break;
 
 				case 0x08: //JR
-					NEXT_STATE.PC = CURRENT_STATE.REGS[X];
+					//NEXT_STATE.PC = CURRENT_STATE.REGS[X];
+					CURRENT_STATE.PC = CURRENT_STATE.REGS[X];
 					//branch_jump = TRUE;
 					//print_instruction(CURRENT_STATE.PC);
 					break;
@@ -1168,7 +1171,8 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 						NEXT_STATE.REGS[X] = CURRENT_STATE.PC + 4;
 					}
 					//NEXT_STATE.REGS[X] = CURRENT_STATE.PC + 4;
-					NEXT_STATE.PC = CURRENT_STATE.REGS[Y];
+					//NEXT_STATE.PC = CURRENT_STATE.REGS[Y];
+					CURRENT_STATE.PC = CURRENT_STATE.REGS[Y];
 					//branch_jump = TRUE;
 					//print_instruction(CURRENT_STATE.PC);
 					break;
@@ -1294,7 +1298,9 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					//print_instruction(CURRENT_STATE.PC);
 					break;
 				case 0x04: //BEQ
-					printf("X: %08x -- Y: %08x\n", CURRENT_STATE.REGS[X], CURRENT_STATE.REGS[Y]);
+					printf("I seg faulted on the printf\n");
+					printf("X: %08x ", CURRENT_STATE.REGS[X]);
+					printf("-- Y: %08x\n", CURRENT_STATE.REGS[Y]);
 					if(CURRENT_STATE.REGS[X] == CURRENT_STATE.REGS[Y]){
 						printf("IN IF\n: PC: %08x\n", NEXT_STATE.PC);
 						
