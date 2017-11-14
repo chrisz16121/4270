@@ -921,6 +921,7 @@ void find_instruct_type()
 	//5->branch
 	//6->jump
 	
+	
 	uint32_t instruction, opcode, function, rs, rt, rd, sa, immediate, target;
 	uint64_t product, p1, p2;
 	
@@ -967,17 +968,17 @@ void find_instruct_type()
 			case 0x0C: //SYSCALL
 				ID_EX.type = 4;
 				break;
-			case 0x10: //MFHI --Load/Store........Reg to Reg?
-
+			case 0x10: //MFHI --ALU........Reg to Reg
+				ID_EX.type = 0;
 				break;
-			case 0x11: //MTHI --Load/Store........Reg to Reg?
-
+			case 0x11: //MTHI --ALU........Reg to Reg
+				ID_EX.type = 0;
 				break;
-			case 0x12: //MFLO --Load/Store........Reg to Reg?
-
+			case 0x12: //MFLO --ALU........Reg to Reg
+				ID_EX.type = 0;
 				break;
-			case 0x13: //MTLO --Load/Store........Reg to Reg?
-
+			case 0x13: //MTLO --ALU........Reg to Reg
+				ID_EX.type = 0;
 				break;
 			case 0x18: //MULT --ALU
 				ID_EX.type = 0;
@@ -1129,6 +1130,8 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 	uint32_t offset = (instruct & 0x0000FFFF);
 	uint32_t target = (instruct & 0x03FFFFFF);
 	uint32_t answer;
+	uint32_t rs = (instruct & 0x03E00000) >> 21;
+	uint32_t rd = (instruct & 0x0000F800) >> 11;
 	uint64_t p1,p2,product,quotient,remainder;
 	if( FF == 1 ){
 		//answer = 0x00000000;
@@ -1168,6 +1171,18 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					NEXT_STATE.PC = CURRENT_STATE.REGS[Y];
 					//branch_jump = TRUE;
 					//print_instruction(CURRENT_STATE.PC);
+					break;
+				case 0x10: //MFHI --ALU........Reg to Reg
+					NEXT_STATE.REGS[rd] = CURRENT_STATE.HI;
+					break;
+				case 0x11: //MTHI --ALU........Reg to Reg
+					NEXT_STATE.HI = CURRENT_STATE.REGS[rs]; 
+					break;
+				case 0x12: //MFLO --ALU........Reg to Reg
+					NEXT_STATE.REGS[rd] = CURRENT_STATE.LO; 
+					break;
+				case 0x13: //MTLO --ALU........Reg to Reg
+					NEXT_STATE.LO = CURRENT_STATE.REGS[rs];
 					break;
 				case 0x18: //MULT
 					if ((X & 0x80000000) == 0x80000000){
