@@ -375,37 +375,46 @@ void WB()
 			int rt = ID_EX.rt;
 			if(ID_EX.type == 0 && destination == ID_EX.rt){
 				printf("Hazard eliminated\n");
-				CURRENT_STATE.REGS[rt] = NEXT_STATE.REGS[rt];
+				//CURRENT_STATE.REGS[rt] = NEXT_STATE.REGS[rt];
 				FF = 0;
+				ID_EX.B = NEXT_STATE.REGS[destination];
 				instruction_fetch_flag = 0;
 			}
-			else if(ID_EX.type == 0 && destination == ID_EX.rs){
+			if(ID_EX.type == 0 && destination == ID_EX.rs){
 				printf("Hazard eliminated\n");
-				CURRENT_STATE.REGS[rs] = NEXT_STATE.REGS[rs];
+				//CURRENT_STATE.REGS[rs] = NEXT_STATE.REGS[rs];
 				FF = 0;
+				ID_EX.A = NEXT_STATE.REGS[destination];
 				instruction_fetch_flag = 0;
 			}
-			else if(ID_EX.type == 1 && destination == ID_EX.rs){
+			if(ID_EX.type == 1 && destination == ID_EX.rs){
 				printf("Hazard eliminated\n");
-				CURRENT_STATE.REGS[rs] = NEXT_STATE.REGS[rs];
+				//CURRENT_STATE.REGS[rs] = NEXT_STATE.REGS[rs];
 				FF = 0;
+				ID_EX.A = NEXT_STATE.REGS[destination];	
 				instruction_fetch_flag = 0;
 			}
-			else if(ID_EX.type == 2 && destination == ID_EX.rs){
+			if(ID_EX.type == 2 && destination == ID_EX.rs){
 				printf("Hazard eliminated\n");
-				CURRENT_STATE.REGS[rs] = NEXT_STATE.REGS[rs];
+				//CURRENT_STATE.REGS[rs] = NEXT_STATE.REGS[rs];
 				FF = 0;
+				ID_EX.A = NEXT_STATE.REGS[destination];
 				instruction_fetch_flag = 0;
 			}
-			else if(ID_EX.type == 3 && destination == ID_EX.rt){
+			if(ID_EX.type == 3 && destination == ID_EX.rt){
 				printf("Hazard eliminated\n");
-				CURRENT_STATE.REGS[rt] = NEXT_STATE.REGS[rt];
+				//CURRENT_STATE.REGS[rt] = NEXT_STATE.REGS[rt];
 				FF = 0;
+				ID_EX.B = NEXT_STATE.REGS[destination];
+				ID_EX.A = NEXT_STATE.REGS[ID_EX.rs];
 				instruction_fetch_flag = 0;
 			}
 		}
 	}
-	
+	int i; 
+	for(i = 0;i < MIPS_REGS; i++){		//update all of the registers
+		CURRENT_STATE.REGS[i] = NEXT_STATE.REGS[i];
+	}
 }
 
 /************************************************************/
@@ -463,6 +472,7 @@ void MEM()
 				}
 			} 
 			else if(EX_MEM.type == 3) { //Store
+				printf("Writing %08x to %08x\n",MEM_WB.B,MEM_WB.ALUOutput);
 				mem_write_32(MEM_WB.ALUOutput,MEM_WB.B);
 			}
 		}
@@ -552,6 +562,7 @@ void EX()
 				//EX_MEM.B = ID_EX.B;
 			}
 			else if(EX_MEM.type == 3) { /*Load/Store*/
+				printf("Store test:EX_MEM.A:%08x\tEX_MEM.IMM:%08x\n",EX_MEM.A,EX_MEM.imm);
 				EX_MEM.ALUOutput = EX_MEM.A + EX_MEM.imm;
 			}
 			else if(EX_MEM.type == 5) { //branch
