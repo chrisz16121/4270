@@ -371,23 +371,35 @@ void WB()
 			NEXT_STATE.REGS[MEM_WB.B] = MEM_WB.LMD;
 		}
 		if(FF == 1){
-			if(ID_EX.type == 0 && ((destination == ID_EX.rt) || (destination == ID_EX.rs))){
+			int rs = ID_EX.rs;
+			int rt = ID_EX.rt;
+			if(ID_EX.type == 0 && destination == ID_EX.rt){
 				printf("Hazard eliminated\n");
+				CURRENT_STATE.REGS[rt] = NEXT_STATE.REGS[rt];
+				FF = 0;
+				instruction_fetch_flag = 0;
+			}
+			else if(ID_EX.type == 0 && destination == ID_EX.rs){
+				printf("Hazard eliminated\n");
+				CURRENT_STATE.REGS[rs] = NEXT_STATE.REGS[rs];
 				FF = 0;
 				instruction_fetch_flag = 0;
 			}
 			else if(ID_EX.type == 1 && destination == ID_EX.rs){
 				printf("Hazard eliminated\n");
+				CURRENT_STATE.REGS[rs] = NEXT_STATE.REGS[rs];
 				FF = 0;
 				instruction_fetch_flag = 0;
 			}
 			else if(ID_EX.type == 2 && destination == ID_EX.rs){
 				printf("Hazard eliminated\n");
+				CURRENT_STATE.REGS[rs] = NEXT_STATE.REGS[rs];
 				FF = 0;
 				instruction_fetch_flag = 0;
 			}
 			else if(ID_EX.type == 3 && destination == ID_EX.rt){
 				printf("Hazard eliminated\n");
+				CURRENT_STATE.REGS[rt] = NEXT_STATE.REGS[rt];
 				FF = 0;
 				instruction_fetch_flag = 0;
 			}
@@ -523,6 +535,7 @@ void EX()
 		else{
 			printf("EX: ");
 			print_instruction(EX_MEM.PC);	
+			printf("TEST2: EX_MEM.A: %08x\tEX_MEM.B: %08x\n",EX_MEM.A,EX_MEM.B);
 			if(EX_MEM.type == 0){ /*ALU, register-register*/
 				EX_MEM.regWrite = 1;
 				printf("EX (reg-reg) destination reg: %d\n",EX_MEM.dest);
@@ -641,48 +654,61 @@ void ID()
 			//printf("REG-REG in ID\n");
 			//printf("EX_MEM.dest = %d\tID_EX.RS = %d\tID_EX.RT = %d\n",EX_MEM.dest,ID_EX.rs,ID_EX.rt);
 			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && ((EX_MEM.dest == ID_EX.rs) || (EX_MEM.dest == ID_EX.rt))){
-				printf("\n***Data hazard on $r%d in the EX_MEM stage (register type)***\n\n",EX_MEM.dest);
-				if(ENABLE_FORWARDING == 1 && EX_MEM.dest == ID_EX.rs){
-					if(EX_MEM.type != 2){
-						ID_EX.A = EX_MEM.ALUOutput;
-						printf("Hazard eliminated with forwarding\ncontents of EX_MEM $r%d were written to ID_EX.rs\n",EX_MEM.dest);
-						forwarded = 1;
-					}
-					else{
-						printf("Cannot forward data to rs from EX stage, instruction is a LOAD, stalling\n");
-						FF = 1;
-					}
-				}
-				else if(ENABLE_FORWARDING == 1 && EX_MEM.dest == ID_EX.rt){
-					if(EX_MEM.type != 2){
-						ID_EX.B = EX_MEM.ALUOutput;
-						printf("Hazard eliminated with forwarding\ncontents of EX_MEM $r%d were written to ID_EX.rt\n",EX_MEM.dest);
-						forwarded = 1;
-					}
-					else{
-						printf("Cannot forward data to rt from EX stage, instruction is a LOAD, stalling\n");
-						FF = 1;
-					}
+				if(EX_MEM.IR == 0x0){
+					printf("DUMMY print, instruction in EX_MEM is null\n");
 				}
 				else{
-					FF = 1; //stall
+					printf("\n***Data hazard on $r%d in the EX_MEM stage (register type)***\n\n",EX_MEM.dest);
+					if(ENABLE_FORWARDING == 1 && EX_MEM.dest == ID_EX.rs){
+						if(EX_MEM.type != 2){
+							ID_EX.A = EX_MEM.ALUOutput;
+							printf("Hazard eliminated with forwarding\ncontents of EX_MEM $r%d were written to ID_EX.rs\n",EX_MEM.dest);
+							forwarded = 1;
+						}
+						else{
+							printf("Cannot forward data to rs from EX stage, instruction is a LOAD, stalling\n");
+							FF = 1;
+						}
+					}
+					else if(ENABLE_FORWARDING == 1 && EX_MEM.dest == ID_EX.rt){
+						if(EX_MEM.type != 2){
+							ID_EX.B = EX_MEM.ALUOutput;
+							printf("Hazard eliminated with forwarding\ncontents of EX_MEM $r%d were written to ID_EX.rt\n",EX_MEM.dest);
+							forwarded = 1;
+						}
+						else{
+							printf("Cannot forward data to rt from EX stage, instruction is a LOAD, stalling\n");
+							FF = 1;
+						}
+					}
+					else{
+						FF = 1; //stall
+					}
 				}
 			}
 			else if((MEM_WB.regWrite == 1) && (MEM_WB.dest != 0) && ((MEM_WB.dest == ID_EX.rs) || (MEM_WB.dest == ID_EX.rt))){
 				int dummy = MEM_WB.dest;
-				printf("\n***Data hazard on $r%d in the MEM_WB stage (register type)***\n\n",dummy);
-				if(ENABLE_FORWARDING == 1 && MEM_WB.dest == ID_EX.rs){
-					ID_EX.A = MEM_WB.ALUOutput;
-					printf("Hazard eliminated with forwarding\ncontents of MEM_WB $r%d were written to ID_EX.rs\n",MEM_WB.dest);
-					forwarded = 1;
-				}
-				else if(ENABLE_FORWARDING == 1 && MEM_WB.dest == ID_EX.rt){
-					ID_EX.B = MEM_WB.ALUOutput;
-					printf("Hazard eliminated with forwarding\ncontents of MEM_WB $r%d were written to ID_EX.rt\n",MEM_WB.dest);
-					forwarded = 1;
+				printf("Test for MEM_WB:\t");
+				print_instruction(MEM_WB.PC);
+				printf("\n");
+				if(MEM_WB.IR == 0x0){
+					printf("DUMMY print, instruction in MEM_WB is null\n");
 				}
 				else{
-					FF = 1;
+					printf("\n***Data hazard on $r%d in the MEM_WB stage (register type)***\n\n",dummy);
+					if(ENABLE_FORWARDING == 1 && MEM_WB.dest == ID_EX.rs){
+						ID_EX.A = MEM_WB.ALUOutput;
+						printf("Hazard eliminated with forwarding\ncontents of MEM_WB $r%d were written to ID_EX.rs\n",MEM_WB.dest);
+						forwarded = 1;
+					}
+					else if(ENABLE_FORWARDING == 1 && MEM_WB.dest == ID_EX.rt){
+						ID_EX.B = MEM_WB.ALUOutput;
+						printf("Hazard eliminated with forwarding\ncontents of MEM_WB $r%d were written to ID_EX.rt\n",MEM_WB.dest);
+						forwarded = 1;
+					}
+					else{
+						FF = 1;
+					}
 				}
 			}			
 		}
@@ -691,30 +717,40 @@ void ID()
 			//printf("EX_MEM.dest: %d ID_EX.rt: %d\n",EX_MEM.dest,ID_EX.rs);
 			if((EX_MEM.regWrite == 1) && (EX_MEM.dest != 0) && (EX_MEM.dest == ID_EX.rs)){
 				printf("\n***Data hazard on $r%d in the EX_MEM stage (immediate instruction)***\n\n",EX_MEM.dest);
-				if(ENABLE_FORWARDING == 1 && EX_MEM.dest == ID_EX.rs){
-					if(EX_MEM.type != 2){
-						ID_EX.A = EX_MEM.ALUOutput;
-						printf("Hazard eliminated with forwarding\ncontents of EX_MEM $r%d were written to ID_EX.rs\n",EX_MEM.dest);
-						forwarded = 1;
+				if(EX_MEM.IR == 0x0){
+					printf("DUMMY print, instruction in EX_MEM is null\n");
+				}
+				else{
+					if(ENABLE_FORWARDING == 1 && EX_MEM.dest == ID_EX.rs){
+						if(EX_MEM.type != 2){
+							ID_EX.A = EX_MEM.ALUOutput;
+							printf("Hazard eliminated with forwarding\ncontents of EX_MEM $r%d were written to ID_EX.rs\n",EX_MEM.dest);
+							forwarded = 1;
+						}
+						else{
+							printf("Cannot forward data from EX stage, instruction is a LOAD stalling\n");
+							FF = 1;
+						}
 					}
 					else{
-						printf("Cannot forward data from EX stage, instruction is a LOAD stalling\n");
 						FF = 1;
 					}
 				}
-				else{
-					FF = 1;
-				}
 			}
 			else if((MEM_WB.regWrite == 1) && (MEM_WB.dest != 0) && (MEM_WB.dest == ID_EX.rs)){
-				printf("\n***Data hazard on $r%d in the MEM_WB stage (immediate instruction)***\n\n",ID_EX.rs);
-				if(ENABLE_FORWARDING == 1 && EX_MEM.dest == ID_EX.rs){
-					ID_EX.A = MEM_WB.ALUOutput;
-					printf("Hazard eliminated with forwarding\ncontents of MEM_WB $r%d were written to ID_EX.rs\n",MEM_WB.dest);
-					forwarded = 1;
+				if(MEM_WB.IR == 0x0){
+					printf("DUMMY print, instruction in MEM_WB is null\n");
 				}
 				else{
-					FF = 1;
+					printf("\n***Data hazard on $r%d in the MEM_WB stage (immediate instruction)***\n\n",ID_EX.rs);
+					if(ENABLE_FORWARDING == 1 && EX_MEM.dest == ID_EX.rs){
+						ID_EX.A = MEM_WB.ALUOutput;
+						printf("Hazard eliminated with forwarding\ncontents of MEM_WB $r%d were written to ID_EX.rs\n",MEM_WB.dest);
+						forwarded = 1;
+					}
+					else{
+						FF = 1;
+					}
 				}
 			}
 		}
@@ -797,14 +833,21 @@ void ID()
 		if(FF == 0){
 			printf("Instruction progresses\n");
 			if(forwarded == 0){
+				int i;
+				//for (i = 0; i < MIPS_REGS; i++){
+				//	printf("[R%d]\t: 0x%08x\n", i, CURRENT_STATE.REGS[i]);
+				//}
+				//printf("test: rs:%d rt:%d\nREG_CONTENTS:%08x\n",ID_EX.rs,ID_EX.rt,CURRENT_STATE.REGS[3]);
 				ID_EX.A = CURRENT_STATE.REGS[ID_EX.rs];
 				ID_EX.B = CURRENT_STATE.REGS[ID_EX.rt];
+				printf("TEST: ID_EX.A: %08x\tID_EX.B: %08x\n",ID_EX.A,ID_EX.B);
 			}
 			forwarded = 0; 
 		}
 		//printf("%x %x %x %x\n", ID_EX.A, ID_EX.B, ID_EX.imm, ID_EX.IR);
 		}
 	}
+	//printf("TEST: ID_EX.A: %08x\tID_EX.B: %08x\n",ID_EX.A,ID_EX.B);
 }
 
 /************************************************************/
