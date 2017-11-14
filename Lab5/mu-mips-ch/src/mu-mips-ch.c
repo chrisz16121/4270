@@ -518,6 +518,10 @@ void EX()
 		EX_MEM.IR = 0;	
 		EX_MEM.PC = 0;
 	}
+	else if(BrnchJmpStall == 2){
+		printf("Stalling to flush...\n");
+		BrnchJmpStall++;
+	}
 	else{
 		EX_MEM = ID_EX;
 		if(EX_MEM.type == 0){
@@ -616,6 +620,7 @@ void ID()
 	}
 	else if( flush == 1 ){
 		//This is supposed to flush an instruction after a branch/jump
+		printf("Flushing...\n");
 		ID_EX.PC = 0;
 		ID_EX.IR = 0;
 		ID_EX.A = 0;
@@ -856,35 +861,37 @@ void ID()
 void IF()
 {
 	//if(FF == 1){
-	if(instruction_fetch_flag == 1){	
-		printf("No instruction fetched\n");
-		//NEXT_STATE.PC = 
-		print_instruction(IF_ID.PC);
-		printf("remains in IF stage\n");
-		if(FF == 0){
-			instruction_fetch_flag = 0;
-		}
-		printf("\n");
-	}
-	else if( BrnchJmpStall ==  1){
+	if( BrnchJmpStall ==  1){
 		printf("IF: Stalled waiting for Branch/Jump Result\n");
 		BrnchJmpStall++;
-	}
-	if(fetch_flag == 0 && instruction_fetch_flag == 0){
-		IF_ID.PC = CURRENT_STATE.PC;
-		IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
-		NEXT_STATE.PC = CURRENT_STATE.PC + 4;
-		//print_instruction(IF_ID.PC);
-		//printf(" is in IF stage\n");
-		printf("IF: ");
-		print_instruction(IF_ID.PC);
-		//print_instruction(CURRENT_STATE.PC);
-		printf("\n");
-		if(FF == 1){
-			instruction_fetch_flag = 1;
+	}else{
+		if(instruction_fetch_flag == 1){	
+			printf("No instruction fetched\n");
+			//NEXT_STATE.PC = 
+			print_instruction(IF_ID.PC);
+			printf("remains in IF stage\n");
+			if(FF == 0){
+				instruction_fetch_flag = 0;
+			}
+			printf("\n");
 		}
-	} 
-	cycle_count++;
+	
+		if(fetch_flag == 0 && instruction_fetch_flag == 0){
+			IF_ID.PC = CURRENT_STATE.PC;
+			IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
+			NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+			//print_instruction(IF_ID.PC);
+			//printf(" is in IF stage\n");
+			printf("IF: ");
+			print_instruction(IF_ID.PC);
+			//print_instruction(CURRENT_STATE.PC);
+			printf("\n");
+			if(FF == 1){
+				instruction_fetch_flag = 1;
+			}
+		} 
+		cycle_count++;
+	}
 } 
 
 /************************************************************/
@@ -1261,8 +1268,12 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					//print_instruction(CURRENT_STATE.PC);
 					break;
 				case 0x04: //BEQ
+					printf("X: %08x -- Y: %08x\n", CURRENT_STATE.REGS[X], CURRENT_STATE.REGS[Y]);
 					if(CURRENT_STATE.REGS[X] == CURRENT_STATE.REGS[Y]){
+						printf("IN IF\n: PC: %08x\n", NEXT_STATE.PC);
+						
 						NEXT_STATE.PC = CURRENT_STATE.PC + ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
+						printf("IN IF\n: PC: %08x\n", NEXT_STATE.PC);
 						//branch_jump = TRUE;
 						flush = 1;
 					}
