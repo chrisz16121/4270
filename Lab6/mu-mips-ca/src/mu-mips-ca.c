@@ -5,7 +5,7 @@
 #include <assert.h>
 
 #include "mu-mips.h"
-
+#include "mu-cache.h"
 
 int cycle_count = 0;
 
