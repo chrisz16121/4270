@@ -391,7 +391,9 @@ void WB()
 				printf("Hazard eliminated\n");
 				//CURRENT_STATE.REGS[rs] = NEXT_STATE.REGS[rs];
 				FF = 0;
-				ID_EX.A = NEXT_STATE.REGS[destination];	
+				printf("%08x, %08x, %08x\n", NEXT_STATE.REGS[MEM_WB.dest],NEXT_STATE.REGS[destination],NEXT_STATE.REGS[23]);
+				ID_EX.A = NEXT_STATE.REGS[MEM_WB.dest];	
+				//ID_EX.A = NEXT_STATE.REGS[destination];	
 				instruction_fetch_flag = 0;
 			}
 			if(ID_EX.type == 2 && destination == ID_EX.rs){
@@ -528,7 +530,7 @@ void EX()
 		EX_MEM.IR = 0;	
 		EX_MEM.PC = 0;
 	}
-	else if(BrnchJmpStall == 2){
+	else if(BrnchJmpStall == 2 && flush == 1){
 		printf("Stalling to flush...\n");
 		BrnchJmpStall++;
 	}
@@ -1159,8 +1161,8 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					break;
 
 				case 0x08: //JR
-					//NEXT_STATE.PC = CURRENT_STATE.REGS[X];
-					CURRENT_STATE.PC = CURRENT_STATE.REGS[X];
+					//NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+					CURRENT_STATE.PC = CURRENT_STATE.REGS[rs];
 					//branch_jump = TRUE;
 					//print_instruction(CURRENT_STATE.PC);
 					break;
@@ -1168,11 +1170,11 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					X = (instruct & 0x000F8000) >> 11;//0x0000F800
 					if( X != 0x00 ){
 						//printf("do_inst: X: %x, 0x00: %x\n", X, 0x00);
-						NEXT_STATE.REGS[X] = CURRENT_STATE.PC + 4;
+						NEXT_STATE.REGS[rs] = CURRENT_STATE.PC + 4;
 					}
 					//NEXT_STATE.REGS[X] = CURRENT_STATE.PC + 4;
 					//NEXT_STATE.PC = CURRENT_STATE.REGS[Y];
-					CURRENT_STATE.PC = CURRENT_STATE.REGS[Y];
+					CURRENT_STATE.PC = CURRENT_STATE.REGS[rt];
 					//branch_jump = TRUE;
 					//print_instruction(CURRENT_STATE.PC);
 					break;
@@ -1270,16 +1272,16 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 				case 0x01:
 
 				if(rt == 0x00000){ //BLTZ
-					if((CURRENT_STATE.REGS[X] & 0x80000000) > 0){
-						NEXT_STATE.PC = CURRENT_STATE.PC + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000)<<2 : (Y & 0x0000FFFF)<<2);
+					if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0){
+						NEXT_STATE.PC = EX_MEM.PC + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000)<<2 : (Y & 0x0000FFFF)<<2);
 						flush = 1;
 						//branch_jump = TRUE;
 					}
 					//print_instruction(CURRENT_STATE.PC);
 				}
 				else if(rt == 0x00001){ //BGEZ
-					if((CURRENT_STATE.REGS[X] & 0x80000000) == 0x0){
-						NEXT_STATE.PC = CURRENT_STATE.PC + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000)<<2 : (Y & 0x0000FFFF)<<2);
+					if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
+						NEXT_STATE.PC = EX_MEM.PC + ( (Y & 0x8000) > 0 ? (Y | 0xFFFF0000)<<2 : (Y & 0x0000FFFF)<<2);
 						flush = 1;
 						//branch_jump = TRUE;
 					}
@@ -1287,24 +1289,24 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 				}
 				break;
 				case 0x02: //J
-					NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
+					NEXT_STATE.PC = (EX_MEM.PC & 0xF0000000) | (target << 2);
 					//branch_jump = TRUE;
 					//print_instruction(CURRENT_STATE.PC);
 					break;
 				case 0x03: //JAL
-					NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
-					NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
+					NEXT_STATE.PC = (EX_MEM.PC & 0xF0000000) | (target << 2);
+					NEXT_STATE.REGS[31] = EX_MEM.PC + 4;
 					//branch_jump = TRUE;
 					//print_instruction(CURRENT_STATE.PC);
 					break;
 				case 0x04: //BEQ
-					printf("I seg faulted on the printf\n");
-					printf("X: %08x ", CURRENT_STATE.REGS[X]);
-					printf("-- Y: %08x\n", CURRENT_STATE.REGS[Y]);
-					if(CURRENT_STATE.REGS[X] == CURRENT_STATE.REGS[Y]){
+					//printf("I seg faulted on the printf\n");
+					//printf("X: %08x ", CURRENT_STATE.REGS[X]);
+					//printf("-- Y: %08x\n", CURRENT_STATE.REGS[Y]);
+					if(CURRENT_STATE.REGS[rt] == CURRENT_STATE.REGS[rs]){
 						printf("IN IF\n: PC: %08x\n", NEXT_STATE.PC);
 						
-						NEXT_STATE.PC = CURRENT_STATE.PC + ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
+						NEXT_STATE.PC = EX_MEM.PC + ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
 						printf("IN IF\n: PC: %08x\n", NEXT_STATE.PC);
 						//branch_jump = TRUE;
 						flush = 1;
@@ -1312,24 +1314,24 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					//print_instruction(CURRENT_STATE.PC);
 					break;
 				case 0x05: //BNE
-					if(CURRENT_STATE.REGS[X] != CURRENT_STATE.REGS[Y]){
-						NEXT_STATE.PC = CURRENT_STATE.PC + ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
+					if(CURRENT_STATE.REGS[rt] != CURRENT_STATE.REGS[rs]){
+						NEXT_STATE.PC = EX_MEM.PC + ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
 						flush = 1;
 						//branch_jump = TRUE;
 					}
 					//print_instruction(CURRENT_STATE.PC);
 					break;
 				case 0x06: //BLEZ
-					if((CURRENT_STATE.REGS[X] & 0x80000000) > 0 || CURRENT_STATE.REGS[X] == 0){
-						NEXT_STATE.PC = CURRENT_STATE.PC +  ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
+					if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0 || CURRENT_STATE.REGS[rs] == 0){
+						NEXT_STATE.PC = EX_MEM.PC +  ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
 						flush = 1;
 						//branch_jump = TRUE;
 					}
 					//print_instruction(CURRENT_STATE.PC);
 					break;
 				case 0x07: //BGTZ
-					if((CURRENT_STATE.REGS[X] & 0x80000000) == 0x0 || CURRENT_STATE.REGS[X] != 0){
-						NEXT_STATE.PC = CURRENT_STATE.PC +  ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
+					if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0 || CURRENT_STATE.REGS[rs] != 0){
+						NEXT_STATE.PC = EX_MEM.PC +  ( (offset & 0x8000) > 0 ? (offset | 0xFFFF0000)<<2 : (offset & 0x0000FFFF)<<2);
 						flush = 1;
 						//branch_jump = TRUE;
 					}
