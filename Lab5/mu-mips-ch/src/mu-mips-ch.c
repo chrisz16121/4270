@@ -1093,7 +1093,8 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 					break;
 
 				case 0x08: //JR
-					NEXT_STATE.PC = CURRENT_STATE.REGS[X];
+					//NEXT_STATE.PC = CURRENT_STATE.REGS[X];
+					CURRENT_STATE.PC = CURRENT_STATE.REGS[X];
 					//branch_jump = TRUE;
 					//print_instruction(CURRENT_STATE.PC);
 					break;
@@ -1104,7 +1105,8 @@ uint32_t do_instruction( uint32_t X, uint32_t Y, uint32_t instruct){
 						NEXT_STATE.REGS[X] = CURRENT_STATE.PC + 4;
 					}
 					//NEXT_STATE.REGS[X] = CURRENT_STATE.PC + 4;
-					NEXT_STATE.PC = CURRENT_STATE.REGS[Y];
+					//NEXT_STATE.PC = CURRENT_STATE.REGS[Y];
+					CURRENT_STATE.PC = CURRENT_STATE.REGS[Y];
 					//branch_jump = TRUE;
 					//print_instruction(CURRENT_STATE.PC);
 					break;
