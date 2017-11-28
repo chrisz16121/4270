@@ -13,6 +13,8 @@ int FF = 0;
 int BrnchJmpStall = 2;
 int flush = 0;
 int instruction_fetch_flag = 0;
+int cacheMiss = 0;
+int cacheStall = 0;
 
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
@@ -438,6 +440,16 @@ void MEM()
 		}
 		else{ /*Load/Store*/
 			if(MEM_WB.type == 2){ //Load
+				if( inCache == 0 ){ //THIS if() IS PSEUDOCODE!!!
+					cacheMiss == 1;
+				}
+				if( cacheMiss == 1 && cacheStall != 101 ){
+					cacheStall == 1;
+				}
+				if( cacheStall == 101 ){
+					printf("Finished 100 cycle stall due to cache miss.\nCurrent cycle: %d\n", cycle_count);
+					cacheStall == 0;			
+				}
 				MEM_WB.regWrite = 1;
 				MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
 				if(FF == 1 && ENABLE_FORWARDING == 1){
@@ -474,6 +486,9 @@ void MEM()
 				}
 			} 
 			else if(EX_MEM.type == 3) { //Store
+				if( cacheMiss == 1 && cacheStall != 101 ){
+					cacheStall == 1;
+				}
 				printf("Writing %08x to %08x\n",MEM_WB.B,MEM_WB.ALUOutput);
 				mem_write_32(MEM_WB.ALUOutput,MEM_WB.B);
 			}
@@ -879,6 +894,10 @@ void IF()
 	if( BrnchJmpStall ==  1){
 		printf("IF: Stalled waiting for Branch/Jump Result\n");
 		BrnchJmpStall++;
+	}else if(cacheStall > 0){
+		//stalling for cache miss
+		cacheStall++;
+		cycle_count++;
 	}else{
 		if(instruction_fetch_flag == 1){	
 			printf("No instruction fetched\n");
