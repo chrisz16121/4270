@@ -441,6 +441,61 @@ void MEM()
 		else{ /*Load/Store*/
 			if(MEM_WB.type == 2){ //Load
 				//INSERT TYLER'S CODE HERE
+				//MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
+				//Cache
+				//int cache_index = (int)MEM_WB.ALUOutput / 16;
+				uint32_t cache_index = 0x000000F0 & MEM_WB.ALUOutput;
+				int word_place = (int)MEM_WB.ALUOutput % 4;
+				
+				if(L1Cache.blocks[cache_index].tag == (0xFFFFFF00 & MEM_WB.ALUOutput)){
+					if(L1Cache.blocks[cache_index].valid == 1){
+						MEM_WB.LMD = L1Cache.blocks[cache_index].words[word_place];
+						cache_hits++;
+					}
+
+				}				
+				else{
+					cache_misses++;
+					cacheMiss = 1;
+					MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
+					L1Cache.blocks[cache_index].tag = (0xFFFFFF00 & MEM_WB.ALUOutput);
+					L1Cache.blocks[cache_index].valid = 1;
+					
+					if(word_place == 0){
+						L1Cache.blocks[cache_index].words.[0] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words.[1] = mem_read_32(MEM_WB.ALUOutput+1);
+						L1Cache.blocks[cache_index].words.[2] = mem_read_32(MEM_WB.ALUOutput+2);
+						L1Cache.blocks[cache_index].words.[3] = mem_read_32(MEM_WB.ALUOutput+3);
+					}
+					if(word_place == 1){
+						L1Cache.blocks[cache_index].words.[0] = mem_read_32(MEM_WB.ALUOutput-1);
+						L1Cache.blocks[cache_index].words.[1] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words.[2] = mem_read_32(MEM_WB.ALUOutput+1);
+						L1Cache.blocks[cache_index].words.[3] = mem_read_32(MEM_WB.ALUOutput+2);
+
+					}
+					if(word_place == 2){
+						L1Cache.blocks[cache_index].words.[0] = mem_read_32(MEM_WB.ALUOutput-2);
+						L1Cache.blocks[cache_index].words.[1] = mem_read_32(MEM_WB.ALUOutput-1);
+						L1Cache.blocks[cache_index].words.[2] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words.[3] = mem_read_32(MEM_WB.ALUOutput+1);
+					}
+					if(word_place == 3){
+						L1Cache.blocks[cache_index].words.[0] = mem_read_32(MEM_WB.ALUOutput-3);
+						L1Cache.blocks[cache_index].words.[1] = mem_read_32(MEM_WB.ALUOutput-2);
+						L1Cache.blocks[cache_index].words.[2] = mem_read_32(MEM_WB.ALUOutput-1);
+						L1Cache.blocks[cache_index].words.[3] = MEM_WB.LMD;
+
+					}
+
+				}
+				
+
+				/*if(L1Cache.blocks[cache_index].words[word_place] == MEM_WB.LMD){
+
+
+				}*/
+
 				if( cacheStall >= 1 && cacheStall != 101 ){
 					//stalling
 				}
@@ -489,6 +544,61 @@ void MEM()
 			} 
 			else if(EX_MEM.type == 3) { //Store
 				//INSERT TYLER'S CODE HERE
+				//MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
+				//Cache
+				//int cache_index = (int)MEM_WB.ALUOutput / 16;
+				uint32_t cache_index = 0x000000F0 & MEM_WB.ALUOutput;
+				int word_place = (int)MEM_WB.ALUOutput % 4;
+				
+				if(L1Cache.blocks[cache_index].tag == (0xFFFFFF00 & MEM_WB.ALUOutput)){
+					if(L1Cache.blocks[cache_index].valid == 1){
+						MEM_WB.LMD = L1Cache.blocks[cache_index].words[word_place];
+						cache_hits++;
+					}
+
+				}				
+				else{
+					cache_misses++;
+					cacheMiss = 1;
+					MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
+					L1Cache.blocks[cache_index].tag = (0xFFFFFF00 & MEM_WB.ALUOutput);
+					L1Cache.blocks[cache_index].valid = 1;
+					
+					if(word_place == 0){
+						L1Cache.blocks[cache_index].words.[0] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words.[1] = mem_read_32(MEM_WB.ALUOutput+1);
+						L1Cache.blocks[cache_index].words.[2] = mem_read_32(MEM_WB.ALUOutput+2);
+						L1Cache.blocks[cache_index].words.[3] = mem_read_32(MEM_WB.ALUOutput+3);
+					}
+					if(word_place == 1){
+						L1Cache.blocks[cache_index].words.[0] = mem_read_32(MEM_WB.ALUOutput-1);
+						L1Cache.blocks[cache_index].words.[1] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words.[2] = mem_read_32(MEM_WB.ALUOutput+1);
+						L1Cache.blocks[cache_index].words.[3] = mem_read_32(MEM_WB.ALUOutput+2);
+
+					}
+					if(word_place == 2){
+						L1Cache.blocks[cache_index].words.[0] = mem_read_32(MEM_WB.ALUOutput-2);
+						L1Cache.blocks[cache_index].words.[1] = mem_read_32(MEM_WB.ALUOutput-1);
+						L1Cache.blocks[cache_index].words.[2] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words.[3] = mem_read_32(MEM_WB.ALUOutput+1);
+					}
+					if(word_place == 3){
+						L1Cache.blocks[cache_index].words.[0] = mem_read_32(MEM_WB.ALUOutput-3);
+						L1Cache.blocks[cache_index].words.[1] = mem_read_32(MEM_WB.ALUOutput-2);
+						L1Cache.blocks[cache_index].words.[2] = mem_read_32(MEM_WB.ALUOutput-1);
+						L1Cache.blocks[cache_index].words.[3] = MEM_WB.LMD;
+
+					}
+
+				}
+				
+
+				/*if(L1Cache.blocks[cache_index].words[word_place] == MEM_WB.LMD){
+
+
+				}*/
+
 				if( cacheStall >= 1 && cacheStall != 101 ){
 					//stalling
 				}
