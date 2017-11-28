@@ -462,29 +462,29 @@ void MEM()
 					L1Cache.blocks[cache_index].valid = 1;
 					
 					if(word_place == 0){
-						L1Cache.blocks[cache_index].words.[0] = MEM_WB.LMD;
-						L1Cache.blocks[cache_index].words.[1] = mem_read_32(MEM_WB.ALUOutput+1);
-						L1Cache.blocks[cache_index].words.[2] = mem_read_32(MEM_WB.ALUOutput+2);
-						L1Cache.blocks[cache_index].words.[3] = mem_read_32(MEM_WB.ALUOutput+3);
+						L1Cache.blocks[cache_index].words[0] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput+1);
+						L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput+2);
+						L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+3);
 					}
 					if(word_place == 1){
-						L1Cache.blocks[cache_index].words.[0] = mem_read_32(MEM_WB.ALUOutput-1);
-						L1Cache.blocks[cache_index].words.[1] = MEM_WB.LMD;
-						L1Cache.blocks[cache_index].words.[2] = mem_read_32(MEM_WB.ALUOutput+1);
-						L1Cache.blocks[cache_index].words.[3] = mem_read_32(MEM_WB.ALUOutput+2);
+						L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-1);
+						L1Cache.blocks[cache_index].words[1] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput+1);
+						L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+2);
 
 					}
 					if(word_place == 2){
-						L1Cache.blocks[cache_index].words.[0] = mem_read_32(MEM_WB.ALUOutput-2);
-						L1Cache.blocks[cache_index].words.[1] = mem_read_32(MEM_WB.ALUOutput-1);
-						L1Cache.blocks[cache_index].words.[2] = MEM_WB.LMD;
-						L1Cache.blocks[cache_index].words.[3] = mem_read_32(MEM_WB.ALUOutput+1);
+						L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-2);
+						L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput-1);
+						L1Cache.blocks[cache_index].words[2] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+1);
 					}
 					if(word_place == 3){
-						L1Cache.blocks[cache_index].words.[0] = mem_read_32(MEM_WB.ALUOutput-3);
-						L1Cache.blocks[cache_index].words.[1] = mem_read_32(MEM_WB.ALUOutput-2);
-						L1Cache.blocks[cache_index].words.[2] = mem_read_32(MEM_WB.ALUOutput-1);
-						L1Cache.blocks[cache_index].words.[3] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-3);
+						L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput-2);
+						L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput-1);
+						L1Cache.blocks[cache_index].words[3] = MEM_WB.LMD;
 
 					}
 
@@ -565,29 +565,29 @@ void MEM()
 					L1Cache.blocks[cache_index].valid = 1;
 					
 					if(word_place == 0){
-						L1Cache.blocks[cache_index].words.[0] = MEM_WB.LMD;
-						L1Cache.blocks[cache_index].words.[1] = mem_read_32(MEM_WB.ALUOutput+1);
-						L1Cache.blocks[cache_index].words.[2] = mem_read_32(MEM_WB.ALUOutput+2);
-						L1Cache.blocks[cache_index].words.[3] = mem_read_32(MEM_WB.ALUOutput+3);
+						L1Cache.blocks[cache_index].words[0] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput+1);
+						L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput+2);
+						L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+3);
 					}
 					if(word_place == 1){
-						L1Cache.blocks[cache_index].words.[0] = mem_read_32(MEM_WB.ALUOutput-1);
-						L1Cache.blocks[cache_index].words.[1] = MEM_WB.LMD;
-						L1Cache.blocks[cache_index].words.[2] = mem_read_32(MEM_WB.ALUOutput+1);
-						L1Cache.blocks[cache_index].words.[3] = mem_read_32(MEM_WB.ALUOutput+2);
+						L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-1);
+						L1Cache.blocks[cache_index].words[1] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput+1);
+						L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+2);
 
 					}
 					if(word_place == 2){
-						L1Cache.blocks[cache_index].words.[0] = mem_read_32(MEM_WB.ALUOutput-2);
-						L1Cache.blocks[cache_index].words.[1] = mem_read_32(MEM_WB.ALUOutput-1);
-						L1Cache.blocks[cache_index].words.[2] = MEM_WB.LMD;
-						L1Cache.blocks[cache_index].words.[3] = mem_read_32(MEM_WB.ALUOutput+1);
+						L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-2);
+						L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput-1);
+						L1Cache.blocks[cache_index].words[2] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+1);
 					}
 					if(word_place == 3){
-						L1Cache.blocks[cache_index].words.[0] = mem_read_32(MEM_WB.ALUOutput-3);
-						L1Cache.blocks[cache_index].words.[1] = mem_read_32(MEM_WB.ALUOutput-2);
-						L1Cache.blocks[cache_index].words.[2] = mem_read_32(MEM_WB.ALUOutput-1);
-						L1Cache.blocks[cache_index].words.[3] = MEM_WB.LMD;
+						L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-3);
+						L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput-2);
+						L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput-1);
+						L1Cache.blocks[cache_index].words[3] = MEM_WB.LMD;
 
 					}
 
