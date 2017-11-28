@@ -440,64 +440,68 @@ void MEM()
 		}
 		else{ /*Load/Store*/
 			if(MEM_WB.type == 2){ //Load
-				if( inCache == 0 ){ //THIS if() IS PSEUDOCODE!!!
-					cacheMiss == 1;
+				//INSERT TYLER'S CODE HERE
+				if( cacheStall >= 1 && cacheStall != 101 ){
+					//stalling
 				}
-				if( cacheMiss == 1 && cacheStall != 101 ){
+				else if( cacheMiss == 1 ){
 					cacheStall == 1;
-				}
-				if( cacheStall == 101 ){
-					printf("Finished 100 cycle stall due to cache miss.\nCurrent cycle: %d\n", cycle_count);
-					cacheStall == 0;			
-				}
-				MEM_WB.regWrite = 1;
-				MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
-				if(FF == 1 && ENABLE_FORWARDING == 1){
-					uint32_t destination = MEM_WB.dest;
-					if(ID_EX.type == 0 && ((destination == ID_EX.rt) || (destination == ID_EX.rs))){
-						if(destination == ID_EX.rt){
-							ID_EX.B = MEM_WB.LMD;
+				}else{
+					if( cacheStall == 101 ){
+						printf("Finished 100 cycle stall due to cache miss.\nCurrent cycle: %d\n", cycle_count);
+						cacheStall == 0;			
+					}
+					MEM_WB.regWrite = 1;
+					MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
+					if(FF == 1 && ENABLE_FORWARDING == 1){
+						uint32_t destination = MEM_WB.dest;
+						if(ID_EX.type == 0 && ((destination == ID_EX.rt) || (destination == ID_EX.rs))){
+							if(destination == ID_EX.rt){
+								ID_EX.B = MEM_WB.LMD;
+							}
+							else{
+								ID_EX.A = MEM_WB.LMD;
+							}
+							printf("Hazard eliminated in MEM\n");
+							FF = 0;
+							instruction_fetch_flag = 0;
 						}
-						else{
+						else if(ID_EX.type == 1 && destination == ID_EX.rs){
 							ID_EX.A = MEM_WB.LMD;
+							printf("Hazard eliminated in MEM\n");
+							FF = 0;
+							instruction_fetch_flag = 0;
 						}
-						printf("Hazard eliminated in MEM\n");
-						FF = 0;
-						instruction_fetch_flag = 0;
-					}
-					else if(ID_EX.type == 1 && destination == ID_EX.rs){
-						ID_EX.A = MEM_WB.LMD;
-						printf("Hazard eliminated in MEM\n");
-						FF = 0;
-						instruction_fetch_flag = 0;
-					}
-					else if(ID_EX.type == 2 && destination == ID_EX.rs){
-						ID_EX.A = MEM_WB.LMD;
-						printf("Hazard eliminated in MEM\n");
-						FF = 0;
-						instruction_fetch_flag = 0;
-					}
-					else if(ID_EX.type == 3 && destination == ID_EX.rt){
-						ID_EX.B = MEM_WB.LMD;
-						printf("Hazard eliminated in MEM\n");
-						FF = 0;
-						instruction_fetch_flag = 0;
+						else if(ID_EX.type == 2 && destination == ID_EX.rs){
+							ID_EX.A = MEM_WB.LMD;
+							printf("Hazard eliminated in MEM\n");
+							FF = 0;
+							instruction_fetch_flag = 0;
+						}
+						else if(ID_EX.type == 3 && destination == ID_EX.rt){
+							ID_EX.B = MEM_WB.LMD;
+							printf("Hazard eliminated in MEM\n");
+							FF = 0;
+							instruction_fetch_flag = 0;
+						}
 					}
 				}
 			} 
 			else if(EX_MEM.type == 3) { //Store
-				if( inCache == 0 ){ //THIS if() IS PSEUDOCODE!!!
-					cacheMiss == 1;
+				//INSERT TYLER'S CODE HERE
+				if( cacheStall >= 1 && cacheStall != 101 ){
+					//stalling
 				}
-				if( cacheMiss == 1 && cacheStall != 101 ){
+				else if( cacheMiss == 1 ){
 					cacheStall == 1;
+				}else{
+					if( cacheStall == 101 ){
+						printf("Finished 100 cycle stall due to cache miss.\nCurrent cycle: %d\n", cycle_count);
+						cacheStall == 0;			
+					}
+					printf("Writing %08x to %08x\n",MEM_WB.B,MEM_WB.ALUOutput);
+					mem_write_32(MEM_WB.ALUOutput,MEM_WB.B);
 				}
-				if( cacheStall == 101 ){
-					printf("Finished 100 cycle stall due to cache miss.\nCurrent cycle: %d\n", cycle_count);
-					cacheStall == 0;			
-				}
-				printf("Writing %08x to %08x\n",MEM_WB.B,MEM_WB.ALUOutput);
-				mem_write_32(MEM_WB.ALUOutput,MEM_WB.B);
 			}
 		}
 	}
