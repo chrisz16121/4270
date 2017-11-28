@@ -486,8 +486,15 @@ void MEM()
 				}
 			} 
 			else if(EX_MEM.type == 3) { //Store
+				if( inCache == 0 ){ //THIS if() IS PSEUDOCODE!!!
+					cacheMiss == 1;
+				}
 				if( cacheMiss == 1 && cacheStall != 101 ){
 					cacheStall == 1;
+				}
+				if( cacheStall == 101 ){
+					printf("Finished 100 cycle stall due to cache miss.\nCurrent cycle: %d\n", cycle_count);
+					cacheStall == 0;			
 				}
 				printf("Writing %08x to %08x\n",MEM_WB.B,MEM_WB.ALUOutput);
 				mem_write_32(MEM_WB.ALUOutput,MEM_WB.B);
