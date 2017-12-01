@@ -31,6 +31,7 @@ void help() {
 	printf("high <val>\t-- set the HI register to <val>\n");
 	printf("low <val>\t-- set the LO register to <val>\n");
 	printf("print\t-- print the program loaded into memory\n");
+	printf("cache\t-- print out the current cache\n");
 	printf("forwarding <n>\t-- enable(<n>=1)/disable(<n>=2) forwarding (disabled by default)\n");
 	printf("show\t-- print the current content of the pipeline registers\n");
 	printf("?\t-- display help menu\n");
@@ -246,6 +247,10 @@ void handle_command() {
 		case 'P':
 		case 'p':
 			print_program(); 
+			break;
+		case 'C':
+		case 'c':
+			print_cache();
 			break;
 		case 'f':
 			if(scanf("%d",&ENABLE_FORWARDING)!=1){
@@ -552,7 +557,8 @@ void MEM()
 				
 				if(L1Cache.blocks[cache_index].tag == (0xFFFFFF00 & MEM_WB.ALUOutput)){
 					if(L1Cache.blocks[cache_index].valid == 1){
-						MEM_WB.LMD = L1Cache.blocks[cache_index].words[word_place];
+						//MEM_WB.LMD = L1Cache.blocks[cache_index].words[word_place];
+						L1Cache.blocks[cache_index].words[word_place] = MEM_WB.LMD;
 						cache_hits++;
 					}
 
@@ -1723,6 +1729,13 @@ void show_pipeline(){
 	printf("MEM/WB.IR: %x\n", MEM_WB.IR);
 	printf("MEM/WB.ALUOutout: %x\n", MEM_WB.ALUOutput);
 	printf("MEM/WB.LMD: %x\n", MEM_WB.LMD);
+}
+
+void print_cache(){
+	printf("Cache: \n");
+	for( int c = 0; c<16; c++){
+		printf("Block: %d | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n", c, L1Cache.blocks[c].valid, L1Cache.blocks[c].tag, L1Cache.blocks[c].words[0], L1Cache.blocks[c].words[1], L1Cache.blocks[c].words[2], L1Cache.blocks[c].words[3]);
+	}
 }
 
 /***************************************************************/
