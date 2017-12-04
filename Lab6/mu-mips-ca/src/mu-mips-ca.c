@@ -457,10 +457,14 @@ void MEM()
 				//MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
 				//Cache
 				//int cache_index = (int)MEM_WB.ALUOutput / 16;
-				uint32_t cache_index = 0x000000F0 & MEM_WB.ALUOutput;
+				//uint32_t cache_index = 0x000000F0 & MEM_WB.ALUOutput;
+				uint32_t hex_cache_index = 0x000000F0 & MEM_WB.ALUOutput;
+				hex_cache_index = hex_cache_index >> 4;
+				int cache_index = (int)hex_cache_index;
 				cache_index = cache_index >> 4;
 				//int word_place = (int)MEM_WB.ALUOutput % 4;
 				uint32_t word_place = 0x00000003 & MEM_WB.ALUOutput;
+				printf("indexhex: %08x   indexint: %d   word_placehex: %08x   word_placeint: %d\n", cache_index, (int)cache_index, word_place, (int)word_place);
 
 				if(L1Cache.blocks[cache_index].tag == (0xFFFFFF00 & MEM_WB.ALUOutput)){
 					if(L1Cache.blocks[cache_index].valid == 1){
@@ -557,6 +561,7 @@ void MEM()
 					if( cacheStall == 101 ){
 						printf("Finished 100 cycle stall due to cache miss.\n");
 						cacheStall = 0;			
+						cache_hits--;
 					}
 					MEM_WB.regWrite = 1;
 					MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
@@ -600,10 +605,12 @@ void MEM()
 				//MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
 				//Cache
 				//int cache_index = (int)MEM_WB.ALUOutput / 16;
-				uint32_t cache_index = 0x000000F0 & MEM_WB.ALUOutput;
-				cache_index = cache_index >> 4;
+				uint32_t hex_cache_index = 0x000000F0 & MEM_WB.ALUOutput;
+				hex_cache_index = hex_cache_index >> 4;
+				int cache_index = (int)hex_cache_index;
 				//int word_place = (int)MEM_WB.ALUOutput % 4;
 				uint32_t word_place = 0x00000003 & MEM_WB.ALUOutput;
+				printf("indexhex: %08x   indexint: %d   word_placehex: %08x   word_placeint: %d\n", cache_index, (int)cache_index, word_place, (int)word_place);
 				
 				if(L1Cache.blocks[cache_index].tag == (0xFFFFFF00 & MEM_WB.ALUOutput)){
 				//	printf("I TRIGGERED THE IF!!!\n\n\n");
@@ -704,6 +711,7 @@ void MEM()
 					if( cacheStall == 101 ){
 						printf("Finished 100 cycle stall due to cache miss.\n");
 						cacheStall = 0;			
+						cache_hits--;
 					}
 					printf("Writing %08x to %08x\n",MEM_WB.B,MEM_WB.ALUOutput);
 					mem_write_32(MEM_WB.ALUOutput,MEM_WB.B);
@@ -767,7 +775,7 @@ void EX()
 		BrnchJmpStall++;
 	}
 	else if(cacheStall != 0){
-		printf("EX: Stalling for cache miss");
+		printf("EX: Stalling for cache miss\n");
 	}
 	else{
 		EX_MEM = ID_EX;
@@ -1837,10 +1845,10 @@ void show_pipeline(){
 
 void print_cache(){
 	printf("Cache: \n");
-	//for( uint32_t c = 0x0000; c<=0x0000000F; c++){
-	//	printf("Block: %d | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n", c, L1Cache.blocks[c].valid, L1Cache.blocks[c].tag, L1Cache.blocks[c].words[0], L1Cache.blocks[c].words[1], L1Cache.blocks[c].words[2], L1Cache.blocks[c].words[3]);
-	//}
-	 
+	for( uint32_t c = 0x0000; c<=0x0000000F; c++){
+		printf("Block: %d | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n", c, L1Cache.blocks[c].valid, L1Cache.blocks[c].tag, L1Cache.blocks[c].words[0], L1Cache.blocks[c].words[1], L1Cache.blocks[c].words[2], L1Cache.blocks[c].words[3]);
+	}
+	/* 
 	printf("Block: 0 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x0000].valid, L1Cache.blocks[0x0000].tag, L1Cache.blocks[0x0000].words[0], L1Cache.blocks[0x0000].words[1], L1Cache.blocks[0x0000].words[2], L1Cache.blocks[0x0000].words[3]);
 	printf("Block: 1 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x0001].valid, L1Cache.blocks[0x0001].tag, L1Cache.blocks[0x0001].words[0], L1Cache.blocks[0x0001].words[1], L1Cache.blocks[0x0001].words[2], L1Cache.blocks[0x0001].words[3]);
 	printf("Block: 2 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x0002].valid, L1Cache.blocks[0x0002].tag, L1Cache.blocks[0x0002].words[0], L1Cache.blocks[0x0002].words[1], L1Cache.blocks[0x0002].words[2], L1Cache.blocks[0x0002].words[3]);
@@ -1857,7 +1865,7 @@ void print_cache(){
 	printf("Block: 13 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x000D].valid, L1Cache.blocks[0x000D].tag, L1Cache.blocks[0x000D].words[0], L1Cache.blocks[0x000D].words[1], L1Cache.blocks[0x000D].words[2], L1Cache.blocks[0x000D].words[3]);
 	printf("Block: 14 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x000E].valid, L1Cache.blocks[0x000E].tag, L1Cache.blocks[0x000E].words[0], L1Cache.blocks[0x000E].words[1], L1Cache.blocks[0x000E].words[2], L1Cache.blocks[0x000E].words[3]);
 	printf("Block: 15 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x000F].valid, L1Cache.blocks[0x000F].tag, L1Cache.blocks[0x000F].words[0], L1Cache.blocks[0x000F].words[1], L1Cache.blocks[0x000F].words[2], L1Cache.blocks[0x000F].words[3]);
-
+*/
 	printf("Number of Hits: %d\nNumber of misses: %d\n", cache_hits, cache_misses);
 }
 
