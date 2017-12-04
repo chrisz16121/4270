@@ -165,6 +165,14 @@ void rdump() {
 	printf("-------------------------------------\n");
 }
 
+void print_cache(){
+	printf("Cache: \n");
+	for( int c = 0; c<16; c++){
+		printf("Block: %d | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n", c, L1Cache.blocks[c].valid, L1Cache.blocks[c].tag, L1Cache.blocks[c].words[0], L1Cache.blocks[c].words[1], L1Cache.blocks[c].words[2], L1Cache.blocks[c].words[3]);
+	}
+}
+
+
 /***************************************************************/
 /* Read a command from standard input.                                                               */  
 /***************************************************************/
@@ -1852,6 +1860,7 @@ void print_cache(){
 
 	printf("Number of Hits: %d\nNumber of misses: %d\n", cache_hits, cache_misses);
 }
+
 
 /***************************************************************/
 /* main                                                                                                                                   */
