@@ -13,8 +13,8 @@ int FF = 0;
 int BrnchJmpStall = 2;
 int flush = 0;
 int instruction_fetch_flag = 0;
-int cacheMiss = 0;
-int cacheStall = 0;
+int cacheMiss;
+int cacheStall;
 
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
@@ -450,12 +450,45 @@ void MEM()
 				//Cache
 				//int cache_index = (int)MEM_WB.ALUOutput / 16;
 				uint32_t cache_index = 0x000000F0 & MEM_WB.ALUOutput;
-				int word_place = (int)MEM_WB.ALUOutput % 4;
-				
+				cache_index = cache_index >> 4;
+				//int word_place = (int)MEM_WB.ALUOutput % 4;
+				uint32_t word_place = 0x00000003 & MEM_WB.ALUOutput;
+
 				if(L1Cache.blocks[cache_index].tag == (0xFFFFFF00 & MEM_WB.ALUOutput)){
 					if(L1Cache.blocks[cache_index].valid == 1){
 						MEM_WB.LMD = L1Cache.blocks[cache_index].words[word_place];
 						cache_hits++;
+					}
+					else{
+						if((MEM_WB.ALUOutput & 0x00000003) == 0x00000000){
+							L1Cache.blocks[cache_index].words[0] = MEM_WB.LMD;
+							L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput+1);
+							L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput+2);
+							L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+3);
+						}
+						//if(word_place == 0x1){
+						if((MEM_WB.ALUOutput & 0x00000003) == 0x00000001){
+							L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-1);
+							L1Cache.blocks[cache_index].words[1] = MEM_WB.LMD;
+							L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput+1);
+							L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+2);
+
+						}
+						//if(word_place == 0x2){
+						if((MEM_WB.ALUOutput & 0x00000003) == 0x00000002){
+							L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-2);
+							L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput-1);
+							L1Cache.blocks[cache_index].words[2] = MEM_WB.LMD;
+							L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+1);
+						}
+						//if(word_place == 0x3){
+						if((MEM_WB.ALUOutput & 0x00000003) == 0x00000003){
+							L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-3);
+							L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput-2);
+							L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput-1);
+							L1Cache.blocks[cache_index].words[3] = MEM_WB.LMD;
+
+						}
 					}
 
 				}				
@@ -466,26 +499,30 @@ void MEM()
 					L1Cache.blocks[cache_index].tag = (0xFFFFFF00 & MEM_WB.ALUOutput);
 					L1Cache.blocks[cache_index].valid = 1;
 					
-					if(word_place == 0){
+					//if(word_place == 0x0){
+					if((MEM_WB.ALUOutput & 0x00000003) == 0x00000000){
 						L1Cache.blocks[cache_index].words[0] = MEM_WB.LMD;
 						L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput+1);
 						L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput+2);
 						L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+3);
 					}
-					if(word_place == 1){
+					//if(word_place == 0x1){
+					if((MEM_WB.ALUOutput & 0x00000003) == 0x00000001){
 						L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-1);
 						L1Cache.blocks[cache_index].words[1] = MEM_WB.LMD;
 						L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput+1);
 						L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+2);
 
 					}
-					if(word_place == 2){
+					//if(word_place == 0x2){
+					if((MEM_WB.ALUOutput & 0x00000003) == 0x00000002){
 						L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-2);
 						L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput-1);
 						L1Cache.blocks[cache_index].words[2] = MEM_WB.LMD;
 						L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+1);
 					}
-					if(word_place == 3){
+					//if(word_place == 0x3){
+					if((MEM_WB.ALUOutput & 0x00000003) == 0x00000003){
 						L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-3);
 						L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput-2);
 						L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput-1);
@@ -503,13 +540,15 @@ void MEM()
 
 				if( cacheStall >= 1 && cacheStall != 101 ){
 					//stalling
+					cache_hits--;
 				}
 				else if( cacheMiss == 1 ){
-					cacheStall == 1;
+					cacheStall = 1;
+					cacheMiss = 0;
 				}else{
 					if( cacheStall == 101 ){
-						printf("Finished 100 cycle stall due to cache miss.\nCurrent cycle: %d\n", cycle_count);
-						cacheStall == 0;			
+						printf("Finished 100 cycle stall due to cache miss.\n");
+						cacheStall = 0;			
 					}
 					MEM_WB.regWrite = 1;
 					MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
@@ -548,48 +587,87 @@ void MEM()
 				}
 			} 
 			else if(EX_MEM.type == 3) { //Store
+			//	printf("I AM HERERERERERERERERERER\n\n\n\n");
 				//INSERT TYLER'S CODE HERE
 				//MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
 				//Cache
 				//int cache_index = (int)MEM_WB.ALUOutput / 16;
 				uint32_t cache_index = 0x000000F0 & MEM_WB.ALUOutput;
-				int word_place = (int)MEM_WB.ALUOutput % 4;
+				cache_index = cache_index >> 4;
+				//int word_place = (int)MEM_WB.ALUOutput % 4;
+				uint32_t word_place = 0x00000003 & MEM_WB.ALUOutput;
 				
 				if(L1Cache.blocks[cache_index].tag == (0xFFFFFF00 & MEM_WB.ALUOutput)){
+				//	printf("I TRIGGERED THE IF!!!\n\n\n");
 					if(L1Cache.blocks[cache_index].valid == 1){
 						//MEM_WB.LMD = L1Cache.blocks[cache_index].words[word_place];
 						L1Cache.blocks[cache_index].words[word_place] = MEM_WB.LMD;
 						cache_hits++;
 					}
+					else{
+						if((MEM_WB.ALUOutput & 0x00000003) == 0x00000000){
+							L1Cache.blocks[cache_index].words[0] = MEM_WB.LMD;
+							L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput+1);
+							L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput+2);
+							L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+3);
+						}
+						//if(word_place == 0x1){
+						if((MEM_WB.ALUOutput & 0x00000003) == 0x00000001){
+							L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-1);
+							L1Cache.blocks[cache_index].words[1] = MEM_WB.LMD;
+							L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput+1);
+							L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+2);
 
+						}
+						//if(word_place == 0x2){
+						if((MEM_WB.ALUOutput & 0x00000003) == 0x00000002){
+							L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-2);
+							L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput-1);
+							L1Cache.blocks[cache_index].words[2] = MEM_WB.LMD;
+							L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+1);
+						}
+						//if(word_place == 0x3){
+						if((MEM_WB.ALUOutput & 0x00000003) == 0x00000003){
+							L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-3);
+							L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput-2);
+							L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput-1);
+							L1Cache.blocks[cache_index].words[3] = MEM_WB.LMD;
+
+						}
+					}
 				}				
 				else{
+				//	printf("I TRIGGERED THE ELSE!!!\n\n\n");
 					cache_misses++;
 					cacheMiss = 1;
 					MEM_WB.LMD = mem_read_32(MEM_WB.ALUOutput);
 					L1Cache.blocks[cache_index].tag = (0xFFFFFF00 & MEM_WB.ALUOutput);
 					L1Cache.blocks[cache_index].valid = 1;
 					
-					if(word_place == 0){
+					//if(word_place == 0x0){
+					if((MEM_WB.ALUOutput & 0x00000003) == 0x00000000){
 						L1Cache.blocks[cache_index].words[0] = MEM_WB.LMD;
 						L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput+1);
 						L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput+2);
 						L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+3);
 					}
-					if(word_place == 1){
+					//if(word_place == 0x1){
+					if((MEM_WB.ALUOutput & 0x00000003) == 0x00000001){
 						L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-1);
 						L1Cache.blocks[cache_index].words[1] = MEM_WB.LMD;
 						L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput+1);
 						L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+2);
 
 					}
-					if(word_place == 2){
+					//if(word_place == 0x2){
+					if((MEM_WB.ALUOutput & 0x00000003) == 0x00000002){
 						L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-2);
 						L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput-1);
 						L1Cache.blocks[cache_index].words[2] = MEM_WB.LMD;
 						L1Cache.blocks[cache_index].words[3] = mem_read_32(MEM_WB.ALUOutput+1);
 					}
-					if(word_place == 3){
+					//if(word_place == 0x3){
+					if((MEM_WB.ALUOutput & 0x00000003) == 0x00000003){
 						L1Cache.blocks[cache_index].words[0] = mem_read_32(MEM_WB.ALUOutput-3);
 						L1Cache.blocks[cache_index].words[1] = mem_read_32(MEM_WB.ALUOutput-2);
 						L1Cache.blocks[cache_index].words[2] = mem_read_32(MEM_WB.ALUOutput-1);
@@ -606,14 +684,18 @@ void MEM()
 				}*/
 
 				if( cacheStall >= 1 && cacheStall != 101 ){
+					//printf("IM STALLING!!!\n\n");
 					//stalling
+					cache_hits--;
 				}
 				else if( cacheMiss == 1 ){
-					cacheStall == 1;
+				//	printf("I should stall...\n\n\n");
+					cacheStall = 1;
+					cacheMiss = 0;
 				}else{
 					if( cacheStall == 101 ){
-						printf("Finished 100 cycle stall due to cache miss.\nCurrent cycle: %d\n", cycle_count);
-						cacheStall == 0;			
+						printf("Finished 100 cycle stall due to cache miss.\n");
+						cacheStall = 0;			
 					}
 					printf("Writing %08x to %08x\n",MEM_WB.B,MEM_WB.ALUOutput);
 					mem_write_32(MEM_WB.ALUOutput,MEM_WB.B);
@@ -675,6 +757,9 @@ void EX()
 	else if(BrnchJmpStall == 2 && flush == 1){
 		printf("Stalling to flush...\n");
 		BrnchJmpStall++;
+	}
+	else if(cacheStall != 0){
+		printf("EX: Stalling for cache miss");
 	}
 	else{
 		EX_MEM = ID_EX;
@@ -768,12 +853,15 @@ void ID()
 
 		printf("ID: Instruction decode is stalled\n");
 		print_instruction(ID_EX.PC);
-		printf("is stil in decode stage\n");
+		printf("is still in decode stage\n");
 	}
 	else if( BrnchJmpStall == 0 ){
 		ID_EX = IF_ID;
 		printf("ID: Being stalled while waiting for Branch/Jump result\n");
 		BrnchJmpStall++;
+	}
+	else if( cacheStall != 0 ){
+		printf("ID: Stalled due to cache miss\n");
 	}
 	else if( flush == 1 ){
 		//This is supposed to flush an instruction after a branch/jump
@@ -1021,10 +1109,16 @@ void IF()
 	if( BrnchJmpStall ==  1){
 		printf("IF: Stalled waiting for Branch/Jump Result\n");
 		BrnchJmpStall++;
-	}else if(cacheStall > 0){
+	}else if(cacheStall > 0 && cacheStall < 110){
+		printf("Currently Stalling\ncacheStall: %d\n",cacheStall);
 		//stalling for cache miss
 		cacheStall++;
 		cycle_count++;
+			printf("IF: ");
+			print_instruction(IF_ID.PC);
+			//print_instruction(CURRENT_STATE.PC);
+			printf("\n");
+
 	}else{
 		if(instruction_fetch_flag == 1){	
 			printf("No instruction fetched\n");
@@ -1268,6 +1362,8 @@ void initialize() {
 	init_memory();
 	ENABLE_FORWARDING = 0;
 	count = 0;
+	cacheMiss = 0;
+	cacheStall = 0;
 	CURRENT_STATE.PC = MEM_TEXT_BEGIN;
 	NEXT_STATE = CURRENT_STATE;
 	RUN_FLAG = TRUE;
@@ -1733,9 +1829,28 @@ void show_pipeline(){
 
 void print_cache(){
 	printf("Cache: \n");
-	for( int c = 0; c<16; c++){
-		printf("Block: %d | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n", c, L1Cache.blocks[c].valid, L1Cache.blocks[c].tag, L1Cache.blocks[c].words[0], L1Cache.blocks[c].words[1], L1Cache.blocks[c].words[2], L1Cache.blocks[c].words[3]);
-	}
+	//for( uint32_t c = 0x0000; c<=0x0000000F; c++){
+	//	printf("Block: %d | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n", c, L1Cache.blocks[c].valid, L1Cache.blocks[c].tag, L1Cache.blocks[c].words[0], L1Cache.blocks[c].words[1], L1Cache.blocks[c].words[2], L1Cache.blocks[c].words[3]);
+	//}
+	 
+	printf("Block: 0 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x0000].valid, L1Cache.blocks[0x0000].tag, L1Cache.blocks[0x0000].words[0], L1Cache.blocks[0x0000].words[1], L1Cache.blocks[0x0000].words[2], L1Cache.blocks[0x0000].words[3]);
+	printf("Block: 1 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x0001].valid, L1Cache.blocks[0x0001].tag, L1Cache.blocks[0x0001].words[0], L1Cache.blocks[0x0001].words[1], L1Cache.blocks[0x0001].words[2], L1Cache.blocks[0x0001].words[3]);
+	printf("Block: 2 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x0002].valid, L1Cache.blocks[0x0002].tag, L1Cache.blocks[0x0002].words[0], L1Cache.blocks[0x0002].words[1], L1Cache.blocks[0x0002].words[2], L1Cache.blocks[0x0002].words[3]);
+	printf("Block: 3 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x0003].valid, L1Cache.blocks[0x0003].tag, L1Cache.blocks[0x0003].words[0], L1Cache.blocks[0x0003].words[1], L1Cache.blocks[0x0003].words[2], L1Cache.blocks[0x0003].words[3]);
+	printf("Block: 4 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x0004].valid, L1Cache.blocks[0x0004].tag, L1Cache.blocks[0x0004].words[0], L1Cache.blocks[0x0004].words[1], L1Cache.blocks[0x0004].words[2], L1Cache.blocks[0x0004].words[3]);
+	printf("Block: 5 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x0005].valid, L1Cache.blocks[0x0005].tag, L1Cache.blocks[0x0005].words[0], L1Cache.blocks[0x0005].words[1], L1Cache.blocks[0x0005].words[2], L1Cache.blocks[0x0005].words[3]);
+	printf("Block: 6 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x0006].valid, L1Cache.blocks[0x0006].tag, L1Cache.blocks[0x0006].words[0], L1Cache.blocks[0x0006].words[1], L1Cache.blocks[0x0006].words[2], L1Cache.blocks[0x0006].words[3]);
+	printf("Block: 7 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x0007].valid, L1Cache.blocks[0x0007].tag, L1Cache.blocks[0x0007].words[0], L1Cache.blocks[0x0007].words[1], L1Cache.blocks[0x0007].words[2], L1Cache.blocks[0x0007].words[3]);
+	printf("Block: 8 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x0008].valid, L1Cache.blocks[0x0008].tag, L1Cache.blocks[0x0008].words[0], L1Cache.blocks[0x0008].words[1], L1Cache.blocks[0x0008].words[2], L1Cache.blocks[0x0008].words[3]);
+	printf("Block: 9 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x0009].valid, L1Cache.blocks[0x0009].tag, L1Cache.blocks[0x0009].words[0], L1Cache.blocks[0x0009].words[1], L1Cache.blocks[0x0009].words[2], L1Cache.blocks[0x0009].words[3]);
+	printf("Block: 10 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x000A].valid, L1Cache.blocks[0x000A].tag, L1Cache.blocks[0x000A].words[0], L1Cache.blocks[0x000A].words[1], L1Cache.blocks[0x000A].words[2], L1Cache.blocks[0x000A].words[3]);
+	printf("Block: 11 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x000B].valid, L1Cache.blocks[0x000B].tag, L1Cache.blocks[0x000B].words[0], L1Cache.blocks[0x000B].words[1], L1Cache.blocks[0x000B].words[2], L1Cache.blocks[0x000B].words[3]);
+	printf("Block: 12 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x000C].valid, L1Cache.blocks[0x000C].tag, L1Cache.blocks[0x000C].words[0], L1Cache.blocks[0x000C].words[1], L1Cache.blocks[0x000C].words[2], L1Cache.blocks[0x000C].words[3]);
+	printf("Block: 13 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x000D].valid, L1Cache.blocks[0x000D].tag, L1Cache.blocks[0x000D].words[0], L1Cache.blocks[0x000D].words[1], L1Cache.blocks[0x000D].words[2], L1Cache.blocks[0x000D].words[3]);
+	printf("Block: 14 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x000E].valid, L1Cache.blocks[0x000E].tag, L1Cache.blocks[0x000E].words[0], L1Cache.blocks[0x000E].words[1], L1Cache.blocks[0x000E].words[2], L1Cache.blocks[0x000E].words[3]);
+	printf("Block: 15 | Valid: %d | Tag: %08x \nWord 0: %08x | Word 1: %08x | Word 2: %08x | Word 3: %08x \n",  L1Cache.blocks[0x000F].valid, L1Cache.blocks[0x000F].tag, L1Cache.blocks[0x000F].words[0], L1Cache.blocks[0x000F].words[1], L1Cache.blocks[0x000F].words[2], L1Cache.blocks[0x000F].words[3]);
+
+	printf("Number of Hits: %d\nNumber of misses: %d\n", cache_hits, cache_misses);
 }
 
 /***************************************************************/
